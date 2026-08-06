@@ -205,6 +205,13 @@ def make_decal(text, w=2400, h=300, color=(250, 250, 250), band=0.30):
     return img
 
 
+def set_u(prog, name, value):
+    """Write a uniform if the driver kept it - Mesa strips unused ones."""
+    u = prog.get(name, None)
+    if u is not None:
+        u.value = value
+
+
 def make_context(require=330):
     """Windows takes the default backend; a headless Linux runner has no X display,
     so try EGL first there. Fails loudly rather than half-rendering."""
@@ -281,10 +288,15 @@ class Renderer:
         eye, model, view, mvp = self._mats(angle, cam_r, elev, target, fov, tilt, shift)
 
         def setmats(p):
-            p['mvp'].write(mvp.T.astype('f4').tobytes())
-            p['model'].write(model.T.astype('f4').tobytes())
-            p['view'].write(view.T.astype('f4').tobytes())
-            if 'camPos' in p: p['camPos'].value = tuple(float(x) for x in eye)
+            # a driver may optimise an unused uniform out of a program (Mesa does,
+            # the desktop drivers don't), so only write the ones that survived
+            for name, mat in (('mvp', mvp), ('model', model), ('view', view)):
+                u = p.get(name, None)
+                if u is not None:
+                    u.write(mat.T.astype('f4').tobytes())
+            u = p.get('camPos', None)
+            if u is not None:
+                u.value = tuple(float(x) for x in eye)
 
         # 1 background
         self.bg_fbo.use(); ctx.disable(moderngl.DEPTH_TEST | moderngl.CULL_FACE | moderngl.BLEND)
@@ -310,12 +322,12 @@ class Renderer:
         # 3a tint (front faces, depth on)
         ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE); ctx.cull_face = 'back'
         p = self.progs['tint']; setmats(p)
-        self.back_tex.use(1); p['backTex'].value = 1; p['res'].value = (self.W, self.H)
+        self.back_tex.use(1); set_u(p, 'backTex', 1); set_u(p, 'res', (self.W, self.H))
         for o in self.objs:
-            p['absorb'].value = o['absorb']; p['fume'].value = o['fume']
-            p['fumeWarm'].value = o['fume_warm']; p['fumeCool'].value = o['fume_cool']
-            p['fumePow'].value = o['fume_pow']
-            p['minThick'].value = o['min_thick']; p['maxThick'].value = o['max_thick']
+            set_u(p, 'absorb', o['absorb']); set_u(p, 'fume', o['fume'])
+            set_u(p, 'fumeWarm', o['fume_warm']); set_u(p, 'fumeCool', o['fume_cool'])
+            set_u(p, 'fumePow', o['fume_pow'])
+            set_u(p, 'minThick', o['min_thick']); set_u(p, 'maxThick', o['max_thick'])
             o['vaos']['tint'].render(moderngl.TRIANGLES)
 
         # 3b density - every surface for see-through glass, front only for solid colour
@@ -325,8 +337,8 @@ class Renderer:
                 ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE); ctx.cull_face = 'back'
             else:
                 ctx.disable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
-            p['lineCol'].value = o['line']; p['kAmt'].value = o['kAmt']
-            p['kPow'].value = o['kPow']
+            set_u(p, 'lineCol', o['line']); set_u(p, 'kAmt', o['kAmt'])
+            set_u(p, 'kPow', o['kPow'])
             o['vaos']['dens'].render(moderngl.TRIANGLES)
 
         # 3c specular (front faces, additive)
@@ -335,7 +347,7 @@ class Renderer:
         ctx.depth_func = '<='
         p = self.progs['spec']; setmats(p)
         for o in self.objs:
-            p['specAmt'].value = o['spec']
+            set_u(p, 'specAmt', o['spec'])
             o['vaos']['spec'].render(moderngl.TRIANGLES)
 
         # 3d enamel print
@@ -343,8 +355,8 @@ class Renderer:
             ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA)
             t, z0, z1, r = self.decal
             p = self.progs['decal']; setmats(p)
-            t.use(3); p['decalTex'].value = 3
-            p['decalZ'].value = (z0, z1); p['decalR'].value = r
+            t.use(3); set_u(p, 'decalTex', 3)
+            set_u(p, 'decalZ', (z0, z1)); set_u(p, 'decalR', r)
             for o in self.objs:
                 if o['decal']: o['vaos']['decal'].render(moderngl.TRIANGLES)
 
