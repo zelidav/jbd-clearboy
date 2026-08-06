@@ -96,7 +96,7 @@ def build_foot_frit(seed=13):
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "out"
     os.makedirs(out, exist_ok=True)
-    f = trimesh.util.concatenate([build_frit(), build_foot_frit()])
+    f = build_frit()          # the mouthpiece stays clean - linework only there
     m = build_marbles()
     f.export(os.path.join(out, "frit.stl"))
     m.export(os.path.join(out, "marbles.stl"))

@@ -24,6 +24,7 @@ CARB_FROM_RIM= 14.0
 HEAD_X0      = -36.0        # closed end
 HEAD_X1      =  32.0        # bowl rim face   (length 68)
 STEM_TOP     = 112.0        # where the stem disappears into the head
+STEM_ANGLE   = 0.0          # rake from vertical, degrees. 0 = the original hammer
 COLLAR_Z     = 100.5        # top of the upper collar
 
 # head sections: (x, height Z, width Y, centre Z)
@@ -102,6 +103,13 @@ def build():
     foot = (cq.Workplane("XY").circle(FOOT_OD / 2).extrude(FOOT_T)
               .edges("|Z or %CIRCLE").fillet(1.6))
 
+    if STEM_ANGLE:
+        # rake the stem back about the joint so the mouthpiece rises to bowl level -
+        # the smoker looks down into the bowl instead of across it
+        j = (0, 0, _interp(0, 0)[2])
+        ax = ((j[0], j[1] - 1, j[2]), (j[0], j[1] + 1, j[2]))
+        stem = stem.rotate(ax[0], ax[1], STEM_ANGLE)
+        foot = foot.rotate(ax[0], ax[1], STEM_ANGLE)
     body = head.union(stem).union(foot)
 
     # ---- carb boss (raised ring on the +Y wall) --------------------------
@@ -135,6 +143,9 @@ def build():
 
     # ---- stem bore -------------------------------------------------------
     sbore = cq.Workplane("XY").circle(STEM_ID / 2).extrude(STEM_TOP)
+    if STEM_ANGLE:
+        j = (0, 0, _interp(0, 0)[2])
+        sbore = sbore.rotate((j[0], j[1] - 1, j[2]), (j[0], j[1] + 1, j[2]), STEM_ANGLE)
     body = body.cut(sbore)
 
     # ---- carb hole -------------------------------------------------------

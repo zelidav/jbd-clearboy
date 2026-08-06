@@ -1,5 +1,15 @@
 [
  {
+  "id": "v-raked-stem",
+  "way": "magenta_gold",
+  "piece": "hammer",
+  "label": "raked stem",
+  "notes": "stem raked 80 deg so the mouthpiece sits level with the bowl base - the smoker looks down into the bowl. No frit on the mouthpiece, linework only.",
+  "dims": {
+   "rake": 80.0
+  }
+ },
+ {
   "id": "v-tighter-spiral",
   "way": "clear_silver",
   "piece": "hammer",

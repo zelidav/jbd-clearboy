@@ -20,7 +20,7 @@ VARIANTS = os.path.join("docs", "variants.json")
 
 HAMMER_BASE = dict(height=140.0, headlen=68.0, headsec=42.0, stemod=14.0,
                    bowlid=25.0, footod=24.5, stemlen=88.0, marbles=4, scatter=0,
-                   lines=5, linepitch=6.0)
+                   lines=5, linepitch=6.0, rake=0.0)
 JAR_BASE = dict(height=92.0, mouthid=38.0, wall=3.0, fritz=25.0, corkh=20.0, marbles=7,
                 lines=18, linepitch=1.9)
 
@@ -50,6 +50,7 @@ def build_hammer(d, out, vid):
     model.BOWL_ID = p["bowlid"]
     model.FOOT_OD = p["footod"]
     model.COLLAR_OD = p["stemod"] + 3.5
+    model.STEM_ANGLE = p["rake"]
     model.BOWL_DEPTH = min(model.BOWL_DEPTH * k_len, model.HEAD_X1 * 0.55 + 12)
 
     body = model.build()
@@ -69,13 +70,32 @@ def build_hammer(d, out, vid):
     frit.build_frit().export(frit_path)
     frit.build_marbles(n=n, seed=int(p["scatter"])).export(marb_path)
 
-    import linework
+    import linework, math, numpy as np, trimesh
     lines_path = os.path.join(out, "%s_lines.stl" % vid)
-    linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"]).export(lines_path)
+    if p["rake"]:
+        # the foot has moved, so its rings have to travel with it
+        head = linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"], foot=False)
+        foot = linework.hammer_spiral(turns=max(p["lines"], 1), pitch=p["linepitch"],
+                                      foot=True, head=False)
+        zj = model._interp(0, 0)[2]
+        T = trimesh.transformations.rotation_matrix(
+            math.radians(p["rake"]), [0, 1, 0], [0, 0, zj])
+        foot.apply_transform(T)
+        trimesh.util.concatenate([head, foot]).export(lines_path)
+    else:
+        linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"]).export(lines_path)
+    if p["rake"]:                       # a raked piece lies wide, so frame it wide
+        return dict(body=body_path, frit=frit_path, marbles=marb_path,
+                    lines_body=lines_path, lines_frit=lines_path,
+                    cam_r=590.0, target=(0, 0, 116 + dz), fov=17.0,
+                    shift=(42.0, 0.0, 0.0), size=(1000, 700),
+                    shadow=(0.5, 0.40, 0.085), decal=None)
     return dict(body=body_path, frit=frit_path, marbles=marb_path,
                 lines_body=lines_path, lines_frit=lines_path,
                 cam_r=700.0 + max(dz, 0) * 2.2, target=(0, 0, 74 + dz * 0.55),
-                fov=17.0, shadow=(0.5, 0.30, 0.075), decal=(20.0, 74.0, p["stemod"] / 2))
+                fov=17.0, shadow=(0.5, 0.30, 0.075),
+                # the sticker projector assumes a vertical stem, so a raked one goes bare
+                decal=None if p["rake"] else (20.0, 74.0, p["stemod"] / 2))
 
 
 # ---------------------------------------------------------------- jar

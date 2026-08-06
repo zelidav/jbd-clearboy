@@ -166,13 +166,14 @@ def tube(path, radius, sections=12, up=(1.0, 0.0, 0.0)):
                            process=False)
 
 
-def hammer_spiral(turns=13, pitch=2.4, minor=0.55, seed=3, per_turn=120, foot=True):
+def hammer_spiral(turns=13, pitch=2.4, minor=0.55, seed=3, per_turn=120,
+                  foot=True, head=True):
     """The same dripped run on the hammer: down the head while it spins, then a short
     run round the foot. The head is not round, so the path follows its sections."""
     import decor
     turns = max(float(turns), 0.0)
     parts = []
-    if turns > 0:
+    if head and turns > 0:
         n = max(int(turns * per_turn), 8)
         t = np.linspace(0.0, 1.0, n)
         rng = np.random.RandomState(seed)
