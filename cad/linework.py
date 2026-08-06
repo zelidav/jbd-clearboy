@@ -14,12 +14,12 @@ import jar
 
 # (centre z, minor radius) - grouped the way a maker actually lays them down
 # matched to assets/jb_jar_linework.png: fine lines, tight pitch, grouped in bands
+# the lines sit on the upper half, the way they do on the reference jar - the lower
+# body stays clear so the maker's stamp has somewhere to live
 GROUPS = [
-    (14.0, 6, 1.9, 0.26),      # z start, count, pitch, thickness
-    (27.0, 9, 1.7, 0.22),
-    (44.0, 4, 2.4, 0.34),
-    (53.0, 11, 1.6, 0.20),
-    (72.0, 3, 2.2, 0.30),
+    (46.0, 5, 1.9, 0.26),      # z start, count, pitch, thickness
+    (57.0, 9, 1.7, 0.22),
+    (74.0, 4, 2.2, 0.30),
 ]
 
 

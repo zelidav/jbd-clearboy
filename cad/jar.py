@@ -19,9 +19,9 @@ HEIGHT    = 92.0           # glass body, rim to bench
 FLOOR     = 3.0            # flat closed bottom, same wall
 
 STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stamp
-STAMP_RX  = 12.5           # half-width of the die face; height follows the traced shape
+STAMP_RX  = 14.0           # half-width of the die face; height follows the traced shape
 STAMP_RZ  = 5.4
-STAMP_TXT = "JBD"
+STAMP_ART_W = 23.0         # width of the JB mark on the wall, mm
 STAMP_SINK = 0.22          # the die barely sinks - a reheat and a press, no dent
 
 FRIT_Z    = (66.0, 90.5)   # frit band around the opening
@@ -45,13 +45,39 @@ def build():
     body = body.cut(bore)
     body = body.edges("|Z or %CIRCLE").fillet(1.2)
 
-    # maker's stamp, pressed into the wall: a shallow blob-shaped depression with
-    # the letters struck deeper inside it. Nothing stands proud of the cylinder.
+    # maker's stamp, pressed into the wall: the reheated area sinks a little, and the
+    # JB mark is struck into it. Nothing stands proud of the cylinder.
     body = body.cut(cq.Workplane(obj=stamp_pad()))
-    face = OD / 2 - STAMP_SINK
-    txt = (cq.Workplane("XZ").workplane(offset=face).center(0, STAMP_Z)
-             .text(STAMP_TXT, 9.0, -1.3, kind="bold", halign="center", valign="center"))
-    return body.cut(txt)
+    for cutter in stamp_art_cutters():
+        body = body.cut(cq.Workplane(obj=cutter))
+    return body
+
+
+def stamp_art_cutters(depth=1.15):
+    """The JB graffiti mark (cad/stamp_art.py), as solids to strike into the die face.
+    A ring OCC will not accept is skipped rather than silently mangled."""
+    import stamp_art
+    # start just outside the wall and cut inwards, so the strike lands whatever the
+    # die face has already taken off
+    y = -(OD / 2 + 1.0)
+    k = STAMP_ART_W                      # artwork is normalised to a long side of 1.0
+
+    def wire(ring):
+        pts = [cq.Vector(x * k, y, STAMP_Z + v * k) for (x, v) in ring]
+        if pts[0].toTuple() != pts[-1].toTuple():
+            pts.append(pts[0])
+        return cq.Wire.makePolygon(pts)
+
+    out = []
+    for sh in stamp_art.load():
+        try:
+            face = cq.Face.makeFromWires(wire(sh["outer"]),
+                                         [wire(h) for h in sh["holes"] if len(h) > 3])
+            out.append(cq.Solid.extrudeLinear(
+                face, cq.Vector(0, 1.0 + STAMP_SINK + depth, 0)))
+        except Exception as e:
+            print("  stamp: skipped a ring (%s)" % type(e).__name__)
+    return out
 
 
 def stamp_pad(depth=7.0, every=3):

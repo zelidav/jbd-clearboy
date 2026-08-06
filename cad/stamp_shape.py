@@ -13,9 +13,39 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 PHOTO = os.path.join("assets", "jbd_stamp_photo.png")
+PLAIN = os.path.join("assets", "jbd_stamp_bw.jpg")        # the mark, high contrast
+DRAWN = os.path.join("assets", "jbd_stamp_traced.jpg")    # the same shot, outline drawn on
 CACHE = os.path.join("cad", "stamp_outline.json")
 PREVIEW = os.path.join("assets", "jbd_stamp_outline.png")
 RAYS = 128
+
+
+def mask_drawn(plain=PLAIN, drawn=DRAWN, grow=11):
+    """The outline David drew on the photo. Differencing the annotated shot against
+    the clean one leaves only the stroke, which closes into the pressed area."""
+    from scipy import ndimage
+    a = Image.open(plain).convert("L")
+    b = Image.open(drawn).convert("L")
+    if a.size != b.size:
+        a = a.resize(b.size)
+    d = np.asarray(b, "f4") / 255.0 - np.asarray(a, "f4") / 255.0
+    line = d > 0.18
+    line = ndimage.binary_closing(line, np.ones((7, 7)))
+    line = ndimage.binary_opening(line, np.ones((3, 3)))
+    lab, n = ndimage.label(line, structure=np.ones((3, 3)))
+    sizes = ndimage.sum(line, lab, range(1, n + 1))
+    line = np.isin(lab, [i + 1 for i, s in enumerate(sizes) if s > 40])
+
+    pad = 40
+    grown = ndimage.binary_dilation(np.pad(line, pad), np.ones((grow, grow)))
+    region = ndimage.binary_fill_holes(grown) & ~grown
+    region = ndimage.binary_dilation(region, np.ones((grow + 6, grow + 6)))
+    lab, n = ndimage.label(region)
+    if not n:
+        raise RuntimeError("the drawn outline did not close - widen `grow`")
+    sizes = ndimage.sum(region, lab, range(1, n + 1))
+    region = lab == (1 + int(np.argmax(sizes)))
+    return ndimage.binary_fill_holes(region)[pad:-pad, pad:-pad]
 
 
 def mask_from(photo=PHOTO, q=0.62):
@@ -69,7 +99,7 @@ def load(rays=RAYS):
     if os.path.exists(CACHE):
         with open(CACHE, encoding="utf-8") as f:
             return json.load(f)["points"]
-    pts = outline(mask_from(), rays)
+    pts = outline(mask_drawn(), rays)
     save(pts)
     return pts
 
@@ -91,7 +121,7 @@ def preview(pts, photo=PHOTO, path=PREVIEW):
 
 
 if __name__ == "__main__":
-    pts = outline(mask_from())
+    pts = outline(mask_drawn())
     save(pts)
     print("traced %d points -> %s" % (len(pts), CACHE))
-    print("preview:", preview(pts))
+    print("preview:", preview(pts, photo=DRAWN))
