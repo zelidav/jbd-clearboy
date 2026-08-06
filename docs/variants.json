@@ -47,5 +47,15 @@
    "marbles": 6.0,
    "scatter": 5.0
   }
+ },
+ {
+  "id": "v-cors-check",
+  "way": "clear_gold",
+  "piece": "jar",
+  "label": "cors check",
+  "notes": "",
+  "dims": {
+   "height": 95.0
+  }
  }
 ]
