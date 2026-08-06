@@ -1,0 +1,352 @@
+<title>Survey | Jerome Baker Designs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<style>
+:root{
+  --ground:#EEF1F0; --panel:#FFFFFF; --sweep-a:#F7F8F8; --sweep-b:#DCE1E0;
+  --ink:#111A18; --ink-2:#41504C; --ink-3:#6E7E79;
+  --rule:#C7D0CD; --rule-soft:#DFE5E3;
+  --accent:#0F7A66; --accent-soft:#DCEFEA;
+  --flag:#9C5A20; --flag-soft:#F6ECE0;
+  --font-display:Bahnschrift,"DIN Alternate","Arial Narrow",ui-sans-serif,sans-serif;
+  --font-mono:ui-monospace,"Cascadia Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --font-body:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0B100F; --panel:#131A18; --sweep-a:#1B2321; --sweep-b:#0D1312;
+    --ink:#E6EDEA; --ink-2:#A9B7B2; --ink-3:#7C8C87;
+    --rule:#26312E; --rule-soft:#1C2523;
+    --accent:#41C9A9; --accent-soft:#12302A;
+    --flag:#D79A5C; --flag-soft:#2A2117;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B100F; --panel:#131A18; --sweep-a:#1B2321; --sweep-b:#0D1312;
+  --ink:#E6EDEA; --ink-2:#A9B7B2; --ink-3:#7C8C87;
+  --rule:#26312E; --rule-soft:#1C2523;
+  --accent:#41C9A9; --accent-soft:#12302A;
+  --flag:#D79A5C; --flag-soft:#2A2117;
+}
+:root[data-theme="light"]{
+  --ground:#EEF1F0; --panel:#FFFFFF; --sweep-a:#F7F8F8; --sweep-b:#DCE1E0;
+  --ink:#111A18; --ink-2:#41504C; --ink-3:#6E7E79;
+  --rule:#C7D0CD; --rule-soft:#DFE5E3;
+  --accent:#0F7A66; --accent-soft:#DCEFEA;
+  --flag:#9C5A20; --flag-soft:#F6ECE0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);
+  font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+
+.masthead{border-bottom:1px solid var(--rule);background:var(--panel)}
+.masthead .wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  padding-top:13px;padding-bottom:12px}
+.marque{font-family:var(--font-display);font-stretch:87.5%;font-weight:700;font-size:18px;
+  letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--ink)}
+.marque span{color:var(--ink-3);font-weight:400}
+nav{display:flex;gap:16px;margin-left:auto;font-family:var(--font-mono);font-size:11.5px;
+  letter-spacing:.12em;text-transform:uppercase}
+nav a{color:var(--ink-3);text-decoration:none;padding-bottom:2px;border-bottom:1px solid transparent}
+nav a:hover{color:var(--ink)}
+nav a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+
+.hero{padding:40px 0 6px}
+.eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.19em;
+  text-transform:uppercase;color:var(--ink-3)}
+.title{font-family:var(--font-display);font-stretch:87.5%;font-weight:700;
+  font-size:clamp(38px,7.4vw,74px);line-height:.95;letter-spacing:-.005em;
+  text-transform:uppercase;margin:10px 0 0}
+.title em{font-style:normal;color:var(--accent)}
+.deck{margin-top:16px;max-width:62ch;color:var(--ink-2);font-size:17px}
+
+section{padding:52px 0}
+.sechead{display:flex;align-items:baseline;gap:14px;border-top:1px solid var(--rule);
+  padding-top:12px;margin-bottom:24px}
+.sechead h2{font-family:var(--font-display);font-stretch:87.5%;font-weight:700;font-size:23px;
+  letter-spacing:.04em;text-transform:uppercase}
+.sechead .n{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.14em;color:var(--ink-3)}
+.sechead .note{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;
+  letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase}
+
+.stagewrap{margin-top:20px;display:grid;grid-template-columns:minmax(0,620px) 1fr;
+  gap:32px;align-items:start}
+.sidecol{display:flex;flex-direction:column;gap:20px;padding-top:2px}
+.sidecol h3{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.stage{position:relative;background:
+    radial-gradient(120% 80% at 50% 12%,var(--sweep-a) 0%,var(--sweep-b) 100%);
+  border:1px solid var(--rule);overflow:hidden;touch-action:none;cursor:grab;
+  user-select:none;--plate-ink:#5C6B66}
+.stage.dragging{cursor:grabbing}
+.stage .frames{position:relative;width:100%;aspect-ratio:520/684}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;
+  pointer-events:none;-webkit-user-drag:none}
+.stage img.on{opacity:1}
+.stage:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hint{position:absolute;left:13px;bottom:11px;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--plate-ink)}
+.readout{position:absolute;right:13px;bottom:11px;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.12em;color:var(--plate-ink);font-variant-numeric:tabular-nums}
+@media (prefers-color-scheme:dark){
+  .stage{border-color:#3A4744;box-shadow:0 0 0 1px rgba(255,255,255,.04),0 18px 46px rgba(0,0,0,.55)}
+  .stage .frames{filter:brightness(.95) contrast(1.02)}
+}
+:root[data-theme="dark"] .stage{border-color:#3A4744;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04),0 18px 46px rgba(0,0,0,.55)}
+:root[data-theme="dark"] .stage .frames{filter:brightness(.95) contrast(1.02)}
+:root[data-theme="light"] .stage{border-color:var(--rule);box-shadow:none}
+:root[data-theme="light"] .stage .frames{filter:none}
+
+.controls{display:flex;align-items:center;gap:8px}
+.controls .step{padding:9px 13px;line-height:1}
+.controls .roll{min-width:96px}
+.tiltnote{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3)}
+.controls input[type="range"]{flex:1;min-width:80px;margin:0;accent-color:var(--accent);
+  background:transparent}
+.pieces{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.piece{padding:9px 16px;background:var(--panel);border:1px solid var(--rule);cursor:pointer;
+  font-family:var(--font-display);font-stretch:87.5%;font-size:15px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--ink-2)}
+.piece:hover{color:var(--ink);border-color:var(--ink-3)}
+.piece[aria-pressed="true"]{color:var(--ink);border-color:var(--accent);
+  box-shadow:inset 0 0 0 1px var(--accent)}
+.ways{display:flex;flex-direction:column;gap:7px}
+.way{display:flex;align-items:center;gap:9px;padding:8px 13px 8px 9px;background:var(--panel);
+  border:1px solid var(--rule);cursor:pointer;color:var(--ink-2);text-align:left;
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.way:hover{border-color:var(--ink-3);color:var(--ink)}
+.way[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);
+  box-shadow:inset 0 0 0 1px var(--accent)}
+.way .dot{width:16px;height:16px;border-radius:50%;flex:0 0 auto}
+
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;
+  border:1px solid var(--rule);background:var(--rule-soft)}
+.fact{padding:13px 15px;background:var(--panel)}
+.fact dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3)}
+.fact dd{margin:5px 0 0;font-family:var(--font-mono);font-size:20px;font-weight:600;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.fact dd small{font-size:12px;font-weight:400;color:var(--ink-3);letter-spacing:.04em}
+
+.remodel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1px;
+  background:var(--rule-soft);border:1px solid var(--rule)}
+.remodel > div{background:var(--panel);padding:22px 24px}
+.sliders{display:flex;flex-direction:column;gap:13px}
+.slider{display:grid;grid-template-columns:1fr auto;gap:3px 12px;align-items:center}
+.slider label{font-family:var(--font-mono);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3)}
+.slider output{font-family:var(--font-mono);font-size:13px;font-variant-numeric:tabular-nums;
+  color:var(--ink)}
+.slider output.changed{color:var(--accent);font-weight:600}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.drawing{background:radial-gradient(120% 80% at 50% 10%,var(--sweep-a) 0%,var(--sweep-b) 100%);
+  border:1px solid var(--rule-soft);aspect-ratio:1/1;width:100%;display:block}
+.legend{display:flex;gap:18px;margin-top:10px;font-family:var(--font-mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);flex-wrap:wrap}
+.legend b{font-weight:400;color:var(--accent)}
+label.field{display:block;margin-top:14px;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+input[type="text"]{width:100%;margin-top:7px;padding:10px 13px;background:var(--ground);
+  border:1px solid var(--rule);color:var(--ink);font-family:var(--font-body);font-size:15px}
+textarea{width:100%;min-height:92px;margin-top:7px;padding:11px 13px;background:var(--ground);
+  border:1px solid var(--rule);color:var(--ink);font-family:var(--font-body);font-size:15px;
+  resize:vertical}
+textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:9px 15px;background:var(--panel);border:1px solid var(--rule);cursor:pointer;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-2)}
+.btn:hover{border-color:var(--ink-3);color:var(--ink)}
+a.btn{text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
+.fine{margin-top:12px;font-size:13.5px;color:var(--ink-3);max-width:60ch}
+.log{margin-top:16px;border-top:1px dashed var(--rule);padding-top:12px;font-family:var(--font-mono);
+  font-size:11.5px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+.log b{color:var(--ink-2);font-weight:600}
+
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px}
+.cols p{color:var(--ink-2);max-width:64ch}
+.cols p + p{margin-top:14px}
+.bench{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;
+  background:var(--rule-soft);border:1px solid var(--rule)}
+.step{background:var(--panel);padding:20px 22px}
+.step h3{font-family:var(--font-mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);display:flex;gap:10px;align-items:baseline}
+.step h3 b{color:var(--ink-3);font-weight:400}
+.step p{margin-top:9px;color:var(--ink-2);font-size:15px}
+.step .spec{margin-top:11px;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.05em;
+  color:var(--ink-3);border-top:1px dashed var(--rule);padding-top:9px}
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:15px}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--rule-soft)}
+thead th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;border-bottom:1px solid var(--rule);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.group td{background:var(--accent-soft);font-family:var(--font-mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--accent);padding:8px 16px}
+.src{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);white-space:nowrap}
+.src.inferred{color:var(--flag)}
+.files td:first-child{font-family:var(--font-mono);font-size:13px}
+.files .use{color:var(--ink-2);font-size:14.5px}
+.callout{margin-top:22px;border:1px solid var(--flag);background:var(--flag-soft);padding:16px 20px;
+  display:flex;gap:16px;align-items:flex-start}
+.callout .tag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--flag);white-space:nowrap;padding-top:2px}
+.callout p{color:var(--ink-2);font-size:15px;max-width:70ch}
+figure{margin:0}
+figure img{width:100%;height:auto;display:block;border:1px solid var(--rule);background:#fff}
+figcaption{margin-top:10px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;
+  color:var(--ink-3);text-transform:uppercase}
+pre{margin:20px 0 0;background:var(--panel);border:1px solid var(--rule);padding:16px 18px;
+  overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;color:var(--ink-2)}
+pre b{color:var(--accent);font-weight:600}
+footer{border-top:1px solid var(--rule);padding:24px 0 56px;color:var(--ink-3);
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.07em}
+footer .wrap{display:flex;gap:18px;flex-wrap:wrap}
+footer .r{margin-left:auto}
+@media (max-width:900px){.remodel{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){
+  .stagewrap{grid-template-columns:minmax(0,1fr)}
+  .stagecol{max-width:620px;width:100%;margin:0 auto}
+}
+@media (max-width:640px){
+  .wrap{padding:0 18px}
+  section{padding:38px 0}
+  nav{gap:12px}
+  .stagecol{margin:0 -18px;max-width:none}
+  .stage{border-left:0;border-right:0}
+  .controls{padding:0 18px}
+}
+</style>
+<header class="masthead"><div class="wrap">
+  <a class="marque" href="index.html">Jerome Baker Designs <span>/ New York</span></a>
+  <nav><a href="index.html">Mockups</a><a href="survey.html" aria-current="page">Survey</a><a href="downloads.html">Downloads</a></nav>
+</div></header>
+<main><div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Hand-blown original &rarr; measured &rarr; parametric solid</div>
+    <h1 class="title">The <em>Survey</em></h1>
+    <p class="deck">Ten photographs with a stainless rule in frame, resolved into a dimensioned
+      survey and rebuilt as a watertight CAD solid. Every mockup is downstream of these numbers.</p>
+  </div>
+
+  <section>
+    <div class="sechead"><span class="n">01</span><h2>How this piece gets made</h2>
+      <span class="note">Bench notes</span></div>
+    <div class="bench">
+      <div class="step">
+        <h3>Stock <b>&mdash; borosilicate 3.3</b></h3>
+        <p>Everything here is COE&nbsp;33 boro: 3.3&nbsp;&times;&nbsp;10<sup>&minus;6</sup>/K
+        expansion, which is what lets a piece take a lighter and a cold sink without checking.
+        The original stem came straight off stock tube &mdash; 11&nbsp;OD, 8&nbsp;ID. The mockups
+        run it out to &empty;14 so the enamel label has something to sit on.</p>
+        <div class="spec">density 2.23 g/cm&sup3; &middot; working &asymp; 1250&nbsp;&deg;C &middot; softening &asymp; 820&nbsp;&deg;C</div>
+      </div>
+      <div class="step">
+        <h3>Head <b>&mdash; blown and shaped</b></h3>
+        <p>The chamber starts as a length of heavy tube, closed at one end, heated to a gather and
+        blown out against the shape the maker wants. Marvered, waisted, worked until the lobe reads
+        full and the bowl end tapers. Hand-shaped means slightly oval, always.</p>
+        <div class="spec">42 &times; 37 section &middot; 68 long &middot; wall &asymp; 3 mm (inferred)</div>
+      </div>
+      <div class="step">
+        <h3>Bowl <b>&mdash; pushed in from the rim</b></h3>
+        <p>The funnel is pushed into the hot chamber wall rather than added on &mdash; the technique
+        the Eugene scene traces back to Bob&nbsp;Snodgrass, and the reason a bowl like this has no
+        seam. It necks from &empty;25 at the rim down to a &empty;5 throat.</p>
+        <div class="spec">&empty;25 rim &rarr; &empty;5 throat &middot; 18&ndash;20 deep</div>
+      </div>
+      <div class="step">
+        <h3>Frit <b>&mdash; rolled, not painted</b></h3>
+        <p>The hot end is rolled through crushed colour on the marver so the grains stick and melt
+        in, leaving a granular band that catches light differently from the body. The marbles go on
+        over it, pressed in while everything is still soft.</p>
+        <div class="spec">band &asymp; 25 mm &middot; grains 0.6&ndash;1.3 mm &middot; 4 marbles on the hammer, 7 at the jar rim</div>
+      </div>
+      <div class="step">
+        <h3>Fume <b>&mdash; silver and gold vapour</b></h3>
+        <p>Silver reads blue-violet, gold reads pink-amber. Both go on as a coat a few atoms thick,
+        which is why the colour moves with the angle you hold it at &mdash; and why it keeps moving
+        with use. These renders are the day-one state, not year two.</p>
+        <div class="spec">silver &rarr; blue / violet &middot; gold &rarr; pink / amber</div>
+      </div>
+      <div class="step">
+        <h3>Anneal <b>&mdash; the part that decides</b></h3>
+        <p>Off the torch it goes straight into the kiln: soak near the annealing point to let the
+        stress out, then a slow ramp down through the strain point. Rush it and a piece with a
+        3&nbsp;mm chamber wall against a 7&nbsp;mm foot cracks weeks later, at rest.</p>
+        <div class="spec">anneal &asymp; 560&nbsp;&deg;C &middot; strain &asymp; 518&nbsp;&deg;C &middot; slow ramp</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">02</span><h2>Measured schedule</h2>
+      <span class="note">mm &middot; &plusmn;2&ndash;3 unless noted</span></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Feature</th><th>Original</th><th>Source</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="4">Overall</td></tr>
+        <tr><td>Height, standing on the foot</td><td class="num">140</td>
+            <td class="src">Rule-referenced</td><td>5.51 in</td></tr>
+        <tr><td>Head (chamber) length</td><td class="num">68</td>
+            <td class="src">Range 62&ndash;71</td><td>Varies by view &mdash; hand-shaped</td></tr>
+        <tr><td>Head max section</td><td class="num">42 &times; 37</td>
+            <td class="src">Measured</td><td>Oval, not round</td></tr>
+        <tr class="group"><td colspan="4">Stem &amp; foot</td></tr>
+        <tr><td>Stem tube OD</td><td class="num">&empty;11</td>
+            <td class="src">Measured</td><td>Mockups run &empty;14 for the label</td></tr>
+        <tr><td>Stem bore ID</td><td class="num">&empty;8</td>
+            <td class="src">Measured</td><td>1.5 mm wall on the original</td></tr>
+        <tr><td>Exposed stem length</td><td class="num">88</td>
+            <td class="src">Measured</td><td>Collar to foot</td></tr>
+        <tr><td>Foot / mouthpiece disc</td><td class="num">&empty;24.5 &times; 7</td>
+            <td class="src">Measured</td><td>Flared and flattened</td></tr>
+        <tr class="group"><td colspan="4">Bowl &amp; carb</td></tr>
+        <tr><td>Bowl opening at rim</td><td class="num">&empty;25</td><td class="src">Measured</td><td></td></tr>
+        <tr><td>Bowl throat / drop hole</td><td class="num">&empty;5</td><td class="src">Measured</td><td></td></tr>
+        <tr><td>Bowl depth to throat</td><td class="num">18&ndash;20</td><td class="src">Measured</td><td></td></tr>
+        <tr><td>Carb hole &middot; boss &middot; position</td><td class="num">&empty;3.5 &middot; &empty;11 &middot; 14</td>
+            <td class="src">Measured</td><td>14 below the rim</td></tr>
+        <tr class="group"><td colspan="4">Wall</td></tr>
+        <tr><td>Chamber wall</td><td class="num">&asymp; 3</td>
+            <td class="src inferred">Inferred</td><td>Not measurable from photos</td></tr>
+        <tr><td>Rim thickness</td><td class="num">4&ndash;5</td>
+            <td class="src inferred">Inferred</td><td>Read off the rim highlight</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout"><span class="tag">Before tooling</span>
+      <p>Wall thickness is the one group that was never measured &mdash; it was read off highlights
+      and reasoned from the form. Two caliper readings, on the rim and on the stem OD, lock the
+      entire model. Everything downstream of those numbers (mass, volume, glass cost, print
+      scaling) moves if they come back different.</p></div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">03</span><h2>The survey sheet</h2>
+      <span class="note">Five set-ups &middot; four cross-checks</span></div>
+    <figure>
+      <img src="dims.jpg?v=22cdd7f3" alt="Five-view dimensional survey of the Clearboy hammer with a measured schedule">
+      <figcaption>Scale set from the stainless rule in IMG_5855&ndash;5859, resolved to &plusmn;0.5 px/mm and corrected for stand-off parallax</figcaption>
+    </figure>
+  </section>
+
+</div></main>
+<footer><div class="wrap">
+  <span>Jerome Baker Designs &middot; Clearboy programme &middot; build 22cdd7f3</span>
+  <span class="r">Renders are proposals &mdash; the original piece stays the reference</span>
+</div></footer>
+<script>
+
+</script>
