@@ -1,15 +1,5 @@
 [
  {
-  "id": "v-no-marbles",
-  "way": "clear_silver",
-  "piece": "jar",
-  "label": "no marbles",
-  "notes": "",
-  "dims": {
-   "marbles": 0.0
-  }
- },
- {
   "id": "v-tighter-spiral",
   "way": "clear_silver",
   "piece": "hammer",
