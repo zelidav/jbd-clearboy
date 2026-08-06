@@ -44,8 +44,10 @@ PIECES = {
 WAYS = {
  "teal_silver": dict(
      body=(0.135, 0.040, 0.050), frit=(0.42, 0.115, 0.16),
-     fume=1.15, fume_cool=(0.62, 0.78, 1.08), fume_warm=(0.90, 0.82, 1.10),
-     fume_pow=1.15,
+     fume=1.05, fume_pow=1.05,
+     # silver: near-white face on, then steel, violet, and a warm flash at the edge
+     fume_stops=((1.00, 1.00, 1.00), (0.90, 0.95, 1.04),
+                 (0.93, 0.88, 1.08), (1.06, 0.98, 0.86)),
      line=(0.02, 0.13, 0.14), fline=(0.01, 0.11, 0.12),
      label=(14, 122, 106), label_text=(255, 255, 255),
      lines="frit", wrap=(0.004, 0.004, 0.004),
@@ -53,8 +55,10 @@ WAYS = {
      sub="teal frit \u00b7 clear marbles \u00b7 clear linework"),
  "magenta_gold": dict(
      body=(0.040, 0.170, 0.078), frit=(0.115, 0.44, 0.21),
-     fume=1.15, fume_cool=(1.08, 0.90, 0.55), fume_warm=(1.12, 0.72, 0.42),
-     fume_pow=1.15,
+     fume=1.05, fume_pow=1.05,
+     # gold: pale metal, then straw, rose, and violet where it turns over
+     fume_stops=((1.00, 0.99, 0.96), (1.06, 0.99, 0.84),
+                 (1.06, 0.88, 0.84), (0.94, 0.88, 1.06)),
      line=(0.15, 0.02, 0.10), fline=(0.13, 0.01, 0.09),
      label=(150, 32, 108), label_text=(255, 255, 255),
      lines="frit", wrap=(0.004, 0.004, 0.004),
@@ -63,8 +67,9 @@ WAYS = {
 
  "clear_silver": dict(
      body=(0.0045, 0.0040, 0.0038), frit=(0.42, 0.115, 0.16),
-     fume=1.55, fume_cool=(0.52, 0.72, 1.12), fume_warm=(0.94, 0.80, 1.14),
-     fume_pow=0.95,
+     fume=1.35, fume_pow=0.90,
+     fume_stops=((1.00, 1.00, 1.00), (0.88, 0.94, 1.06),
+                 (0.92, 0.86, 1.10), (1.08, 0.98, 0.84)),
      line=(0.09, 0.11, 0.14), fline=(0.01, 0.11, 0.12),
      marble=(0.30, 0.085, 0.12), wrap=(0.30, 0.085, 0.12), lines="body",
      label=(14, 122, 106), label_text=(255, 255, 255),
@@ -72,8 +77,9 @@ WAYS = {
      sub="teal frit, marbles \u00b7 wrapped linework"),
  "clear_gold": dict(
      body=(0.0045, 0.0040, 0.0038), frit=(0.115, 0.44, 0.21),
-     fume=1.55, fume_cool=(1.14, 0.88, 0.48), fume_warm=(1.16, 0.66, 0.40),
-     fume_pow=0.95,
+     fume=1.35, fume_pow=0.90,
+     fume_stops=((1.00, 0.99, 0.95), (1.08, 1.00, 0.82),
+                 (1.08, 0.86, 0.82), (0.92, 0.86, 1.08)),
      line=(0.14, 0.10, 0.06), fline=(0.13, 0.01, 0.09),
      marble=(0.085, 0.34, 0.16), wrap=(0.085, 0.34, 0.16), lines="body",
      label=(150, 32, 108), label_text=(255, 255, 255),
@@ -171,8 +177,7 @@ def build_renderer(piece, key, W, H):
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
-          fume_warm=c["fume_warm"], fume_cool=c["fume_cool"],
-          fume_pow=c.get("fume_pow", 1.4),
+          fume_stops=c["fume_stops"], fume_pow=c.get("fume_pow", 1.4),
           line=c["line"], kAmt=0.38, kPow=2.6, spec=1.0,
           decal=p["decal"] is not None, solid=True, min_thick=2.2)
     r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],

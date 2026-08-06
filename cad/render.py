@@ -74,8 +74,8 @@ in vec3 v_wpos; in vec3 v_wnorm; in float v_vdepth;
 out vec4 f_out;
 uniform sampler2D backTex; uniform vec2 res;
 uniform vec3 absorb; uniform float fume;
-uniform vec3 fumeWarm; uniform vec3 fumeCool; uniform float minThick;
-uniform float maxThick; uniform float fumePow;
+uniform vec3 fumeA; uniform vec3 fumeB; uniform vec3 fumeC; uniform vec3 fumeD;
+uniform float minThick; uniform float maxThick; uniform float fumePow;
 """ + COMMON + """
 void main(){
     vec2 uv = gl_FragCoord.xy/res;
@@ -84,12 +84,15 @@ void main(){
                                                // clear; ceiling makes opaque stock flat
     vec3 tint = exp(-absorb*thick);
     if(fume > 0.0){
-        // silver/gold fume is an interference coat: the shift follows viewing angle,
-        // and a heavy coat pulls the whole body toward the metal
+        // a fume coat is interference, not a dye: the hue walks through a sequence as
+        // the angle opens up, which is what makes silver and gold read as metal
         float g = pow(1.0-ndotv(v_wnorm,v_wpos), fumePow);
-        // the coat bites hardest where the light grazes, and only tints face-on
-        float infl = clamp(fume*(0.28 + 0.72*g), 0.0, 1.5);
-        tint *= mix(vec3(1.0), mix(fumeCool, fumeWarm, g), infl);
+        float t = clamp(g, 0.0, 1.0) * 3.0;
+        vec3 band = t < 1.0 ? mix(fumeA, fumeB, t)
+                  : t < 2.0 ? mix(fumeB, fumeC, t - 1.0)
+                            : mix(fumeC, fumeD, t - 2.0);
+        float infl = clamp(fume*(0.18 + 0.82*g), 0.0, 1.5);
+        tint *= mix(vec3(1.0), band, infl);
     }
     f_out = vec4(tint,1.0);
 }"""
@@ -250,8 +253,9 @@ class Renderer:
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
             kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, min_thick=0.0, max_thick=60.0,
-            fume_warm=(1.00, 0.83, 0.58), fume_cool=(0.74, 0.83, 1.00), fume_pow=1.4,
-            smooth=36.0):
+            fume_stops=((1.0, 1.0, 1.0), (0.92, 0.95, 1.02),
+                        (0.95, 0.90, 1.05), (1.02, 0.95, 0.86)),
+            fume_pow=1.4, smooth=36.0):
         """solid=True depth-tests the density pass, so only the surface facing the
         camera draws contour - the piece stops reading as an X-ray of its own walls."""
         v, n, f = load(path, smooth)
@@ -262,7 +266,7 @@ class Renderer:
         self.objs.append(dict(vaos=vaos, absorb=absorb, fume=fume, line=line,
                               kAmt=kAmt, kPow=kPow, spec=spec, decal=decal,
                               solid=solid, min_thick=min_thick, max_thick=max_thick,
-                              fume_warm=fume_warm, fume_cool=fume_cool, fume_pow=fume_pow))
+                              fume_stops=fume_stops, fume_pow=fume_pow))
 
     def set_decal(self, img, z0, z1, r):
         t = self.ctx.texture(img.size, 4, img.tobytes())
@@ -325,7 +329,8 @@ class Renderer:
         self.back_tex.use(1); set_u(p, 'backTex', 1); set_u(p, 'res', (self.W, self.H))
         for o in self.objs:
             set_u(p, 'absorb', o['absorb']); set_u(p, 'fume', o['fume'])
-            set_u(p, 'fumeWarm', o['fume_warm']); set_u(p, 'fumeCool', o['fume_cool'])
+            for nm, col in zip(('fumeA', 'fumeB', 'fumeC', 'fumeD'), o['fume_stops']):
+                set_u(p, nm, tuple(col))
             set_u(p, 'fumePow', o['fume_pow'])
             set_u(p, 'minThick', o['min_thick']); set_u(p, 'maxThick', o['max_thick'])
             o['vaos']['tint'].render(moderngl.TRIANGLES)

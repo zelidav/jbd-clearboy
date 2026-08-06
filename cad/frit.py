@@ -13,9 +13,9 @@ import trimesh
 
 from decor import surface_pt, RIM_X
 
-FRIT_X0 = -4.0             # frit band runs from here forward to the rim
+FRIT_X0 = -22.0            # the whole bowl end, not just the lip
 FRIT_X1 = RIM_X + 0.5
-GRAINS = 1950
+GRAINS = 2600
 GRAIN_R = (0.50, 1.30)
 
 MARBLES = [               # (x station, theta, radius)
@@ -74,10 +74,30 @@ def build_marbles(n=None, seed=None):
         [_sphere(r, surface_pt(x, th, out=-r * 0.22), subdiv=2) for (x, th, r) in plan])
 
 
+FOOT_Z = (0.5, 9.0)        # the foot disc and the first of the stem
+FOOT_R = 12.25             # FOOT_OD / 2
+FOOT_GRAINS = 420
+
+
+def build_foot_frit(seed=13):
+    """The foot gets rolled in the same colour, so the piece reads as a pair of ends."""
+    rng = np.random.RandomState(seed)
+    parts = []
+    for _ in range(FOOT_GRAINS):
+        t = rng.random_sample()
+        z = FOOT_Z[0] + (FOOT_Z[1] - FOOT_Z[0]) * t
+        th = 2 * math.pi * rng.random_sample()
+        r = GRAIN_R[0] + (GRAIN_R[1] - GRAIN_R[0]) * rng.random_sample() ** 1.6
+        rad = (FOOT_R if z < 7.0 else 7.0) - r * 0.55
+        parts.append(_sphere(r, (rad * math.cos(th), rad * math.sin(th), z)))
+    return trimesh.util.concatenate(parts)
+
+
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "out"
     os.makedirs(out, exist_ok=True)
-    f, m = build_frit(), build_marbles()
+    f = trimesh.util.concatenate([build_frit(), build_foot_frit()])
+    m = build_marbles()
     f.export(os.path.join(out, "frit.stl"))
     m.export(os.path.join(out, "marbles.stl"))
     print("frit %d grains / %d faces   marbles %d / %d faces"

@@ -39,22 +39,24 @@ GROUPS_FRIT = [
 ]
 
 
-def bands(n=18, pitch=1.9, minor=0.24, top=88.0, groups=3, gap=4.0):
-    """Lay n lines up the body in `groups` bands at the given pitch. Spacing and
-    density are what a maker actually varies, so they are the two knobs."""
+def bands(n=26, pitch=1.9, minor=0.24, top=88.0, bottom=6.0, seed=5):
+    """n lines down the whole body at roughly the given pitch, jittered: a lathe line
+    is never evenly spaced and never quite the same weight twice."""
     n = max(int(n), 0)
     if not n:
         return []
-    per = max(n // max(groups, 1), 1)
+    rng = np.random.RandomState(seed)
+    span = max(top - bottom, 1.0)
     out = []
     z = top
-    for g in range(groups):
-        count = per if g < groups - 1 else max(n - per * (groups - 1), 1)
-        z -= (count - 1) * pitch
-        out.append((z, count, pitch, minor))
-        z -= gap
-        if z < 8.0:
-            break
+    for i in range(n):
+        step = pitch * rng.uniform(0.55, 1.85)          # uneven spacing
+        if rng.random_sample() < 0.16:
+            step *= rng.uniform(2.0, 3.4)              # the odd gap between groups
+        z -= step
+        if z < bottom:
+            z = bottom + (span * rng.random_sample() * 0.12)
+        out.append((z, 1, pitch, minor * rng.uniform(0.62, 1.55)))   # uneven weight
     return out
 
 
@@ -67,23 +69,40 @@ def build(groups=None, proud=0.0):
     return trimesh.util.concatenate(parts)
 
 
-def hammer_rings(n=5, pitch=6.0, minor=0.55, start=None, seg=140):
-    """Spun linework on the hammer: rings laid round the head while it turns. The
-    head is not round, so each ring follows its own section rather than a circle."""
+def hammer_rings(n=9, pitch=5.0, minor=0.5, start=None, seg=150, seed=3, foot=True):
+    """Spun linework on the hammer: rings laid round the head while it turns, plus a
+    few round the foot. The head is not round, so each ring follows its own section.
+    Spacing and weight are jittered - it is hand work."""
     import decor
     n = max(int(n), 0)
-    if not n:
-        return trimesh.creation.icosphere(subdivisions=1, radius=0.001)
-    x0 = decor.RIM_X - 6.0 if start is None else start
     parts = []
-    for i in range(n):
-        x = x0 - i * pitch
-        for j in range(seg):
-            th = 2 * math.pi * j / seg
-            p = decor.surface_pt(x, th, out=-minor * 0.45)
-            m = trimesh.creation.icosphere(subdivisions=1, radius=minor)
-            m.apply_translation(p)
-            parts.append(m)
+    rng = np.random.RandomState(seed)
+    if n:
+        x = (decor.RIM_X - 3.0) if start is None else start
+        for i in range(n):
+            x -= pitch * rng.uniform(0.6, 1.7)
+            if x < -34.0:
+                break
+            r = minor * rng.uniform(0.62, 1.5)
+            for j in range(seg):
+                th = 2 * math.pi * j / seg
+                m = trimesh.creation.icosphere(subdivisions=1, radius=r)
+                m.apply_translation(decor.surface_pt(x, th, out=-r * 0.45))
+                parts.append(m)
+    if foot and n:
+        for k in range(max(n // 3, 2)):
+            z = 1.6 + k * 2.1 * rng.uniform(0.8, 1.4)
+            if z > 8.5:
+                break
+            r = minor * rng.uniform(0.6, 1.3)
+            rad = 12.25 - r * 0.5
+            for j in range(seg):
+                th = 2 * math.pi * j / seg
+                m = trimesh.creation.icosphere(subdivisions=1, radius=r)
+                m.apply_translation((rad * math.cos(th), rad * math.sin(th), z))
+                parts.append(m)
+    if not parts:
+        return trimesh.creation.icosphere(subdivisions=1, radius=0.001)
     return trimesh.util.concatenate(parts)
 
 
@@ -93,7 +112,7 @@ if __name__ == "__main__":
     m = build(bands())
     m.export(os.path.join(out, "jar_lines.stl"))
     # the frit sits about 0.5 proud, so these ride over it
-    f = build(GROUPS_FRIT, proud=1.15)
+    f = build(GROUPS_FRIT, proud=1.15)   # over the frit, for the coloured builds
     f.export(os.path.join(out, "jar_lines_frit.stl"))
     h = hammer_rings()
     h.export(os.path.join(out, "hammer_lines.stl"))
