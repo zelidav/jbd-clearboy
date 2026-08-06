@@ -24,6 +24,7 @@ PIECES = {
      body="out/clearboy_hammer.stl", frit="out/frit.stl", marbles="out/marbles.stl",
      cam_r=545.0, target=(0, 0, 72), fov=17.0, shadow=(0.5, 0.30, 0.055),
      decal=(20.0, 74.0, 7.0),      # z0, z1, stem radius
+     lines_body="out/hammer_lines.stl", lines_frit="out/hammer_lines.stl",
      size=(900, 760),              # one frame size for the whole standing->flat sweep
      name="Clearboy hammer", note="140 mm \u00b7 hand-blown original"),
  "hammer_flat": dict(

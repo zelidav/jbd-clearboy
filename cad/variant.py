@@ -19,8 +19,10 @@ import cadquery as cq
 VARIANTS = os.path.join("docs", "variants.json")
 
 HAMMER_BASE = dict(height=140.0, headlen=68.0, headsec=42.0, stemod=14.0,
-                   bowlid=25.0, footod=24.5, stemlen=88.0, marbles=4, scatter=0)
-JAR_BASE = dict(height=92.0, mouthid=38.0, wall=3.0, fritz=25.0, corkh=20.0, marbles=7)
+                   bowlid=25.0, footod=24.5, stemlen=88.0, marbles=4, scatter=0,
+                   lines=5, linepitch=6.0)
+JAR_BASE = dict(height=92.0, mouthid=38.0, wall=3.0, fritz=25.0, corkh=20.0, marbles=7,
+                lines=18, linepitch=1.9)
 
 
 def slug(text, fallback):
@@ -66,7 +68,12 @@ def build_hammer(d, out, vid):
     marb_path = os.path.join(out, "%s_marbles.stl" % vid)
     frit.build_frit().export(frit_path)
     frit.build_marbles(n=n, seed=int(p["scatter"])).export(marb_path)
+
+    import linework
+    lines_path = os.path.join(out, "%s_lines.stl" % vid)
+    linework.hammer_rings(n=p["lines"], pitch=p["linepitch"]).export(lines_path)
     return dict(body=body_path, frit=frit_path, marbles=marb_path,
+                lines_body=lines_path, lines_frit=lines_path,
                 cam_r=700.0 + max(dz, 0) * 2.2, target=(0, 0, 74 + dz * 0.55),
                 fov=17.0, shadow=(0.5, 0.30, 0.075), decal=(20.0, 74.0, p["stemod"] / 2))
 
@@ -99,8 +106,16 @@ def build_jar(d, out, vid):
     marb_path = os.path.join(out, "%s_marbles.stl" % vid)
     jar.build_frit().export(frit_path)
     jar.build_marbles().export(marb_path)
+
+    import linework
+    body_lines = os.path.join(out, "%s_lines.stl" % vid)
+    frit_lines = os.path.join(out, "%s_lines_frit.stl" % vid)
+    linework.build(linework.bands(n=p["lines"], pitch=p["linepitch"],
+                                  top=p["height"] - 4.0)).export(body_lines)
+    linework.build(linework.GROUPS_FRIT, proud=1.15).export(frit_lines)
     top = p["height"] + p["corkh"]
     return dict(body=body_path, frit=frit_path, marbles=marb_path, cork=cork_path,
+                lines_body=body_lines, lines_frit=frit_lines,
                 cam_r=650.0 + max(top - 112.0, 0) * 2.4, target=(0, 0, top * 0.51),
                 fov=17.0, shadow=(0.5, 0.32, 0.130), decal=None)
 

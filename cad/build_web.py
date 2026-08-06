@@ -56,6 +56,8 @@ BASE = {
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
    dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
+   dict(k="lines",   label="Spun linework",    v=5,    min=0,   max=14,  step=1,   unit="lines"),
+   dict(k="linepitch", label="Line spacing",   v=6,    min=2,   max=14,  step=0.5, unit="mm"),
  ],
  "hammer_flat": [
    dict(k="height",  label="Overall height",   v=140,  min=110, max=180, step=1,   unit="mm"),
@@ -75,6 +77,8 @@ BASE = {
    dict(k="fritz",   label="Frit band depth",  v=25, min=10, max=50,  step=1,   unit="mm"),
    dict(k="corkh",   label="Cork above rim",   v=20, min=10, max=34,  step=1,   unit="mm"),
    dict(k="marbles", label="Marbles at rim",   v=7,  min=0,  max=12,  step=1,   unit=""),
+   dict(k="lines",   label="Line density",     v=18, min=0,  max=40,  step=1,   unit="lines"),
+   dict(k="linepitch", label="Line spacing",   v=1.9, min=1.0, max=5.0, step=0.1, unit="mm"),
  ],
 }
 
