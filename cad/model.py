@@ -23,6 +23,8 @@ CARB_BOSS_D  = 11.0
 CARB_FROM_RIM= 14.0
 HEAD_X0      = -36.0        # closed end
 HEAD_X1      =  32.0        # bowl rim face   (length 68)
+STEM_TOP     = 112.0        # where the stem disappears into the head
+COLLAR_Z     = 100.5        # top of the upper collar
 
 # head sections: (x, height Z, width Y, centre Z)
 SECTIONS = [
@@ -92,15 +94,15 @@ def build():
     head = cq.Workplane(obj=head_loft())
 
     # ---- stem + collar + foot -------------------------------------------
-    stem_top = 112.0
+    stem_top = STEM_TOP
     stem = (cq.Workplane("XY").circle(STEM_OD / 2).extrude(stem_top)
               .translate((0, 0, 3.0)))
     collar = (cq.Workplane("XY")
               .circle(COLLAR_OD / 2).workplane(offset=COLLAR_H).circle(STEM_OD / 2)
-              .loft(ruled=False).translate((0, 0, 100.5 - COLLAR_H)))
+              .loft(ruled=False).translate((0, 0, COLLAR_Z - COLLAR_H)))
     collar2 = (cq.Workplane("XY")
                .circle(STEM_OD / 2).workplane(offset=4.0).circle(COLLAR_OD / 2)
-               .loft(ruled=False).translate((0, 0, 96.5 - COLLAR_H)))
+               .loft(ruled=False).translate((0, 0, COLLAR_Z - 4.0 - COLLAR_H)))
     foot = (cq.Workplane("XY").circle(FOOT_OD / 2).extrude(FOOT_T)
               .edges("|Z or %CIRCLE").fillet(1.6))
 
@@ -136,7 +138,7 @@ def build():
     body = body.cut(bore).cut(throat)
 
     # ---- stem bore -------------------------------------------------------
-    sbore = cq.Workplane("XY").circle(STEM_ID / 2).extrude(112.0)
+    sbore = cq.Workplane("XY").circle(STEM_ID / 2).extrude(STEM_TOP)
     body = body.cut(sbore)
 
     # ---- carb hole -------------------------------------------------------

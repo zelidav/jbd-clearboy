@@ -1,0 +1,15 @@
+[
+ {
+  "id": "v-short-stem-fat-lobe",
+  "way": "teal_silver",
+  "piece": "hammer",
+  "label": "short stem fat lobe",
+  "notes": "test request",
+  "dims": {
+   "height": 124.0,
+   "headlen": 76.0,
+   "headsec": 46.0,
+   "stemod": 16.0
+  }
+ }
+]

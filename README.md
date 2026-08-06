@@ -1,23 +1,23 @@
 # Clearboy programme — CAD, mockups, site
 
 Reverse-engineered CAD of one hand-blown JBD "Clearboy" hammer bubbler, built from 10
-photographs with a stainless rule in frame — plus a matching stash jar, both mocked up in
-two fumed colourways.
+photographs with a stainless rule in frame — plus a matching cork-top nug jar, both mocked
+up in two fumed colourways.
 
 **Site:** https://zelidav.github.io/jbd-clearboy/ — spinners, survey, downloads.
 
 ## The pieces
 
-| | Clearboy hammer | Stash jar |
+| | Clearboy hammer | Nug jar |
 |---|---|---|
-| Overall | 140 mm | 92 mm |
-| Section | head 68 long, 42 × 37 oval | body ø66 |
-| Opening | bowl ø25 → ø5 throat | mouth ø38 |
-| Wall | ≈ 3 mm chamber (inferred) | 3 mm |
+| Overall | 140 mm | 92 mm glass + cork lid |
+| Section | head 68 long, 42 × 37 oval | straight cylinder, ø44 |
+| Opening | bowl ø25 → ø5 throat | mouth ø38, cork plug |
+| Wall | ≈ 3 mm chamber (inferred) | 3 mm, flat closed bottom |
 | Stem | ø14 OD / ø8 bore (thickened from the original's ø11 to carry the enamel label) | — |
-| Mark | enamel label, white dropout | embossed JBD medallion |
-| Glass | ≈ 83 g in boro 3.3 | ≈ 137 g |
-| Frit + marbles | bowl end, 4 clear marbles | shoulder band, 7 marbles at the rim |
+| Mark | enamel label, JBD × Boutiq dropped out in white | JBD pressed into a molten stamp pad, lower middle |
+| Glass | ≈ 83 g in boro 3.3 | ≈ 90 g + ≈ 10 g cork |
+| Frit + marbles | bowl end, 4 clear marbles | band under the rim, 7 marbles around the opening |
 
 Colourways: **bluish teal / silver fume** and **magenta / gold fume**, both frit-rolled with
 clear marbles.
@@ -42,7 +42,7 @@ scaling) moves if they come back different.
 |---|---|
 | `cad/model.py` | Hammer solid — head lofted through 13 measured sections, hollowed, bowl funnel, stem bore, carb. STEP + STL. |
 | `cad/frit.py` | Frit grains and clear marbles for the hammer, built as meshes. |
-| `cad/jar.py` | Jar solid + its frit and rim marbles. |
+| `cad/jar.py` | Jar solid, cork lid, pressed maker's stamp, frit and rim marbles. |
 | `cad/render.py` | Studio glass compositor (moderngl): sweep → Beer-Lambert tint with fume shift → density pass → specular → enamel decal. Not a path tracer. |
 | `cad/mockups.py` | Pieces, colourways, hero stills. |
 | `cad/turntable.py` | 72-position turntables, broadside start, rotating on the piece's own axis. |

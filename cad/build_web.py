@@ -22,8 +22,8 @@ WAYS = ["teal_silver", "magenta_gold"]
 PIECE_META = {
     "hammer": dict(name="Clearboy hammer", code="JBD-CB-140",
                    note="140 mm, from the measured original"),
-    "jar":    dict(name="Stash jar", code="JBD-SJ-92",
-                   note="92 mm, 38 mm opening, 3 mm wall"),
+    "jar":    dict(name="Nug jar", code="JBD-NJ-92",
+                   note="92 mm straight cylinder, 38 mm opening, cork lid"),
 }
 WAY_META = {
     "teal_silver":  dict(name="Bluish teal", sub="silver fume",
@@ -46,11 +46,11 @@ BASE = {
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
  ],
  "jar": [
-   dict(k="height",  label="Overall height",   v=92, min=70, max=130, step=1,   unit="mm"),
-   dict(k="bodyod",  label="Body diameter",    v=66, min=48, max=90,  step=1,   unit="mm"),
+   dict(k="height",  label="Glass height",     v=92, min=70, max=130, step=1,   unit="mm"),
    dict(k="mouthid", label="Mouth opening",    v=38, min=28, max=53,  step=1,   unit="mm"),
    dict(k="wall",    label="Wall thickness",   v=3,  min=2,  max=6,   step=0.5, unit="mm"),
-   dict(k="fritz",   label="Frit band depth",  v=27, min=10, max=50,  step=1,   unit="mm"),
+   dict(k="fritz",   label="Frit band depth",  v=25, min=10, max=50,  step=1,   unit="mm"),
+   dict(k="corkh",   label="Cork above rim",   v=20, min=10, max=34,  step=1,   unit="mm"),
    dict(k="marbles", label="Marbles at rim",   v=7,  min=0,  max=12,  step=1,   unit=""),
  ],
 }
@@ -62,21 +62,33 @@ FILES = [
   ("out/marbles.stl",          "hammer", "The four clear marbles"),
   ("out/hammer_teal_silver.glb",  "hammer", "Web / realtime - transmission, IOR 1.474, volume"),
   ("out/hammer_magenta_gold.glb", "hammer", "Web / realtime - magenta build"),
-  ("out/jar.step",             "jar", "CAD hand-off - 38 mm mouth, 3 mm wall, embossed JBD"),
+  ("out/jar.step",             "jar", "CAD hand-off - straight cylinder, 38 mm mouth, 3 mm wall, pressed JBD stamp"),
   ("out/jar.stl",              "jar", "Mesh - print or mould"),
+  ("out/jar_cork.step",        "jar", "Cork lid - tapered plug plus cap"),
+  ("out/jar_cork.stl",         "jar", "Cork lid, meshed"),
   ("out/jar_frit.stl",         "jar", "Frit grains, shoulder band"),
-  ("out/jar_marbles.stl",      "jar", "Seven rim marbles"),
+  ("out/jar_marbles.stl",      "jar", "Seven marbles around the opening"),
   ("out/jar_teal_silver.glb",  "jar", "Web / realtime"),
   ("out/jar_magenta_gold.glb", "jar", "Web / realtime"),
 ]
+
+def variants():
+    """Re-rendered remodel requests. They are added alongside the originals,
+    which are never replaced."""
+    path = os.path.join(SITE, "variants.json")
+    if not os.path.exists(path):
+        return []
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
 
 SPECS = {
     "hammer": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
                ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
                ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
-    "jar":    [["Overall height", "92", "mm"], ["Body", "&empty;66", "mm"],
+    "jar":    [["Glass height", "92", "mm"], ["Body", "&empty;44", "mm straight"],
                ["Mouth", "&empty;38", "mm"], ["Wall", "3", "mm"],
-               ["Glass", "&asymp; 137", "g"], ["Marbles", "7", "at the rim"]],
+               ["Glass", "&asymp; 90", "g + cork"], ["Marbles", "7", "at the opening"]],
 }
 
 
@@ -87,16 +99,67 @@ def data_uri(path):
         return "data:%s;base64,%s" % (mime, base64.b64encode(f.read()).decode())
 
 
+def all_pieces():
+    out = list(PIECES)
+    for v in variants():
+        if v["id"] not in out:
+            out.append(v["id"])
+    return out
+
+
 def assets(inline):
     ref = data_uri if inline else (lambda p: os.path.relpath(p, SITE).replace("\\", "/"))
     out = {}
-    for pc in PIECES:
+    for pc in all_pieces():
         out[pc] = {}
         for w in WAYS:
             d = os.path.join(SITE, "spin", "%s_%s" % (pc, w))
+            if not os.path.isdir(d):
+                continue                      # a variant is usually rendered in one colourway
             out[pc][w] = {"frames": [ref(os.path.join(d, f))
                                      for f in sorted(os.listdir(d)) if f.endswith(".webp")]}
     return out
+
+
+def piece_meta():
+    m = dict(PIECE_META)
+    for v in variants():
+        m[v["id"]] = dict(name=v.get("label") or v["id"], code=v["id"].upper(),
+                          note="variant of the " + PIECE_META[v["piece"]]["name"].lower(),
+                          variant_of=v["piece"], dims=v.get("dims", {}))
+    return m
+
+
+def base_dims():
+    b = dict(BASE)
+    for v in variants():
+        rows = []
+        for row in BASE[v["piece"]]:
+            r = dict(row)
+            if row["k"] in v.get("dims", {}):
+                r["v"] = v["dims"][row["k"]]
+            rows.append(r)
+        b[v["id"]] = rows
+    return b
+
+
+def piece_specs():
+    sp = dict(SPECS)
+    for v in variants():
+        rows = [list(r) for r in SPECS[v["piece"]]]
+        d = v.get("dims", {})
+        for r in rows:
+            key = {"Overall height": "height", "Glass height": "height",
+                   "Stem OD": "stemod", "Mouth": "mouthid", "Wall": "wall",
+                   "Marbles": "marbles", "Bowl": "bowlid"}.get(r[0])
+            if key and key in d:
+                r[1] = ("&empty;%g" % d[key]) if r[0] in ("Mouth", "Bowl") else ("%g" % d[key])
+            if r[0] == "Head":
+                r[1] = "%g &times; %g" % (d.get("headlen", 68), d.get("headsec", 42))
+            if r[0] == "Glass":
+                r[1] = "&mdash;"                      # recompute on the next full build
+        sp[v["id"]] = rows
+    return sp
 
 
 def sizes():
@@ -256,6 +319,8 @@ section{padding:52px 0}
 .legend b{font-weight:400;color:var(--accent)}
 label.field{display:block;margin-top:14px;font-family:var(--font-mono);font-size:11px;
   letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+input[type="text"]{width:100%;margin-top:7px;padding:10px 13px;background:var(--ground);
+  border:1px solid var(--rule);color:var(--ink);font-family:var(--font-body);font-size:15px}
 textarea{width:100%;min-height:92px;margin-top:7px;padding:11px 13px;background:var(--ground);
   border:1px solid var(--rule);color:var(--ink);font-family:var(--font-body);font-size:15px;
   resize:vertical}
@@ -267,6 +332,7 @@ textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outli
 .btn:hover{border-color:var(--ink-3);color:var(--ink)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{filter:brightness(1.08)}
+.fine{margin-top:12px;font-size:13.5px;color:var(--ink-3);max-width:60ch}
 .log{margin-top:16px;border-top:1px dashed var(--rule);padding-top:12px;font-family:var(--font-mono);
   font-size:11.5px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
 .log b{color:var(--ink-2);font-weight:600}
@@ -394,13 +460,19 @@ INDEX_BODY = r"""
           <span>&middot;&middot;&middot; original</span>
           <span id="deltaline">no changes yet</span>
         </div>
+        <label class="field" for="vname">Name this variant</label>
+        <input id="vname" type="text" maxlength="40" placeholder="Fat lobe, short stem">
         <label class="field" for="notes">What should change</label>
         <textarea id="notes" placeholder="Shorter stem, fatter lobe, marbles only on the carb side, colder teal, frit further down the body..."></textarea>
         <div class="actions">
-          <button class="btn primary" id="save" type="button">Save request</button>
+          <button class="btn primary" id="render" type="button">Request re-render</button>
           <button class="btn" id="copy" type="button">Copy spec</button>
           <button class="btn" id="mail" type="button">Email it</button>
+          <button class="btn" id="save" type="button">Keep on this device</button>
         </div>
+        <p class="fine">A request opens a build ticket with these numbers in it. The
+          re-render comes back under the name you gave it and joins the piece menu at the top
+          of this page &mdash; the original build is never replaced.</p>
         <div class="log" id="log"></div>
       </div>
     </div>
@@ -564,7 +636,7 @@ python3.12 -m venv cadenv && ./cadenv/Scripts/python -m pip install -r requireme
 
 INDEX_JS = r"""
 const ASSETS = __ASSETS__, META = __META__, BASE = __BASE__, SPECS = __SPECS__;
-const CONTACT = "__CONTACT__";
+const CONTACT = "__CONTACT__", REPO = "__REPO__";
 const PIECES = Object.keys(META.pieces), WAYS = Object.keys(META.ways);
 const MID = "·", DEG = "°", ARROW = "→";
 
@@ -586,7 +658,10 @@ function mount(pc, w){
   layers[pc + "/" + w] = {box: box, imgs: imgs};
   N = imgs.length;
 }
-PIECES.forEach(function(pc){ WAYS.forEach(function(w){ mount(pc, w); }); });
+PIECES.forEach(function(pc){
+  WAYS.forEach(function(w){ if(ASSETS[pc] && ASSETS[pc][w]) mount(pc, w); });
+});
+function waysFor(pc){ return WAYS.filter(function(w){ return ASSETS[pc] && ASSETS[pc][w]; }); }
 
 function show(i){
   idx = ((i % N) + N) % N;
@@ -598,12 +673,18 @@ function show(i){
 }
 
 function select(pc, w){
+  const avail = waysFor(pc);
+  if(avail.indexOf(w) < 0) w = avail[0];
   piece = pc; way = w;
+  N = layers[pc + "/" + w].imgs.length;
   Object.keys(layers).forEach(function(k){ layers[k].box.style.display = "none"; });
   layers[pc + "/" + w].box.style.display = "block";
   document.querySelectorAll(".piece").forEach(function(b){
     b.setAttribute("aria-pressed", String(b.dataset.k === pc)); });
   document.querySelectorAll(".way").forEach(function(b){
+    const ok = avail.indexOf(b.dataset.k) >= 0;
+    b.disabled = !ok;
+    b.style.opacity = ok ? "1" : ".4";
     b.setAttribute("aria-pressed", String(b.dataset.k === w)); });
   document.getElementById("specs-head").textContent = META.pieces[pc].name;
   document.getElementById("facts").innerHTML = SPECS[pc].map(function(f){
@@ -701,13 +782,15 @@ function outline(pc, d){
       marks: [{x: nose - d.bowlid * 0.34, y: h - hs * 0.5, r: d.bowlid / 2}],
       h: h, w: Math.max(hl, d.footod)};
   }
-  const h = d.height, br = d.bodyod / 2, mr = d.mouthid / 2 + d.wall, sh = h * 0.70;
+  const h = d.height, br = d.mouthid / 2 + d.wall, ck = d.corkh,
+        cr = br * 1.05, pr = d.mouthid / 2 - 0.4;
   return {seg: [
-    ["M", -br * 0.90, 0], ["L", br * 0.90, 0], ["Q", br, 0, br, h * 0.08],
-    ["L", br, sh], ["Q", br, h * 0.90, mr, h * 0.93], ["L", mr, h],
-    ["L", -mr, h], ["L", -mr, h * 0.93], ["Q", -br, h * 0.90, -br, sh],
-    ["L", -br, h * 0.08], ["Q", -br, 0, -br * 0.90, 0], ["Z"]],
-    marks: [], h: h, w: d.bodyod, frit: [h - d.fritz, h]};
+    ["M", -br * 0.94, 0], ["L", br * 0.94, 0], ["Q", br, 0, br, 2],
+    ["L", br, h], ["L", -br, h], ["L", -br, 2], ["Q", -br, 0, -br * 0.94, 0], ["Z"],
+    ["M", -pr, h - 6], ["L", pr, h - 6], ["L", pr, h + ck * 0.55],
+    ["L", cr, h + ck * 0.55], ["L", cr, h + ck], ["L", -cr, h + ck],
+    ["L", -cr, h + ck * 0.55], ["L", -pr, h + ck * 0.55], ["Z"]],
+    marks: [], h: h + ck, w: Math.max(2 * cr, 2 * br), frit: [h - d.fritz, h]};
 }
 
 function toPath(o, s, cx, cy){
@@ -765,6 +848,17 @@ function deltas(){
                              (s.unit ? " " + s.unit : ""); });
 }
 
+function requestJson(){
+  const dims = {};
+  BASE[piece].forEach(function(s){ if(cur[s.k] !== s.v) dims[s.k] = cur[s.k]; });
+  const meta = META.pieces[piece];
+  return {piece: meta.variant_of || piece, way: way,
+          label: (document.getElementById("notes").value.trim().split("\n")[0] || "")
+                 .slice(0, 40) || (meta.name + " variant"),
+          notes: document.getElementById("notes").value.trim(),
+          dims: dims};
+}
+
 function specText(){
   const lines = ["JBD remodel request",
     "Piece: " + META.pieces[piece].name + " (" + META.pieces[piece].code + ")",
@@ -795,7 +889,9 @@ function paintLog(){
 }
 
 document.getElementById("reset").onclick = function(){
-  document.getElementById("notes").value = ""; buildSliders();
+  document.getElementById("notes").value = "";
+  document.getElementById("vname").value = "";
+  buildSliders();
 };
 document.getElementById("copy").onclick = function(){
   navigator.clipboard.writeText(specText())
@@ -806,6 +902,13 @@ document.getElementById("mail").onclick = function(){
   location.href = "mailto:" + CONTACT + "?subject=" +
     encodeURIComponent("JBD remodel request - " + META.pieces[piece].name) +
     "&body=" + encodeURIComponent(specText());
+};
+document.getElementById("render").onclick = function(){
+  const r = requestJson();
+  const url = "https://github.com/" + REPO + "/issues/new?labels=variant&title=" +
+    encodeURIComponent("Re-render: " + r.label) + "&body=" + encodeURIComponent(specText());
+  window.open(url, "_blank", "noopener");
+  flash("render", "Ticket opened");
 };
 document.getElementById("save").onclick = function(){
   const all = loadLog();
@@ -836,9 +939,10 @@ document.getElementById("videorows").innerHTML = VIDEOS.map(function(v){
 def build_index(inline):
     js = (INDEX_JS
           .replace("__ASSETS__", json.dumps(assets(inline)))
-          .replace("__META__", json.dumps({"pieces": PIECE_META, "ways": WAY_META}))
-          .replace("__BASE__", json.dumps(BASE))
-          .replace("__SPECS__", json.dumps(SPECS))
+          .replace("__META__", json.dumps({"pieces": piece_meta(), "ways": WAY_META}))
+          .replace("__BASE__", json.dumps(base_dims()))
+          .replace("__SPECS__", json.dumps(piece_specs()))
+          .replace("__REPO__", REPO)
           .replace("__CONTACT__", CONTACT))
     return shell("Mockups &middot; Clearboy programme | Jerome Baker Designs",
                  INDEX_BODY, js, "index", standalone=inline)

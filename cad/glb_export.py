@@ -23,6 +23,7 @@ GLASS = {
                          atten=(0.86, 0.30, 0.62), dist=13.0),
 }
 MARBLE_COLOUR = (0.94, 0.96, 0.97)
+CORK_COLOUR = (0.78, 0.63, 0.42)      # opaque - the cork is not glass
 
 
 def load(path, smooth_angle=36.0):
@@ -41,9 +42,11 @@ def build_scene(piece, colour):
     T = trimesh.transformations.rotation_matrix(-math.pi / 2, [1, 0, 0])
     T[:3, :3] *= 0.001
     scene = trimesh.Scene()
-    parts = (("body", p["body"], colour["body"]),
+    parts = [("body", p["body"], colour["body"]),
              ("frit", p["frit"], colour["frit"]),
-             ("marbles", p["marbles"], MARBLE_COLOUR))
+             ("marbles", p["marbles"], MARBLE_COLOUR)]
+    if p.get("cork"):
+        parts.append(("cork", p["cork"], CORK_COLOUR))
     for name, path, c in parts:
         mesh = load(path)
         mesh.apply_transform(T)
@@ -75,6 +78,10 @@ def patch_glass(glb_bytes, colour):
 
     for m in j.get("materials", []):
         name = (m.get("name") or "")
+        if name.startswith("cork"):
+            m["alphaMode"] = "OPAQUE"
+            m["pbrMetallicRoughness"]["roughnessFactor"] = 0.85
+            continue                                   # cork stays a plain matte solid
         marble = name.startswith("marbles")
         thick = 0.0035 if name.startswith("body") else 0.0025
         m["alphaMode"] = "OPAQUE"

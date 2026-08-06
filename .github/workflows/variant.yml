@@ -1,0 +1,74 @@
+name: Re-render variant
+
+# A remodel request from the site opens an issue with a ```json block in it.
+# Label that issue `variant` (or run this by hand with the same JSON) and the
+# piece is rebuilt at those dimensions, rendered, and committed as its own
+# variant. The originals are never touched.
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      request:
+        description: 'Remodel request JSON'
+        required: true
+        default: '{"piece":"hammer","way":"teal_silver","label":"test","dims":{"height":130}}'
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  render:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'variant'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Headless GL + fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libegl1 libgl1 libgles2 libglvnd0 \
+            libosmesa6 mesa-utils fonts-dejavu-core ffmpeg
+
+      - name: Install
+        run: pip install -q -r requirements.txt
+
+      - name: Extract the request
+        id: req
+        env:
+          BODY: ${{ github.event.issue.body }}
+          INPUT: ${{ github.event.inputs.request }}
+        run: |
+          python - <<'PY'
+          import json, os, re
+          body = os.environ.get("BODY") or ""
+          inp = os.environ.get("INPUT") or ""
+          m = re.search(r"```json\s*(\{.*?\})\s*```", body, re.S)
+          req = m.group(1) if m else inp
+          json.loads(req)                      # fail loudly on a malformed request
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write("json=" + json.dumps(json.loads(req)) + "\n")
+          PY
+
+      - name: Render the variant
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          PYOPENGL_PLATFORM: osmesa
+        run: python cad/variant.py '${{ steps.req.outputs.json }}'
+
+      - name: Rebuild the site
+        run: python cad/build_web.py
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add out docs
+          git commit -m "Variant re-render from request" || echo "nothing to commit"
+          git push

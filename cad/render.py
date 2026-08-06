@@ -74,12 +74,13 @@ in vec3 v_wpos; in vec3 v_wnorm; in float v_vdepth;
 out vec4 f_out;
 uniform sampler2D backTex; uniform vec2 res;
 uniform vec3 absorb; uniform float fume;
-uniform vec3 fumeWarm; uniform vec3 fumeCool; uniform float minThick;
+uniform vec3 fumeWarm; uniform vec3 fumeCool; uniform float minThick; uniform float maxThick;
 """ + COMMON + """
 void main(){
     vec2 uv = gl_FragCoord.xy/res;
     float thick = clamp(texture(backTex,uv).w - v_vdepth, 0.0, 60.0);
-    thick = max(thick, minThick);          // floor keeps thin edges from going clear
+    thick = clamp(thick, minThick, maxThick);   // floor keeps thin edges from going
+                                               // clear; ceiling makes opaque stock flat
     vec3 tint = exp(-absorb*thick);
     if(fume > 0.0){
         // silver/gold fume is an interference coat: the shift follows viewing angle
@@ -214,7 +215,7 @@ class Renderer:
         self.decal = None
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
-            kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, min_thick=0.0,
+            kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, min_thick=0.0, max_thick=60.0,
             fume_warm=(1.00, 0.83, 0.58), fume_cool=(0.74, 0.83, 1.00), smooth=36.0):
         """solid=True depth-tests the density pass, so only the surface facing the
         camera draws contour - the piece stops reading as an X-ray of its own walls."""
@@ -225,7 +226,7 @@ class Renderer:
                 for k, p in self.progs.items()}
         self.objs.append(dict(vaos=vaos, absorb=absorb, fume=fume, line=line,
                               kAmt=kAmt, kPow=kPow, spec=spec, decal=decal,
-                              solid=solid, min_thick=min_thick,
+                              solid=solid, min_thick=min_thick, max_thick=max_thick,
                               fume_warm=fume_warm, fume_cool=fume_cool))
 
     def set_decal(self, img, z0, z1, r):
@@ -281,7 +282,7 @@ class Renderer:
         for o in self.objs:
             p['absorb'].value = o['absorb']; p['fume'].value = o['fume']
             p['fumeWarm'].value = o['fume_warm']; p['fumeCool'].value = o['fume_cool']
-            p['minThick'].value = o['min_thick']
+            p['minThick'].value = o['min_thick']; p['maxThick'].value = o['max_thick']
             o['vaos']['tint'].render(moderngl.TRIANGLES)
 
         # 3b density - every surface for see-through glass, front only for solid colour

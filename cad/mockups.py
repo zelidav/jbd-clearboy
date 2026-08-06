@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 import render
 
 OUT = "shots"
-TEXT = "JEROME BAKER"
+TEXT = "JBD X BOUTIQ"
 SIDE = 0.0                       # yaw where the piece reads broadside to camera
 
 PIECES = {
@@ -27,9 +27,10 @@ PIECES = {
      name="Clearboy hammer", note="140 mm \u00b7 hand-blown original"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
-     cam_r=620.0, target=(0, 0, 47), fov=17.0, shadow=(0.5, 0.34, 0.175),
+     cork="out/jar_cork.stl",
+     cam_r=650.0, target=(0, 0, 58), fov=17.0, shadow=(0.5, 0.32, 0.130),
      decal=None,
-     name="Stash jar", note="92 mm \u00b7 38 mm opening"),
+     name="Nug jar", note="92 mm \u00b7 38 mm opening \u00b7 cork lid"),
 }
 
 WAYS = {
@@ -50,27 +51,88 @@ WAYS = {
 }
 
 MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.14, 0.15, 0.17))
+# cork is not glass: a thickness floor plus heavy absorption gives it a flat, matte body
+CORK = dict(absorb=(0.0225, 0.0430, 0.0790), line=(0.42, 0.33, 0.22),
+            min_thick=6.0, max_thick=8.5, kAmt=0.50, kPow=1.9, spec=0.16)
 
-FONT = "C:/Windows/Fonts/arialbd.ttf"
+def _font_path():
+    """Arial Bold on the workstation, DejaVu on a Linux runner."""
+    for c in ("C:/Windows/Fonts/arialbd.ttf",
+              "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+              "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+              "/System/Library/Fonts/Supplemental/Arial Bold.ttf"):
+        if os.path.exists(c):
+            return c
+    raise RuntimeError("no bold sans font found - install DejaVu or Liberation")
+
+
+FONT = _font_path()
+
+
+def _tracked_text(d, xy, text, font, fill, track):
+    """Letterspaced text - the Boutiq mark is set wide."""
+    x, y = xy
+    for ch in text:
+        d.text((x, y), ch, font=font, fill=fill)
+        x += d.textlength(ch, font=font) + track
+    return x - track
+
+
+def _tracked_width(d, text, font, track):
+    return sum(d.textlength(ch, font=font) for ch in text) + track * (len(text) - 1)
+
+
+def draw_boutiq(d, x, cy, h, ink):
+    """The Boutiq mark: letterspaced BOUTIQ knocked out of a framed badge.
+    Drawn at the supplied height, never stretched - width follows from the type."""
+    stroke = max(int(h * 0.085), 3)
+    pad_x, pad_y = h * 0.34, h * 0.30
+    f = ImageFont.truetype(FONT, int(h * 0.62))
+    track = h * 0.14
+    tw = _tracked_width(d, "BOUTIQ", f, track)
+    w = tw + 2 * pad_x
+    box = [x, cy - h / 2, x + w, cy + h / 2]
+    d.rounded_rectangle(box, radius=int(h * 0.16), outline=ink + (255,), width=stroke)
+    _tracked_text(d, (x + pad_x, cy - h * 0.62 * 0.66), "BOUTIQ", f, ink + (255,), track)
+    return w
 
 
 def make_label(text, fill, ink, w=2400, h=420, pad=0.13):
-    """Enamel label: solid colour band, lettering dropped out in white.
+    """Enamel label: solid colour band, JBD x Boutiq dropped out in white.
     u runs up the stem, v across the face; mirrored in v so it reads correctly
     on the camera side of the tube."""
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     m = int(h * pad)
-    d.rounded_rectangle([0, m, w - 1, h - m - 1], radius=int((h - 2 * m) * 0.30),
+    band_h = h - 2 * m
+    d.rounded_rectangle([0, m, w - 1, h - m - 1], radius=int(band_h * 0.30),
                         fill=fill + (255,))
-    size = int((h - 2 * m) * 0.46)
+    cy = h / 2
+    size = int(band_h * 0.46)
     f = ImageFont.truetype(FONT, size)
-    tw = d.textlength(text, font=f)
-    if tw > w * 0.86:
-        size = int(size * w * 0.86 / tw)
+    gap = size * 0.55
+    jbd_w = d.textlength("JBD", font=f)
+    x_w = d.textlength("×", font=f)
+    badge_h = band_h * 0.60
+    # measure the badge before laying anything down, so the lockup centres properly
+    probe = ImageDraw.Draw(Image.new("RGBA", (10, 10)))
+    fb = ImageFont.truetype(FONT, int(badge_h * 0.62))
+    badge_w = _tracked_width(probe, "BOUTIQ", fb, badge_h * 0.14) + 2 * (badge_h * 0.34)
+    total = jbd_w + gap + x_w + gap + badge_w
+    if total > w * 0.88:
+        k = w * 0.88 / total
+        size = int(size * k); badge_h *= k; gap *= k
         f = ImageFont.truetype(FONT, size)
-        tw = d.textlength(text, font=f)
-    d.text(((w - tw) / 2, h / 2 - size * 0.62), text, font=f, fill=ink + (255,))
+        fb = ImageFont.truetype(FONT, int(badge_h * 0.62))
+        jbd_w = d.textlength("JBD", font=f); x_w = d.textlength("×", font=f)
+        badge_w = _tracked_width(probe, "BOUTIQ", fb, badge_h * 0.14) + 2 * (badge_h * 0.34)
+        total = jbd_w + gap + x_w + gap + badge_w
+    x = (w - total) / 2
+    d.text((x, cy - size * 0.62), "JBD", font=f, fill=ink + (255,))
+    x += jbd_w + gap
+    d.text((x, cy - size * 0.62), "×", font=f, fill=ink + (255,))
+    x += x_w + gap
+    draw_boutiq(d, x, cy, badge_h, ink)
     return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
@@ -85,6 +147,11 @@ def build_renderer(piece, key, W, H):
           kAmt=0.22, kPow=2.0, spec=1.25, solid=True, min_thick=3.4, smooth=0.0)
     r.add(p["marbles"], absorb=MARBLE["absorb"], fume=0.0, line=MARBLE["line"],
           kAmt=0.70, kPow=3.0, spec=1.60, smooth=60.0)
+    if p.get("cork"):
+        r.add(p["cork"], absorb=CORK["absorb"], fume=0.0, line=CORK["line"],
+              kAmt=CORK["kAmt"], kPow=CORK["kPow"], spec=CORK["spec"],
+              solid=True, min_thick=CORK["min_thick"], max_thick=CORK["max_thick"],
+              smooth=24.0)
     if p["decal"]:
         z0, z1, rad = p["decal"]
         r.set_decal(make_label(TEXT, c["label"], c["label_text"]), z0, z1, rad)

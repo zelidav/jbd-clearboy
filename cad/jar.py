@@ -1,88 +1,98 @@
-"""JBD stash jar - 38 mm opening, 3 mm wall, embossed JBD stamp.
+"""JBD nug jar - straight cylinder, flat closed bottom, cork lid.
 
-Same glass programme as the hammer: fumed body, frit-rolled shoulder, clear marbles
-set evenly around the rim.
+38 mm opening, 3 mm wall, so the tube runs 44 mm OD from the base to the rim. Embossed
+JBD medallion on the front. Frit-rolled band under the rim with clear marbles set evenly
+around it, matching the hammer.
 
-    python jar.py out   -> out/jar.stl/.step, out/jar_frit.stl, out/jar_marbles.stl
+    python jar.py out   -> out/jar.stl/.step, out/jar_frit.stl, out/jar_marbles.stl,
+                           out/jar_cork.stl
 """
 import math, os, sys
 import cadquery as cq
 import numpy as np
 import trimesh
 
-MOUTH_ID = 38.0            # the spec: 38 mm opening
-WALL     = 3.0
-NECK_OD  = MOUTH_ID + 2 * WALL
-BODY_OD  = 66.0
-HEIGHT   = 92.0
+MOUTH_ID  = 38.0           # the spec: 38 mm opening
+WALL      = 3.0
+OD        = MOUTH_ID + 2 * WALL      # 44 - straight cylinder, no shoulder
+HEIGHT    = 92.0           # glass body, rim to bench
+FLOOR     = 3.0            # flat closed bottom, same wall
 
-# outer profile: (z, outer radius)
-PROFILE = [
-    (0.0,  30.0), (3.0,  32.6), (8.0,  33.0), (52.0, 33.0), (63.0, 32.4),
-    (70.0, 30.2), (76.0, 26.6), (80.5, 23.6), (84.0, NECK_OD / 2),
-    (88.0, NECK_OD / 2), (90.0, NECK_OD / 2 + 1.1), (92.0, NECK_OD / 2 + 1.1),
-]
-
-STAMP_Z   = 30.0           # centre of the embossed medallion
-STAMP_R   = 15.0           # medallion radius
+STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stamp
+STAMP_RX  = 13.0           # the pad is a squashed gather, wider than tall
+STAMP_RZ  = 9.0
 STAMP_TXT = "JBD"
 
-FRIT_Z    = (62.0, 89.0)   # frit band: shoulder up over the neck
-GRAINS    = 620
+FRIT_Z    = (66.0, 90.5)   # frit band around the opening
+GRAINS    = 520
 GRAIN_R   = (0.55, 1.25)
-N_MARBLES = 7              # evenly spaced around the rim
+N_MARBLES = 7              # evenly spaced around the opening
 MARBLE_R  = 4.0
-MARBLE_Z  = 79.0
+MARBLE_Z  = 84.5
 
-
-def radius_at(z):
-    zs = [p[0] for p in PROFILE]
-    if z <= zs[0]:  return PROFILE[0][1]
-    if z >= zs[-1]: return PROFILE[-1][1]
-    i = max(j for j in range(len(zs)) if zs[j] <= z)
-    i = min(i, len(PROFILE) - 2)
-    (z0, r0), (z1, r1) = PROFILE[i], PROFILE[i + 1]
-    return r0 + (r1 - r0) * (z - z0) / (z1 - z0)
+CORK_H       = 24.0        # plug depth
+CORK_D_BOT   = 37.0        # tapered so it seats
+CORK_D_TOP   = 39.6
+CORK_SEAT    = 12.0        # how far the plug sits down in the mouth
+CAP_H        = 8.0
+CAP_D        = 46.0
 
 
 def build():
-    # loft through the profile circles
-    wires = [cq.Wire.makeCircle(r, cq.Vector(0, 0, z), cq.Vector(0, 0, 1))
-             for (z, r) in PROFILE]
-    body = cq.Workplane(obj=cq.Solid.makeLoft(wires, ruled=False))
+    body = cq.Workplane("XY").circle(OD / 2).extrude(HEIGHT)
+    bore = (cq.Workplane("XY").workplane(offset=FLOOR)
+              .circle(MOUTH_ID / 2).extrude(HEIGHT))
+    body = body.cut(bore)
+    body = body.edges("|Z or %CIRCLE").fillet(1.2)
 
-    # cavity: same profile pulled in by the wall, open at the top
-    inner = [(max(z - WALL, 0.0), max(r - WALL, 0.5)) for (z, r) in PROFILE if z >= WALL]
-    inner = [(WALL, radius_at(WALL) - WALL)] + inner
-    iw = [cq.Wire.makeCircle(r, cq.Vector(0, 0, z), cq.Vector(0, 0, 1))
-          for (z, r) in inner]
-    cavity = cq.Workplane(obj=cq.Solid.makeLoft(iw, ruled=False))
-    # extend the cavity out of the top so the mouth is genuinely open
-    cavity = cavity.union(cq.Workplane("XY").circle(MOUTH_ID / 2)
-                          .extrude(12.0).translate((0, 0, HEIGHT - 10.0)))
-    body = body.cut(cavity)
+    # maker's stamp: a squashed gather of glass with the mark pressed into it.
+    # The pad starts inside the wall so it seats on the curve instead of floating.
+    body = body.union(cq.Workplane(obj=stamp_pad()))
+    face = OD / 2 + 2.4
+    txt = (cq.Workplane("XZ").workplane(offset=face).center(0, STAMP_Z)
+             .text(STAMP_TXT, 10.5, -2.4, kind="bold", halign="center", valign="center"))
+    return body.cut(txt)
 
-    # embossed medallion + JBD, on the front (-Y) face
-    rs = radius_at(STAMP_Z)
-    pad = (cq.Workplane("XZ").workplane(offset=rs - 1.4).center(0, STAMP_Z)
-             .circle(STAMP_R).extrude(-3.2))
-    body = body.union(pad)
-    txt = (cq.Workplane("XZ").workplane(offset=rs + 1.8).center(0, STAMP_Z)
-             .text(STAMP_TXT, 13.0, -1.6, kind="bold",
-                   halign="center", valign="center"))
-    body = body.union(txt)
-    return body
+
+def stamp_pad(depth=7.0, wobble=0.15):
+    """Irregular, molten-edged blob - a hand-pressed stamp is never a clean circle."""
+    pts = []
+    n = 72
+    for i in range(n):
+        t = 2 * math.pi * i / n
+        k = 1.0 + wobble * math.sin(3 * t + 0.7) + 0.5 * wobble * math.sin(5 * t + 2.1)
+        pts.append(cq.Vector(STAMP_RX * k * math.cos(t),
+                             -(OD / 2 - 4.6),
+                             STAMP_Z + STAMP_RZ * k * math.sin(t)))
+    wire = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts, periodic=True)])
+    return cq.Solid.extrudeLinear(cq.Face.makeFromWires(wire), cq.Vector(0, -depth, 0))
+
+
+def build_cork():
+    """Tapered plug plus the cap that sits proud of the rim."""
+    z0 = HEIGHT - CORK_SEAT
+    plug = (cq.Workplane("XY").workplane(offset=z0)
+              .circle(CORK_D_BOT / 2).workplane(offset=CORK_H).circle(CORK_D_TOP / 2)
+              .loft(ruled=True))
+    cap = (cq.Workplane("XY").workplane(offset=z0 + CORK_H)
+             .circle(CAP_D / 2).extrude(CAP_H)
+             .edges(">Z or %CIRCLE").fillet(2.4))
+    return plug.union(cap)
+
+
+def radius_at(z):
+    return OD / 2
+
+
+def surface_pt(z, theta, out=0.0):
+    r = radius_at(z) + out
+    return (r * math.cos(theta), r * math.sin(theta), z)
 
 
 def _sphere(radius, pos, subdiv=1):
     m = trimesh.creation.icosphere(subdivisions=subdiv, radius=radius)
     m.apply_translation(pos)
     return m
-
-
-def surface_pt(z, theta, out=0.0):
-    r = radius_at(z) + out
-    return (r * math.cos(theta), r * math.sin(theta), z)
 
 
 def build_frit(seed=11):
@@ -107,16 +117,18 @@ def build_marbles():
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "out"
     os.makedirs(out, exist_ok=True)
-    j = build()
-    solid = j.val()
-    print("jar volume mm^3:", round(solid.Volume(), 1),
-          "-> glass approx", round(solid.Volume() * 2.23e-3, 1), "g")
-    bb = solid.BoundingBox()
-    print("bbox X %.1f..%.1f Z %.1f..%.1f" % (bb.xmin, bb.xmax, bb.zmin, bb.zmax))
+    j, c = build(), build_cork()
+    print("jar glass mm^3:", round(j.val().Volume(), 1),
+          "-> approx", round(j.val().Volume() * 2.23e-3, 1), "g")
+    print("cork mm^3:", round(c.val().Volume(), 1),
+          "-> approx", round(c.val().Volume() * 0.24e-3, 1), "g")
     cq.exporters.export(j, os.path.join(out, "jar.step"))
     cq.exporters.export(j, os.path.join(out, "jar.stl"),
                         tolerance=0.03, angularTolerance=0.12)
-    f, m = build_frit(), build_marbles()
-    f.export(os.path.join(out, "jar_frit.stl"))
-    m.export(os.path.join(out, "jar_marbles.stl"))
-    print("frit %d grains, %d marbles" % (GRAINS, N_MARBLES))
+    cq.exporters.export(c, os.path.join(out, "jar_cork.step"))
+    cq.exporters.export(c, os.path.join(out, "jar_cork.stl"),
+                        tolerance=0.03, angularTolerance=0.12)
+    build_frit().export(os.path.join(out, "jar_frit.stl"))
+    build_marbles().export(os.path.join(out, "jar_marbles.stl"))
+    print("straight cylinder %.0f OD x %.0f, %d grains, %d marbles, cork %.0f tall"
+          % (OD, HEIGHT, GRAINS, N_MARBLES, CORK_H + CAP_H))

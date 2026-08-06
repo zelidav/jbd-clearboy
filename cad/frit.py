@@ -13,10 +13,10 @@ import trimesh
 
 from decor import surface_pt, RIM_X
 
-FRIT_X0 = 6.0             # frit band runs from here forward to the rim
+FRIT_X0 = -4.0             # frit band runs from here forward to the rim
 FRIT_X1 = RIM_X + 0.5
-GRAINS = 520
-GRAIN_R = (0.55, 1.25)
+GRAINS = 1950
+GRAIN_R = (0.50, 1.30)
 
 MARBLES = [               # (x station, theta, radius)
     (24.0, math.radians(90),  3.8),
@@ -36,12 +36,12 @@ def build_frit(seed=7):
     rng = np.random.RandomState(seed)
     parts = []
     for _ in range(GRAINS):
-        x = FRIT_X0 + (FRIT_X1 - FRIT_X0) * rng.random_sample() ** 0.85
+        x = FRIT_X0 + (FRIT_X1 - FRIT_X0) * rng.random_sample() ** 0.62
         th = 2 * math.pi * rng.random_sample()
         r = GRAIN_R[0] + (GRAIN_R[1] - GRAIN_R[0]) * rng.random_sample() ** 1.6
         # grains sit half-buried in the skin, denser and prouder toward the rim
         t = (x - FRIT_X0) / (FRIT_X1 - FRIT_X0)
-        out = -r * (0.62 - 0.22 * t)
+        out = -r * (0.60 - 0.24 * t)
         parts.append(_sphere(r, surface_pt(x, th, out=out)))
     return trimesh.util.concatenate(parts)
 
