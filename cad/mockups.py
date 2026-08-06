@@ -44,6 +44,7 @@ PIECES = {
 
 WAYS = {
  "teal_silver": dict(
+     sticker="assets/sticker_blue.png",
      body=(0.0372, 0.0157, 0.0213), frit=(0.175, 0.0797, 0.0908),
      fume=1.05, fume_pow=1.05,
      # silver: near-white face on, then steel, violet, and a warm flash at the edge
@@ -55,6 +56,7 @@ WAYS = {
      name="Bluish teal \u00b7 silver fume",
      sub="teal frit \u00b7 clear marbles \u00b7 clear linework"),
  "magenta_gold": dict(
+     sticker="assets/sticker_pink.png",
      body=(0.0251, 0.0548, 0.0414), frit=(0.0797, 0.2122, 0.1446),
      fume=1.05, fume_pow=1.05,
      # gold: pale metal, then straw, rose, and violet where it turns over
@@ -67,6 +69,7 @@ WAYS = {
      sub="magenta frit \u00b7 clear marbles \u00b7 clear linework"),
 
  "clear_silver": dict(
+     sticker="assets/sticker_white.png",
      body=(0.0045, 0.0040, 0.0038), frit=(0.175, 0.0797, 0.0908),
      fume=1.35, fume_pow=0.90,
      fume_stops=((1.00, 1.00, 1.00), (0.88, 0.94, 1.06),
@@ -77,6 +80,7 @@ WAYS = {
      name="Clear \u00b7 heavy silver fume",
      sub="teal frit, marbles \u00b7 wrapped linework"),
  "clear_gold": dict(
+     sticker="assets/sticker_pink.png",
      body=(0.0045, 0.0040, 0.0038), frit=(0.0797, 0.2122, 0.1446),
      fume=1.35, fume_pow=0.90,
      fume_stops=((1.00, 0.99, 0.95), (1.08, 1.00, 0.82),
@@ -191,6 +195,13 @@ def make_stamp_decal(w=1400, h=900, size=0.62, ink=(236, 240, 244), alpha=104):
     return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
+def load_sticker(path):
+    """The printed sticker art itself - same projector as the drawn label, so it
+    lands on the stem the right way round."""
+    im = Image.open(path).convert("RGBA")
+    return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+
+
 def build_renderer(piece, key, W, H):
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
@@ -223,7 +234,9 @@ def build_renderer(piece, key, W, H):
               smooth=24.0)
     if p["decal"]:
         z0, z1, rad = p["decal"]
-        r.set_decal(make_label(TEXT, c["label"], c["label_text"]), z0, z1, rad)
+        art = c.get("sticker")
+        r.set_decal(load_sticker(art) if art
+                    else make_label(TEXT, c["label"], c["label_text"]), z0, z1, rad)
     elif p.get("stamp"):
         z0, z1, rad = p["stamp"]
         r.set_decal(make_stamp_decal(), z0, z1, rad)
