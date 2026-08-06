@@ -13,5 +13,16 @@
    "marbles": 6.0,
    "scatter": 7.0
   }
+ },
+ {
+  "id": "v-ci-smoke-tall-jar",
+  "way": "clear_silver",
+  "piece": "jar",
+  "label": "ci smoke tall jar",
+  "notes": "",
+  "dims": {
+   "height": 104.0,
+   "marbles": 9.0
+  }
  }
 ]
