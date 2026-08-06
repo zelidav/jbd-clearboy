@@ -21,8 +21,8 @@ FLOOR     = 3.0            # flat closed bottom, same wall
 STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stamp
 STAMP_RX  = 14.0           # half-width of the die face; height follows the traced shape
 STAMP_RZ  = 5.4
-STAMP_ART_W = 27.0         # width of the JB mark on the wall, mm
-STAMP_SINK = 0.35          # the die sinks a little - a reheat and a press, no dent
+STAMP_ART_W = 25.0         # width of the JB mark on the wall, mm
+STAMP_SINK = 0.0           # no sunken die face: it read as a lens in the glass
 
 FRIT_Z    = (66.0, 90.5)   # frit band around the opening
 GRAINS    = 520
@@ -45,15 +45,14 @@ def build():
     body = body.cut(bore)
     body = body.edges("|Z or %CIRCLE").fillet(1.2)
 
-    # maker's stamp, pressed into the wall: the reheated area sinks a little, and the
-    # JB mark is struck into it. Nothing stands proud of the cylinder.
-    body = body.cut(cq.Workplane(obj=stamp_pad()))
+    # maker's stamp: only the mark is struck in. Sinking a die face around it as well
+    # turned the whole area into a lens - the glass either side of the strike stays flat.
     for cutter in stamp_art_cutters():
         body = body.cut(cq.Workplane(obj=cutter))
     return body
 
 
-def stamp_art_cutters(depth=1.9):
+def stamp_art_cutters(depth=1.0):
     """The JB graffiti mark (cad/stamp_art.py), as solids to strike into the die face.
     A ring OCC will not accept is skipped rather than silently mangled."""
     import stamp_art
