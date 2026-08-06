@@ -59,7 +59,9 @@ jobs:
       - name: Render the variant
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
-          PYOPENGL_PLATFORM: osmesa
+          EGL_PLATFORM: surfaceless
+          MESA_GL_VERSION_OVERRIDE: '3.3'
+          GALLIUM_DRIVER: llvmpipe
         run: python cad/variant.py '${{ steps.req.outputs.json }}'
 
       - name: Rebuild the site

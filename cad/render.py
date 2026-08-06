@@ -205,10 +205,23 @@ def make_decal(text, w=2400, h=300, color=(250, 250, 250), band=0.30):
     return img
 
 
+def make_context(require=330):
+    """Windows takes the default backend; a headless Linux runner has no X display,
+    so try EGL first there. Fails loudly rather than half-rendering."""
+    attempts = [{}] if os.name == 'nt' else [{'backend': 'egl'}, {}]
+    errors = []
+    for kw in attempts:
+        try:
+            return moderngl.create_standalone_context(require=require, **kw)
+        except Exception as e:
+            errors.append('%s -> %s' % (kw.get('backend', 'default'), e))
+    raise RuntimeError('no GL context available: ' + ' | '.join(errors))
+
+
 class Renderer:
     def __init__(self, W, H):
         self.W, self.H = W*SS, H*SS
-        self.ctx = ctx = moderngl.create_standalone_context(require=330)
+        self.ctx = ctx = make_context()
         self.progs = {}
         for k, fs in (('back', BACK_FRAG), ('tint', TINT_FRAG), ('dens', DENS_FRAG),
                       ('spec', SPEC_FRAG), ('decal', DECAL_FRAG)):
