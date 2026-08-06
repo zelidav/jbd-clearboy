@@ -29,8 +29,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Stage the site
+        run: |
+          mkdir -p _site
+          cp -r docs/. _site/
+          rm -f _site/mockups_selfcontained.html    # 10 MB, published as an artifact
+          touch _site/.nojekyll
+          du -sh _site
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
