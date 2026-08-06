@@ -29,6 +29,22 @@ PIECE_META = {
     "jar":    dict(name="Nug jar", code="JBD-NJ-92",
                    note="92 mm straight cylinder, 38 mm opening, cork lid"),
 }
+# sampled off assets/northstar_rods.jpg - what the shop can actually pull
+STOCK = {
+    "teal_silver":  dict(body="Teal", body_hex="#4E8483", rod="rod 10",
+                         accent="Teal", accent_hex="#2E9C86",
+                         fume="Silver (silver nitrate)"),
+    "magenta_gold": dict(body="Magenta", body_hex="#C0348A", rod="rod 3 family",
+                         accent="Magenta", accent_hex="#BF3E96",
+                         fume="Gold (gold chloride)"),
+    "clear_silver": dict(body="Clear", body_hex="#F7F8FA", rod="rod 9",
+                         accent="Teal", accent_hex="#2E9C86",
+                         fume="Silver, heavy"),
+    "clear_gold":   dict(body="Clear", body_hex="#F7F8FA", rod="rod 9",
+                         accent="Magenta", accent_hex="#BF3E96",
+                         fume="Gold, heavy"),
+}
+
 WAY_META = {
     "teal_silver":  dict(name="Bluish teal", sub="silver fume",
                          dot="linear-gradient(145deg,#7FD8D0,#1C8C7C 62%,#0C6154)",
@@ -578,6 +594,7 @@ INDEX_BODY = r"""
           <button class="btn" id="dl" type="button">Download request</button>
           <a class="btn" id="mail" href="#">Email it</a>
           <button class="btn" id="save" type="button">Keep on this device</button>
+          <button class="btn" id="spec" type="button">Download spec</button>
         </div>
         <p class="fine" id="renderstate" hidden></p>
         <p class="fine">Re-render sends it straight to the build. It takes a couple of
@@ -762,6 +779,7 @@ INDEX_JS = r"""
 const ASSETS = __ASSETS__, META = __META__, BASE = __BASE__, SPECS = __SPECS__;
 const CONTACT = "__CONTACT__", REPO = "__REPO__";
 const RENDER_URL = "__RENDER_URL__", RENDER_KEY = "__RENDER_KEY__";
+const STOCK = __STOCK__, BUILD = "__BUILD__";
 const SITE = "https://zelidav.github.io/jbd-clearboy/";
 const PIECES = Object.keys(META.pieces), WAYS = Object.keys(META.ways);
 const MID = "·", DEG = "°", ARROW = "→";
@@ -1151,6 +1169,79 @@ document.getElementById("render").onclick = function(){
       note.textContent = "Could not reach the build service. Copy the spec and send it across.";
     });
 };
+function specSheet(){
+  const meta = META.pieces[piece], m = META.ways[way], st = STOCK[way] || {};
+  const dims = {};
+  BASE[piece].forEach(function(s){ dims[s.k] = {v: cur[s.k], label: s.label, unit: s.unit}; });
+  const L = [];
+  L.push("JEROME BAKER DESIGNS - MANUFACTURING SPEC");
+  L.push("=========================================");
+  L.push("Piece:      " + meta.name + "  (" + meta.code + ")");
+  L.push("Colourway:  " + m.name + " " + MID + " " + m.sub);
+  L.push("Build:      " + BUILD);
+  L.push("");
+  L.push("GLASS");
+  L.push("  Stock:        borosilicate 3.3 (COE 33), density 2.23 g/cm3");
+  L.push("  Body colour:  " + (st.body || "-") + "   " + (st.body_hex || "") +
+         "   [" + (st.rod || "see swatch") + "]");
+  L.push("  Accent:       " + (st.accent || "-") + "   " + (st.accent_hex || "") +
+         "   (frit, marbles, linework)");
+  L.push("  Fume:         " + (st.fume || "-"));
+  L.push("");
+  L.push("DIMENSIONS (mm unless noted)");
+  Object.keys(dims).forEach(function(k){
+    const d = dims[k];
+    L.push("  " + (d.label + "                    ").slice(0, 22) + String(d.v) +
+           (d.unit ? " " + d.unit : ""));
+  });
+  L.push("");
+  L.push("SURFACE WORK");
+  if(piece === "jar" || (meta.variant_of || piece) === "jar"){
+    L.push("  Frit:        rolled band under the rim, grains 0.55-1.25 mm");
+    L.push("  Marbles:     " + (cur.marbles || 0) + " clear, set evenly round the opening");
+    L.push("  Linework:    dripped spiral, " + (cur.lines || 0) + " turns at " +
+           (cur.linepitch || 0) + " mm drop per turn, thickness varying 0.35-1.9x");
+    L.push("  Mark:        JB graffiti stamp, pressed lower middle, approx 25 mm wide");
+    L.push("  Closure:     natural cork, tapered, seats 15 mm into a 38 mm mouth");
+  } else {
+    L.push("  Frit:        rolled over the whole bowl end and the foot");
+    L.push("  Marbles:     " + (cur.marbles || 0) + " clear over the frit" +
+           (cur.scatter ? " (scatter seed " + cur.scatter + ")" : " (hand-placed set)"));
+    L.push("  Linework:    dripped spiral, " + (cur.lines || 0) + " turns at " +
+           (cur.linepitch || 0) + " mm drop per turn, plus a run round the foot");
+    L.push("  Label:       JBD x Boutiq enamel, white dropout, on the stem");
+  }
+  L.push("");
+  L.push("PROCESS NOTES");
+  L.push("  Head/body blown from heavy tube, shaped by hand - not axisymmetric.");
+  L.push("  Bowl pushed in from the rim, no seam.");
+  L.push("  Frit rolled on the marver while hot; marbles pressed in after.");
+  L.push("  Linework dripped onto the piece while it spins - pitch and weight vary.");
+  L.push("  Fume laid on last, before the final flash.");
+  L.push("  Anneal: soak near 560 C, ramp slowly through the strain point (~518 C).");
+  L.push("");
+  L.push("TOLERANCES");
+  L.push("  Rule-referenced dimensions  +/- 2-3 mm (hand-blown).");
+  L.push("  Wall thickness is INFERRED, not measured - confirm with calipers on the");
+  L.push("  rim and the stem OD before tooling. Mass, volume and glass cost move with it.");
+  L.push("");
+  L.push("FILES");
+  L.push("  STEP / STL / GLB per piece and colourway: " +
+         "https://github.com/" + REPO);
+  L.push("  Site: https://zelidav.github.io/jbd-clearboy/");
+  return L.join("\n");
+}
+
+document.getElementById("spec").onclick = function(){
+  const blob = new Blob([specSheet()], {type: "text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "JBD_" + piece + "_" + way + "_spec.txt";
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+  flash("spec", "Downloaded");
+};
+
 document.getElementById("save").onclick = function(){
   const all = loadLog();
   all.unshift({piece: piece, way: way, spec: specText(), changes: deltas().length,
@@ -1190,7 +1281,8 @@ def build_index(inline):
           .replace("__REPO__", REPO)
           .replace("__CONTACT__", CONTACT)
           .replace("__RENDER_URL__", "" if inline else RENDER_URL)
-          .replace("__RENDER_KEY__", RENDER_KEY))
+          .replace("__RENDER_KEY__", RENDER_KEY)
+          .replace("__STOCK__", json.dumps(STOCK)))
     return shell("Mockups &middot; Clearboy programme | Jerome Baker Designs",
                  INDEX_BODY, js, "index", standalone=inline)
 
