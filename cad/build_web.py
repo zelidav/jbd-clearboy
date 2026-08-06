@@ -9,7 +9,7 @@ docs/ is what GitHub Pages serves. Run from the repo root.
 
     python build_web.py
 """
-import base64, json, mimetypes, os, shutil
+import base64, hashlib, json, mimetypes, os, shutil
 
 SITE = "docs"
 REPO = "zelidav/jbd-clearboy"
@@ -144,6 +144,26 @@ SPECS = {
 
 
 # ------------------------------------------------------------------ assets
+def build_id():
+    """A short stamp over everything the site serves. Any change moves it, which is
+    what the ?v= on each asset rides on - browsers cache these paths hard."""
+    h = hashlib.md5()
+    for root in (os.path.join(SITE, "spin"), os.path.join(SITE, "video"),
+                 os.path.join(SITE, "still"), "out"):
+        for dirpath, _, names in os.walk(root):
+            for n in sorted(names):
+                f = os.path.join(dirpath, n)
+                h.update(n.encode())
+                h.update(str(os.path.getsize(f)).encode())
+    for f in sorted(os.listdir("cad")):
+        if f.endswith(".py"):
+            h.update(open(os.path.join("cad", f), "rb").read())
+    return h.hexdigest()[:8]
+
+
+BUILD = None
+
+
 def data_uri(path):
     mime = mimetypes.guess_type(path)[0] or "application/octet-stream"
     with open(path, "rb") as f:
@@ -159,7 +179,8 @@ def all_pieces():
 
 
 def assets(inline):
-    ref = data_uri if inline else (lambda p: os.path.relpath(p, SITE).replace("\\", "/"))
+    ref = data_uri if inline else (
+        lambda p: os.path.relpath(p, SITE).replace("\\", "/") + "?v=" + BUILD)
     out = {}
     for pc in all_pieces():
         out[pc] = {}
@@ -471,6 +492,7 @@ def shell(title, body, script="", nav="index", standalone=False):
              ('</span>' if standalone else '</a>')
     return """<title>%s</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <style>%s</style>
 <header class="masthead"><div class="wrap">
   %s
@@ -480,7 +502,7 @@ def shell(title, body, script="", nav="index", standalone=False):
 %s
 </div></main>
 <footer><div class="wrap">
-  <span>Jerome Baker Designs &middot; Clearboy programme &middot; mockups rev B</span>
+  <span>Jerome Baker Designs &middot; Clearboy programme &middot; build __BUILD__</span>
   <span class="r">Renders are proposals &mdash; the original piece stays the reference</span>
 </div></footer>
 <script>
@@ -676,7 +698,7 @@ SURVEY_BODY = r"""
     <div class="sechead"><span class="n">03</span><h2>The survey sheet</h2>
       <span class="note">Five set-ups &middot; four cross-checks</span></div>
     <figure>
-      <img src="dims.jpg" alt="Five-view dimensional survey of the Clearboy hammer with a measured schedule">
+      <img src="dims.jpg?v=__BUILD__" alt="Five-view dimensional survey of the Clearboy hammer with a measured schedule">
       <figcaption>Scale set from the stainless rule in IMG_5855&ndash;5859, resolved to &plusmn;0.5 px/mm and corrected for stand-off parallax</figcaption>
     </figure>
   </section>
@@ -1144,16 +1166,16 @@ if(!reduced) startSpin();
 
 DOWNLOADS_JS = r"""
 const FILES = __FILES__, SIZES = __SIZES__, RAW = "__RAW__", VIDEOS = __VIDEOS__;
-const STILLS = __STILLS__;
+const STILLS = __STILLS__, BUILD = "__BUILD__";
 document.getElementById("filerows").innerHTML = FILES.map(function(f){
   return "<tr><td><a href='" + RAW + f[0] + "'>" + f[0].replace("out/", "") + "</a></td>" +
     "<td class='num'>" + f[1] + "</td><td class='num'>" + (SIZES[f[0]] || "-") +
     "</td><td class='use'>" + f[2] + "</td></tr>"; }).join("");
 document.getElementById("stillrows").innerHTML = STILLS.map(function(v){
-  return "<tr><td><a href='still/" + v[0] + "'>" + v[0] + "</a></td>" +
+  return "<tr><td><a href='still/" + v[0] + "?v=" + BUILD + "'>" + v[0] + "</a></td>" +
     "<td class='use'>" + v[1] + "</td></tr>"; }).join("");
 document.getElementById("videorows").innerHTML = VIDEOS.map(function(v){
-  return "<tr><td><a href='video/" + v[0] + "'>" + v[0] + "</a></td>" +
+  return "<tr><td><a href='video/" + v[0] + "?v=" + BUILD + "'>" + v[0] + "</a></td>" +
     "<td class='num'>" + (SIZES["video/" + v[0]] || "-") + "</td>" +
     "<td class='use'>" + v[1] + "</td></tr>"; }).join("");
 """
@@ -1202,6 +1224,7 @@ def build_downloads():
 
 
 def write(name, html):
+    html = html.replace("__BUILD__", BUILD)
     p = os.path.join(SITE, name)
     with open(p, "w", encoding="utf-8") as f:
         f.write(html)
@@ -1210,6 +1233,9 @@ def write(name, html):
 
 if __name__ == "__main__":
     os.makedirs(SITE, exist_ok=True)
+    os.makedirs(os.path.join(SITE, "still"), exist_ok=True)
+    BUILD = build_id()
+    print("build", BUILD)
     dims = os.path.join(SITE, "dims.jpg")
     if os.path.exists("JBD_Clearboy_dimensions.png") and not os.path.exists(dims):
         from PIL import Image
