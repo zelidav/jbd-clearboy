@@ -73,4 +73,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add out docs
           git commit -m "Variant re-render from request" || echo "nothing to commit"
-          git push
+          # another render (or a local push) may have landed while this one ran
+          for i in 1 2 3 4 5; do
+            git pull --rebase -X ours origin main && git push && exit 0
+            echo "push raced, retrying ($i)"; sleep $((i * 5))
+          done
+          echo "could not land the commit after 5 tries"; exit 1
