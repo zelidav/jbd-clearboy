@@ -21,8 +21,8 @@ FLOOR     = 3.0            # flat closed bottom, same wall
 STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stamp
 STAMP_RX  = 14.0           # half-width of the die face; height follows the traced shape
 STAMP_RZ  = 5.4
-STAMP_ART_W = 23.0         # width of the JB mark on the wall, mm
-STAMP_SINK = 0.22          # the die barely sinks - a reheat and a press, no dent
+STAMP_ART_W = 27.0         # width of the JB mark on the wall, mm
+STAMP_SINK = 0.35          # the die sinks a little - a reheat and a press, no dent
 
 FRIT_Z    = (66.0, 90.5)   # frit band around the opening
 GRAINS    = 520
@@ -53,7 +53,7 @@ def build():
     return body
 
 
-def stamp_art_cutters(depth=1.15):
+def stamp_art_cutters(depth=1.9):
     """The JB graffiti mark (cad/stamp_art.py), as solids to strike into the die face.
     A ring OCC will not accept is skipped rather than silently mangled."""
     import stamp_art
