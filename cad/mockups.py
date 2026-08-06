@@ -212,11 +212,14 @@ def build_renderer(piece, key, W, H):
           solid=True, min_thick=2.2)
     r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],
           kAmt=0.22, kPow=2.0, spec=1.25, solid=True, min_thick=3.4, smooth=0.0)
-    # marbles are clear glass: barely any contour, or the ones on the far side read
-    # as hard outlines through the body
+    # a clear marble has to catch light to be seen at all, while a tinted one only
+    # needs a whisper - too much and the far side rings through the body
+    tinted = "marble" in c
     r.add(p["marbles"], absorb=c.get("marble", MARBLE["absorb"]), fume=0.0,
-          line=MARBLE["line"], kAmt=0.16, kPow=4.4, spec=1.30, smooth=60.0,
-          solid="marble" in c, min_thick=0.8 if "marble" in c else 0.0)
+          line=(0.30, 0.34, 0.38) if not tinted else MARBLE["line"],
+          kAmt=0.16 if tinted else 0.46, kPow=4.4 if tinted else 3.0,
+          spec=1.30 if tinted else 1.85, smooth=60.0,
+          solid=tinted, min_thick=0.8 if tinted else 0.0)
     which = c.get("lines")
     lines = p.get("lines_%s" % which) if which else None
     if lines:

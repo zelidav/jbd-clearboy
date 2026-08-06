@@ -64,14 +64,14 @@ def marble_plan(n=None, seed=None):
         # spread them round the bowl, then jitter so it never reads as a pattern
         th = 2 * math.pi * ((i + 0.5) / max(n, 1)) + rng.uniform(-0.55, 0.55)
         x = rng.uniform(x0, x1)
-        plan.append((x, th, rng.uniform(3.0, 3.9)))
+        plan.append((x, th, rng.uniform(3.3, 4.2)))
     return plan
 
 
 def build_marbles(n=None, seed=None):
     plan = marble_plan(n, seed) or [(0.0, 0.0, 0.001)]
     return trimesh.util.concatenate(
-        [_sphere(r, surface_pt(x, th, out=-r * 0.36), subdiv=2) for (x, th, r) in plan])
+        [_sphere(r, surface_pt(x, th, out=-r * 0.20), subdiv=2) for (x, th, r) in plan])
 
 
 FOOT_Z = (0.5, 9.0)        # the foot disc and the first of the stem
