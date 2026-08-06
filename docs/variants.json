@@ -24,5 +24,15 @@
    "height": 104.0,
    "marbles": 9.0
   }
+ },
+ {
+  "id": "v-api-trigger-check",
+  "way": "clear_gold",
+  "piece": "jar",
+  "label": "api trigger check",
+  "notes": "",
+  "dims": {
+   "height": 96.0
+  }
  }
 ]
