@@ -725,6 +725,7 @@ INDEX_JS = r"""
 const ASSETS = __ASSETS__, META = __META__, BASE = __BASE__, SPECS = __SPECS__;
 const CONTACT = "__CONTACT__", REPO = "__REPO__";
 const RENDER_URL = "__RENDER_URL__", RENDER_KEY = "__RENDER_KEY__";
+const SITE = "https://zelidav.github.io/jbd-clearboy/";
 const PIECES = Object.keys(META.pieces), WAYS = Object.keys(META.ways);
 const MID = "·", DEG = "°", ARROW = "→";
 
@@ -1063,6 +1064,12 @@ document.getElementById("dl").onclick = function(){
 document.getElementById("render").onclick = function(){
   const btn = document.getElementById("render"), note = document.getElementById("renderstate");
   const req = requestJson();
+  if(!RENDER_URL){          // the shareable single file cannot call out - send them across
+    note.hidden = false;
+    note.innerHTML = 'This copy is a single offline file, so it cannot reach the build. ' +
+      'Copy the spec, or open <a href="' + SITE + '">the live page</a> and re-render there.';
+    return;
+  }
   btn.disabled = true; btn.textContent = "Sending";
   note.hidden = false; note.textContent = "Sending " + req.label + " to the build...";
   fetch(RENDER_URL, {method: "POST",
@@ -1120,7 +1127,7 @@ def build_index(inline):
           .replace("__SPECS__", json.dumps(piece_specs()))
           .replace("__REPO__", REPO)
           .replace("__CONTACT__", CONTACT)
-          .replace("__RENDER_URL__", RENDER_URL)
+          .replace("__RENDER_URL__", "" if inline else RENDER_URL)
           .replace("__RENDER_KEY__", RENDER_KEY))
     return shell("Mockups &middot; Clearboy programme | Jerome Baker Designs",
                  INDEX_BODY, js, "index", standalone=inline)

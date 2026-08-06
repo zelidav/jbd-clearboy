@@ -33,7 +33,8 @@ def cors(resp):
     origin = request.headers.get("Origin", "")
     if any(origin.startswith(a) for a in ALLOWED_ORIGINS):
         resp.headers["Access-Control-Allow-Origin"] = origin
-        resp.headers["Access-Control-Allow-Headers"] = "content-type"
+        resp.headers["Access-Control-Allow-Headers"] = "content-type, x-render-key"
+        resp.headers["Access-Control-Max-Age"] = "86400"
         resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
     return resp
 
