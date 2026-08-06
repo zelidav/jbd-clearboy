@@ -13,11 +13,13 @@ import trimesh
 import jar
 
 # (centre z, minor radius) - grouped the way a maker actually lays them down
+# matched to assets/jb_jar_linework.png: fine lines, tight pitch, grouped in bands
 GROUPS = [
-    (20.0, 5, 2.6, 0.42),      # z start, count, pitch, thickness
-    (34.0, 3, 3.4, 0.62),
-    (43.0, 7, 2.1, 0.34),
-    (57.0, 2, 4.0, 0.75),
+    (14.0, 6, 1.9, 0.26),      # z start, count, pitch, thickness
+    (27.0, 9, 1.7, 0.22),
+    (44.0, 4, 2.4, 0.34),
+    (53.0, 11, 1.6, 0.20),
+    (72.0, 3, 2.2, 0.30),
 ]
 
 
