@@ -1,0 +1,10 @@
+# Python 3.12 (CadQuery has no 3.13/3.14 wheels yet)
+#   py install 3.12
+#   python3.12 -m venv cadenv && ./cadenv/Scripts/python -m pip install -r requirements.txt
+cadquery==2.6.0
+trimesh
+numpy
+scipy
+moderngl
+pillow
+imageio-ffmpeg
