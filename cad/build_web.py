@@ -17,7 +17,7 @@ RAW = "https://raw.githubusercontent.com/%s/main/" % REPO
 CONTACT = "david@canismajorpartners.com"
 
 PIECES = ["hammer", "hammer_flat", "jar"]
-WAYS = ["teal_silver", "magenta_gold"]
+WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
 PIECE_META = {
     "hammer": dict(name="Clearboy hammer", code="JBD-CB-140",
@@ -34,6 +34,12 @@ WAY_META = {
     "magenta_gold": dict(name="Magenta", sub="gold fume",
                          dot="linear-gradient(145deg,#F0A0C8,#C0348A 62%,#7E1E5C)",
                          ring="#C0348A"),
+    "clear_silver": dict(name="Clear, heavy silver fume", sub="teal accents, linework",
+                         dot="linear-gradient(145deg,#EDF2F6,#9FB6E0 55%,#6E8CC4)",
+                         ring="#1C8C7C"),
+    "clear_gold": dict(name="Clear, heavy gold fume", sub="magenta accents, linework",
+                       dot="linear-gradient(145deg,#FBF3E4,#E0BE7A 55%,#C08A3E)",
+                       ring="#C0348A"),
 }
 
 # what the remodeller starts from, and always keeps as the ghost outline
@@ -159,8 +165,10 @@ def assets(inline):
             from PIL import Image
             with Image.open(os.path.join(d, names[0])) as im:
                 aspect = "%d/%d" % im.size          # the laid-down set is landscape
+            rows = len(set(f.split("_")[0] for f in names)) if names[0].startswith("t") else 1
             out[pc][w] = {"frames": [ref(os.path.join(d, f)) for f in names],
-                          "aspect": aspect}
+                          "aspect": aspect, "rows": rows,
+                          "cols": len(names) // max(rows, 1)}
     return out
 
 
@@ -255,7 +263,7 @@ CSS = r"""
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);
   font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
 h1,h2,h3{margin:0;text-wrap:balance}
 p{margin:0}
 a{color:var(--accent)}
@@ -291,7 +299,7 @@ section{padding:52px 0}
 .sechead .note{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;
   letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase}
 
-.stagewrap{margin-top:20px;display:grid;grid-template-columns:minmax(0,520px) 1fr;
+.stagewrap{margin-top:20px;display:grid;grid-template-columns:minmax(0,620px) 1fr;
   gap:32px;align-items:start}
 .sidecol{display:flex;flex-direction:column;gap:20px;padding-top:2px}
 .sidecol h3{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
@@ -320,6 +328,11 @@ section{padding:52px 0}
 :root[data-theme="light"] .stage{border-color:var(--rule);box-shadow:none}
 :root[data-theme="light"] .stage .frames{filter:none}
 
+.controls{display:flex;align-items:center;gap:8px}
+.controls .step{padding:9px 13px;line-height:1}
+.controls .roll{min-width:96px}
+.controls input[type="range"]{flex:1;min-width:80px;margin:0;accent-color:var(--accent);
+  background:transparent}
 .pieces{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
 .piece{padding:9px 16px;background:var(--panel);border:1px solid var(--rule);cursor:pointer;
   font-family:var(--font-display);font-stretch:87.5%;font-size:15px;letter-spacing:.05em;
@@ -374,6 +387,7 @@ textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outli
   font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--ink-2)}
 .btn:hover{border-color:var(--ink-3);color:var(--ink)}
+a.btn{text-decoration:none;display:inline-block}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{filter:brightness(1.08)}
 .fine{margin-top:12px;font-size:13.5px;color:var(--ink-3);max-width:60ch}
@@ -426,7 +440,7 @@ footer .r{margin-left:auto}
 @media (max-width:900px){.remodel{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:860px){
   .stagewrap{grid-template-columns:minmax(0,1fr)}
-  .stagecol{max-width:520px;width:100%;margin:0 auto}
+  .stagecol{max-width:620px;width:100%;margin:0 auto}
 }
 @media (max-width:640px){.wrap{padding:0 18px}section{padding:38px 0}nav{gap:12px}}
 """
@@ -478,8 +492,15 @@ INDEX_BODY = r"""
            aria-label="Rotate the piece" aria-valuemin="0" aria-valuemax="359"
            aria-valuenow="0" aria-valuetext="0 degrees">
         <div class="frames" id="frames"></div>
-        <div class="hint">Drag &middot; or &larr; &rarr;</div>
+        <div class="hint" id="hint">Drag to spin</div>
         <div class="readout" id="readout">000&deg;</div>
+      </div>
+      <div class="controls">
+        <button class="btn step" id="back" type="button" aria-label="Roll back one step">&#9664;</button>
+        <button class="btn primary roll" id="play" type="button">Roll</button>
+        <button class="btn step" id="fwd" type="button" aria-label="Roll forward one step">&#9654;</button>
+        <input id="scrub" type="range" min="0" max="35" value="0" step="1"
+               aria-label="Rotation">
       </div>
     </div>
     <div class="sidecol">
@@ -509,11 +530,15 @@ INDEX_BODY = r"""
         <label class="field" for="notes">What should change</label>
         <textarea id="notes" placeholder="Shorter stem, fatter lobe, marbles only on the carb side, colder teal, frit further down the body..."></textarea>
         <div class="actions">
-          <button class="btn primary" id="mail" type="button">Send the request</button>
-          <button class="btn" id="copy" type="button">Copy spec</button>
+          <button class="btn primary" id="copy" type="button">Copy spec</button>
+          <button class="btn" id="dl" type="button">Download request</button>
+          <a class="btn" id="mail" href="#">Email it</a>
           <button class="btn" id="save" type="button">Keep on this device</button>
         </div>
-        <p class="fine">Sending mails the numbers straight through &mdash; no accounts, no
+        <p class="fine">Copy or download drops the exact request &mdash; numbers, notes and
+          the one-line render command &mdash; wherever you want it. Email works too where the
+          browser allows it. No accounts, no sign-in.</p>
+        <p class="fine" hidden>Sending mails the numbers straight through &mdash; no accounts, no
           sign-in. The re-render comes back under the name you gave it and joins the piece
           menu at the top of this page; the original build is never replaced.</p>
         <div class="log" id="log"></div>
@@ -685,7 +710,7 @@ const MID = "·", DEG = "°", ARROW = "→";
 
 const framesEl = document.getElementById("frames"), stage = document.getElementById("stage");
 const readout = document.getElementById("readout");
-let piece = PIECES[0], way = WAYS[0], idx = 0, N = 0;
+let piece = PIECES[0], way = WAYS[0], idx = 0, N = 0, row = 0, ROWS = 1;
 const layers = {};
 
 function mount(pc, w){
@@ -706,9 +731,11 @@ PIECES.forEach(function(pc){
 });
 function waysFor(pc){ return WAYS.filter(function(w){ return ASSETS[pc] && ASSETS[pc][w]; }); }
 
-function show(i){
+function show(i, r){
   idx = ((i % N) + N) % N;
-  layers[piece + "/" + way].imgs.forEach(function(im, k){ im.classList.toggle("on", k === idx); });
+  if(r !== undefined) row = Math.max(0, Math.min(ROWS - 1, r));
+  const active = row * N + idx;
+  layers[piece + "/" + way].imgs.forEach(function(im, k){ im.classList.toggle("on", k === active); });
   const deg = Math.round(idx * 360 / N);
   readout.textContent = String(deg).padStart(3, "0") + DEG;
   stage.setAttribute("aria-valuenow", deg);
@@ -719,10 +746,15 @@ function select(pc, w){
   const avail = waysFor(pc);
   if(avail.indexOf(w) < 0) w = avail[0];
   piece = pc; way = w;
-  N = layers[pc + "/" + w].imgs.length;
+  const a = ASSETS[pc][w];
+  ROWS = a.rows || 1;
+  N = a.cols || a.frames.length;
+  row = 0;
   Object.keys(layers).forEach(function(k){ layers[k].box.style.display = "none"; });
   layers[pc + "/" + w].box.style.display = "block";
-  framesEl.style.aspectRatio = ASSETS[pc][w].aspect || "520/684";
+  framesEl.style.aspectRatio = a.aspect || "520/684";
+  document.getElementById("hint").textContent =
+    ROWS > 1 ? "Drag \u2194 to roll, \u2195 to stand it up" : "Drag to spin";
   document.querySelectorAll(".piece").forEach(function(b){
     b.setAttribute("aria-pressed", String(b.dataset.k === pc)); });
   document.querySelectorAll(".way").forEach(function(b){
@@ -761,17 +793,39 @@ WAYS.forEach(function(w){
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let timer = null, last = 0;
 function tick(t){ if(t - last > 90){ show(idx + 1); last = t; } timer = requestAnimationFrame(tick); }
-function stopSpin(){ if(timer){ cancelAnimationFrame(timer); timer = null; } }
+function stopSpin(){
+  if(timer){ cancelAnimationFrame(timer); timer = null; }
+  const b = document.getElementById("play");
+  if(b) b.textContent = "Roll";
+}
+function startSpin(){
+  if(timer) return;
+  last = 0; timer = requestAnimationFrame(tick);
+  document.getElementById("play").textContent = "Pause";
+}
+document.getElementById("play").onclick = function(){ timer ? stopSpin() : startSpin(); };
+document.getElementById("back").onclick = function(){ stopSpin(); show(idx - 1); };
+document.getElementById("fwd").onclick = function(){ stopSpin(); show(idx + 1); };
+document.getElementById("scrub").addEventListener("input", function(e){
+  stopSpin(); show(parseInt(e.target.value, 10));
+});
 
-let dragging = false, x0 = 0, i0 = 0;
+let dragging = false, x0 = 0, y0 = 0, i0 = 0, r0 = 0;
 stage.addEventListener("pointerdown", function(e){
-  stopSpin(); dragging = true; x0 = e.clientX; i0 = idx;
+  stopSpin(); dragging = true; x0 = e.clientX; y0 = e.clientY; i0 = idx; r0 = row;
   stage.classList.add("dragging"); stage.setPointerCapture(e.pointerId); e.preventDefault();
 });
 stage.addEventListener("pointermove", function(e){
   if(!dragging) return;
   const per = Math.max(stage.clientWidth / N, 6);
-  show(i0 - Math.round((e.clientX - x0) / per));
+  if(ROWS > 1){
+    // left/right rolls the piece on its own axis, up/down tips it upright
+    const perY = Math.max(stage.clientHeight / (ROWS * 2.2), 14);
+    show(i0 - Math.round((e.clientX - x0) / per),
+         r0 + Math.round((e.clientY - y0) / perY));
+  } else {
+    show(i0 - Math.round((e.clientX - x0) / per));
+  }
 });
 ["pointerup", "pointercancel", "lostpointercapture"].forEach(function(ev){
   stage.addEventListener(ev, function(){ dragging = false; stage.classList.remove("dragging"); });
@@ -780,6 +834,8 @@ stage.addEventListener("dragstart", function(e){ e.preventDefault(); });
 stage.addEventListener("keydown", function(e){
   if(e.key === "ArrowLeft"){ stopSpin(); show(idx - 1); e.preventDefault(); }
   if(e.key === "ArrowRight"){ stopSpin(); show(idx + 1); e.preventDefault(); }
+  if(e.key === "ArrowUp"){ stopSpin(); show(idx, row + 1); e.preventDefault(); }
+  if(e.key === "ArrowDown"){ stopSpin(); show(idx, row - 1); e.preventDefault(); }
 });
 
 /* ---- remodeller ---- */
@@ -953,10 +1009,22 @@ document.getElementById("copy").onclick = function(){
     .then(function(){ flash("copy", "Copied"); })
     .catch(function(){ flash("copy", "Select and copy"); });
 };
-document.getElementById("mail").onclick = function(){
-  location.href = "mailto:" + CONTACT + "?subject=" +
+function refreshMail(){
+  document.getElementById("mail").href = "mailto:" + CONTACT + "?subject=" +
     encodeURIComponent("JBD remodel request - " + META.pieces[piece].name) +
     "&body=" + encodeURIComponent(specText());
+}
+document.getElementById("mail").addEventListener("mousedown", refreshMail);
+document.getElementById("mail").addEventListener("focus", refreshMail);
+document.getElementById("dl").onclick = function(){
+  const blob = new Blob([JSON.stringify(requestJson(), null, 1)],
+                        {type: "application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (requestJson().label || "remodel").replace(/[^a-z0-9]+/gi, "-") + ".json";
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  flash("dl", "Downloaded");
 };
 document.getElementById("save").onclick = function(){
   const all = loadLog();
@@ -968,7 +1036,7 @@ document.getElementById("save").onclick = function(){
 
 select(PIECES[0], WAYS[0]);
 paintLog();
-if(!reduced) timer = requestAnimationFrame(tick);
+if(!reduced) startSpin();
 """
 
 DOWNLOADS_JS = r"""

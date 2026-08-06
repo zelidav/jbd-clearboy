@@ -22,18 +22,19 @@ SIDE = 0.0                       # yaw where the piece reads broadside to camera
 PIECES = {
  "hammer": dict(
      body="out/clearboy_hammer.stl", frit="out/frit.stl", marbles="out/marbles.stl",
-     cam_r=700.0, target=(0, 0, 74), fov=17.0, shadow=(0.5, 0.30, 0.075),
+     cam_r=545.0, target=(0, 0, 72), fov=17.0, shadow=(0.5, 0.30, 0.055),
      decal=(20.0, 74.0, 7.0),      # z0, z1, stem radius
      name="Clearboy hammer", note="140 mm \u00b7 hand-blown original"),
  "hammer_flat": dict(
      body="out/clearboy_hammer.stl", frit="out/frit.stl", marbles="out/marbles.stl",
-     cam_r=700.0, target=(0, 0, 12), fov=17.0, shadow=(0.5, 0.46, 0.10),
+     cam_r=395.0, target=(0, 0, 10), fov=17.0, shadow=(0.5, 0.46, 0.10),
      decal=(20.0, 74.0, 7.0), tilt=-90.0, shift=(70.0, 0.0, 8.0), size=(1000, 700),
      name="Hammer, laid down", note="how it sits in the case"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
-     cork="out/jar_cork.stl",
-     cam_r=650.0, target=(0, 0, 58), fov=17.0, shadow=(0.5, 0.32, 0.130),
+     cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
+     lines_frit="out/jar_lines_frit.stl",
+     cam_r=455.0, target=(0, 0, 56), fov=17.0, shadow=(0.5, 0.32, 0.115),
      decal=None,
      name="Nug jar", note="92 mm \u00b7 38 mm opening \u00b7 cork lid"),
 }
@@ -45,16 +46,37 @@ WAYS = {
      fume_pow=1.15,
      line=(0.02, 0.13, 0.14), fline=(0.01, 0.11, 0.12),
      label=(14, 122, 106), label_text=(255, 255, 255),
+     lines="frit", wrap=(0.004, 0.004, 0.004),
      name="Bluish teal \u00b7 silver fume",
-     sub="teal frit \u00b7 clear marbles"),
+     sub="teal frit \u00b7 clear marbles \u00b7 clear linework"),
  "magenta_gold": dict(
      body=(0.040, 0.170, 0.078), frit=(0.115, 0.44, 0.21),
      fume=1.15, fume_cool=(1.08, 0.90, 0.55), fume_warm=(1.12, 0.72, 0.42),
      fume_pow=1.15,
      line=(0.15, 0.02, 0.10), fline=(0.13, 0.01, 0.09),
      label=(150, 32, 108), label_text=(255, 255, 255),
+     lines="frit", wrap=(0.004, 0.004, 0.004),
      name="Magenta \u00b7 gold fume",
-     sub="magenta frit \u00b7 clear marbles"),
+     sub="magenta frit \u00b7 clear marbles \u00b7 clear linework"),
+
+ "clear_silver": dict(
+     body=(0.0045, 0.0040, 0.0038), frit=(0.42, 0.115, 0.16),
+     fume=1.55, fume_cool=(0.52, 0.72, 1.12), fume_warm=(0.94, 0.80, 1.14),
+     fume_pow=0.95,
+     line=(0.09, 0.11, 0.14), fline=(0.01, 0.11, 0.12),
+     marble=(0.30, 0.085, 0.12), wrap=(0.30, 0.085, 0.12), lines="body",
+     label=(14, 122, 106), label_text=(255, 255, 255),
+     name="Clear \u00b7 heavy silver fume",
+     sub="teal frit, marbles \u00b7 wrapped linework"),
+ "clear_gold": dict(
+     body=(0.0045, 0.0040, 0.0038), frit=(0.115, 0.44, 0.21),
+     fume=1.55, fume_cool=(1.14, 0.88, 0.48), fume_warm=(1.16, 0.66, 0.40),
+     fume_pow=0.95,
+     line=(0.14, 0.10, 0.06), fline=(0.13, 0.01, 0.09),
+     marble=(0.085, 0.34, 0.16), wrap=(0.085, 0.34, 0.16), lines="body",
+     label=(150, 32, 108), label_text=(255, 255, 255),
+     name="Clear \u00b7 heavy gold fume",
+     sub="magenta frit, marbles \u00b7 wrapped linework"),
 }
 
 MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.14, 0.15, 0.17))
@@ -153,8 +175,19 @@ def build_renderer(piece, key, W, H):
           decal=p["decal"] is not None, solid=True, min_thick=2.2)
     r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],
           kAmt=0.22, kPow=2.0, spec=1.25, solid=True, min_thick=3.4, smooth=0.0)
-    r.add(p["marbles"], absorb=MARBLE["absorb"], fume=0.0, line=MARBLE["line"],
-          kAmt=0.70, kPow=3.0, spec=1.60, smooth=60.0)
+    r.add(p["marbles"], absorb=c.get("marble", MARBLE["absorb"]), fume=0.0,
+          line=MARBLE["line"], kAmt=0.70, kPow=3.0, spec=1.60, smooth=60.0,
+          solid="marble" in c, min_thick=2.0 if "marble" in c else 0.0)
+    which = c.get("lines")
+    lines = p.get("lines_%s" % which) if which else None
+    if lines:
+        clear = which == "frit"          # clear lines laid over a coloured, fritted body
+        r.add(lines, absorb=c.get("wrap", (0.30, 0.085, 0.12)), fume=0.0,
+              line=(0.10, 0.12, 0.14) if clear else c["fline"],
+              kAmt=0.62 if clear else 0.30, kPow=2.6 if clear else 2.0,
+              spec=1.55 if clear else 1.05,
+              solid=not clear, min_thick=0.0 if clear else 5.5,
+              max_thick=60.0 if clear else 7.0, smooth=24.0)
     if p.get("cork"):
         r.add(p["cork"], absorb=CORK["absorb"], fume=0.0, line=CORK["line"],
               kAmt=CORK["kAmt"], kPow=CORK["kPow"], spec=CORK["spec"],
@@ -166,10 +199,21 @@ def build_renderer(piece, key, W, H):
     return r
 
 
-def frame(r, piece, angle):
+def frame(r, piece, angle, tilt=None):
+    """tilt=None uses the piece's own orientation. Pass a tilt in degrees to sweep
+    between standing (0) and laid down (-90): the camera pulls back and the piece
+    slides across so it stays framed the whole way."""
     p = PIECES[piece]
-    return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
-                   shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
+    if tilt is None:
+        return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
+                       shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
+    t = abs(tilt) / 90.0                      # 0 standing, 1 flat on its side
+    cam_r = 640.0 - 245.0 * t
+    target = (0, 0, 74.0 - 64.0 * t)
+    shift = (70.0 * t, 0.0, 8.0 * t)
+    shadow = (0.5, 0.30 + 0.16 * t, 0.055 + 0.045 * t)
+    return r.frame(angle, cam_r=cam_r, target=target, fov=p["fov"],
+                   shadow=shadow, tilt=tilt, shift=shift)
 
 
 def size_of(piece, W=None, H=None):

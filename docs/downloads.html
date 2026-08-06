@@ -37,7 +37,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);
   font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
 h1,h2,h3{margin:0;text-wrap:balance}
 p{margin:0}
 a{color:var(--accent)}
@@ -73,7 +73,7 @@ section{padding:52px 0}
 .sechead .note{margin-left:auto;font-family:var(--font-mono);font-size:11.5px;
   letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase}
 
-.stagewrap{margin-top:20px;display:grid;grid-template-columns:minmax(0,520px) 1fr;
+.stagewrap{margin-top:20px;display:grid;grid-template-columns:minmax(0,620px) 1fr;
   gap:32px;align-items:start}
 .sidecol{display:flex;flex-direction:column;gap:20px;padding-top:2px}
 .sidecol h3{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
@@ -102,6 +102,11 @@ section{padding:52px 0}
 :root[data-theme="light"] .stage{border-color:var(--rule);box-shadow:none}
 :root[data-theme="light"] .stage .frames{filter:none}
 
+.controls{display:flex;align-items:center;gap:8px}
+.controls .step{padding:9px 13px;line-height:1}
+.controls .roll{min-width:96px}
+.controls input[type="range"]{flex:1;min-width:80px;margin:0;accent-color:var(--accent);
+  background:transparent}
 .pieces{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
 .piece{padding:9px 16px;background:var(--panel);border:1px solid var(--rule);cursor:pointer;
   font-family:var(--font-display);font-stretch:87.5%;font-size:15px;letter-spacing:.05em;
@@ -156,6 +161,7 @@ textarea:focus-visible,input:focus-visible{outline:2px solid var(--accent);outli
   font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--ink-2)}
 .btn:hover{border-color:var(--ink-3);color:var(--ink)}
+a.btn{text-decoration:none;display:inline-block}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{filter:brightness(1.08)}
 .fine{margin-top:12px;font-size:13.5px;color:var(--ink-3);max-width:60ch}
@@ -208,7 +214,7 @@ footer .r{margin-left:auto}
 @media (max-width:900px){.remodel{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:860px){
   .stagewrap{grid-template-columns:minmax(0,1fr)}
-  .stagecol{max-width:520px;width:100%;margin:0 auto}
+  .stagecol{max-width:620px;width:100%;margin:0 auto}
 }
 @media (max-width:640px){.wrap{padding:0 18px}section{padding:38px 0}nav{gap:12px}}
 </style>
@@ -268,7 +274,7 @@ python3.12 -m venv cadenv && ./cadenv/Scripts/python -m pip install -r requireme
 </div></footer>
 <script>
 
-const FILES = [["out/clearboy_hammer.step", "hammer", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/clearboy_hammer.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/frit.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/hammer_flat_magenta_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, magenta build"], ["out/hammer_flat_teal_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, bluish teal build"], ["out/hammer_magenta_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, magenta build"], ["out/hammer_teal_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, bluish teal build"], ["out/jar.step", "jar", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/jar.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_cork.step", "jar", "The cork lid - STEP"], ["out/jar_cork.stl", "jar", "The cork lid - STL"], ["out/jar_frit.stl", "jar", "Frit grains - STL"], ["out/jar_magenta_gold.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, magenta build"], ["out/jar_marbles.stl", "jar", "The clear marbles - STL"], ["out/jar_teal_silver.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, bluish teal build"], ["out/marbles.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/v-short-stem-fat-lobe.step", "variant", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/v-short-stem-fat-lobe.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-short-stem-fat-lobe_frit.stl", "variant", "Frit grains - STL"], ["out/v-short-stem-fat-lobe_marbles.stl", "variant", "The clear marbles - STL"]], SIZES = {"out/clearboy_hammer.step": "2.7 MB", "out/clearboy_hammer.stl": "1.7 MB", "out/frit.stl": "7.8 MB", "out/hammer_flat_magenta_gold.glb": "4.7 MB", "out/hammer_flat_teal_silver.glb": "4.7 MB", "out/hammer_magenta_gold.glb": "4.7 MB", "out/hammer_teal_silver.glb": "4.7 MB", "out/jar.step": "0.5 MB", "out/jar.stl": "1.3 MB", "out/jar_cork.step": "0.0 MB", "out/jar_cork.stl": "0.6 MB", "out/jar_frit.stl": "2.1 MB", "out/jar_magenta_gold.glb": "2.0 MB", "out/jar_marbles.stl": "0.1 MB", "out/jar_teal_silver.glb": "2.0 MB", "out/marbles.stl": "0.1 MB", "out/v-short-stem-fat-lobe.step": "2.5 MB", "out/v-short-stem-fat-lobe.stl": "1.6 MB", "out/v-short-stem-fat-lobe_frit.stl": "7.8 MB", "out/v-short-stem-fat-lobe_marbles.stl": "0.1 MB", "video/hammer_teal_silver.mp4": "0.4 MB", "video/hammer_magenta_gold.mp4": "0.4 MB", "video/hammer_flat_teal_silver.mp4": "0.2 MB", "video/hammer_flat_magenta_gold.mp4": "0.2 MB", "video/jar_teal_silver.mp4": "0.3 MB", "video/jar_magenta_gold.mp4": "0.3 MB"}, RAW = "https://raw.githubusercontent.com/zelidav/jbd-clearboy/main/", VIDEOS = [["hammer_teal_silver.mp4", "Clearboy hammer / Bluish teal silver fume"], ["hammer_magenta_gold.mp4", "Clearboy hammer / Magenta gold fume"], ["hammer_flat_teal_silver.mp4", "Hammer, laid down / Bluish teal silver fume"], ["hammer_flat_magenta_gold.mp4", "Hammer, laid down / Magenta gold fume"], ["jar_teal_silver.mp4", "Nug jar / Bluish teal silver fume"], ["jar_magenta_gold.mp4", "Nug jar / Magenta gold fume"]];
+const FILES = [["out/clearboy_hammer.step", "hammer", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/clearboy_hammer.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/frit.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/hammer_flat_magenta_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, magenta build"], ["out/hammer_flat_teal_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, bluish teal build"], ["out/hammer_magenta_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, magenta build"], ["out/hammer_teal_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, bluish teal build"], ["out/jar.step", "jar", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/jar.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_cork.step", "jar", "The cork lid - STEP"], ["out/jar_cork.stl", "jar", "The cork lid - STL"], ["out/jar_frit.stl", "jar", "Frit grains - STL"], ["out/jar_lines.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_lines_frit.stl", "jar", "Frit grains - STL"], ["out/jar_magenta_gold.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, magenta build"], ["out/jar_marbles.stl", "jar", "The clear marbles - STL"], ["out/jar_teal_silver.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, bluish teal build"], ["out/marbles.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/v-short-stem-fat-lobe.step", "variant", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/v-short-stem-fat-lobe.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-short-stem-fat-lobe_frit.stl", "variant", "Frit grains - STL"], ["out/v-short-stem-fat-lobe_marbles.stl", "variant", "The clear marbles - STL"]], SIZES = {"out/clearboy_hammer.step": "2.6 MB", "out/clearboy_hammer.stl": "1.6 MB", "out/frit.stl": "7.8 MB", "out/hammer_flat_magenta_gold.glb": "4.6 MB", "out/hammer_flat_teal_silver.glb": "4.6 MB", "out/hammer_magenta_gold.glb": "4.6 MB", "out/hammer_teal_silver.glb": "4.6 MB", "out/jar.step": "0.5 MB", "out/jar.stl": "1.3 MB", "out/jar_cork.step": "0.0 MB", "out/jar_cork.stl": "0.3 MB", "out/jar_frit.stl": "2.1 MB", "out/jar_lines.stl": "1.6 MB", "out/jar_lines_frit.stl": "1.2 MB", "out/jar_magenta_gold.glb": "1.9 MB", "out/jar_marbles.stl": "0.1 MB", "out/jar_teal_silver.glb": "1.9 MB", "out/marbles.stl": "0.1 MB", "out/v-short-stem-fat-lobe.step": "2.5 MB", "out/v-short-stem-fat-lobe.stl": "1.6 MB", "out/v-short-stem-fat-lobe_frit.stl": "7.8 MB", "out/v-short-stem-fat-lobe_marbles.stl": "0.1 MB", "video/hammer_teal_silver.mp4": "0.5 MB", "video/hammer_magenta_gold.mp4": "0.6 MB", "video/hammer_clear_silver.mp4": "0.5 MB", "video/hammer_clear_gold.mp4": "0.6 MB", "video/hammer_flat_teal_silver.mp4": "0.2 MB", "video/hammer_flat_magenta_gold.mp4": "0.2 MB", "video/hammer_flat_clear_silver.mp4": "0.2 MB", "video/hammer_flat_clear_gold.mp4": "0.3 MB", "video/jar_teal_silver.mp4": "0.6 MB", "video/jar_magenta_gold.mp4": "0.6 MB", "video/jar_clear_silver.mp4": "0.5 MB", "video/jar_clear_gold.mp4": "0.6 MB"}, RAW = "https://raw.githubusercontent.com/zelidav/jbd-clearboy/main/", VIDEOS = [["hammer_teal_silver.mp4", "Clearboy hammer / Bluish teal silver fume"], ["hammer_magenta_gold.mp4", "Clearboy hammer / Magenta gold fume"], ["hammer_clear_silver.mp4", "Clearboy hammer / Clear, heavy silver fume teal accents, linework"], ["hammer_clear_gold.mp4", "Clearboy hammer / Clear, heavy gold fume magenta accents, linework"], ["hammer_flat_teal_silver.mp4", "Hammer, laid down / Bluish teal silver fume"], ["hammer_flat_magenta_gold.mp4", "Hammer, laid down / Magenta gold fume"], ["hammer_flat_clear_silver.mp4", "Hammer, laid down / Clear, heavy silver fume teal accents, linework"], ["hammer_flat_clear_gold.mp4", "Hammer, laid down / Clear, heavy gold fume magenta accents, linework"], ["jar_teal_silver.mp4", "Nug jar / Bluish teal silver fume"], ["jar_magenta_gold.mp4", "Nug jar / Magenta gold fume"], ["jar_clear_silver.mp4", "Nug jar / Clear, heavy silver fume teal accents, linework"], ["jar_clear_gold.mp4", "Nug jar / Clear, heavy gold fume magenta accents, linework"]];
 document.getElementById("filerows").innerHTML = FILES.map(function(f){
   return "<tr><td><a href='" + RAW + f[0] + "'>" + f[0].replace("out/", "") + "</a></td>" +
     "<td class='num'>" + f[1] + "</td><td class='num'>" + (SIZES[f[0]] || "-") +

@@ -97,16 +97,12 @@ def build():
     stem_top = STEM_TOP
     stem = (cq.Workplane("XY").circle(STEM_OD / 2).extrude(stem_top)
               .translate((0, 0, 3.0)))
-    collar = (cq.Workplane("XY")
-              .circle(COLLAR_OD / 2).workplane(offset=COLLAR_H).circle(STEM_OD / 2)
-              .loft(ruled=False).translate((0, 0, COLLAR_Z - COLLAR_H)))
-    collar2 = (cq.Workplane("XY")
-               .circle(STEM_OD / 2).workplane(offset=4.0).circle(COLLAR_OD / 2)
-               .loft(ruled=False).translate((0, 0, COLLAR_Z - 4.0 - COLLAR_H)))
+    # no collar: on the original the tube is simply fused into the chamber, so the
+    # stem runs straight up into the head
     foot = (cq.Workplane("XY").circle(FOOT_OD / 2).extrude(FOOT_T)
               .edges("|Z or %CIRCLE").fillet(1.6))
 
-    body = head.union(stem).union(collar).union(collar2).union(foot)
+    body = head.union(stem).union(foot)
 
     # ---- carb boss (raised ring on the +Y wall) --------------------------
     cx = HEAD_X1 - CARB_FROM_RIM

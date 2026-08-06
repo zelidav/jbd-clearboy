@@ -31,12 +31,11 @@ N_MARBLES = 7              # evenly spaced around the opening
 MARBLE_R  = 4.0
 MARBLE_Z  = 84.5
 
-CORK_H       = 24.0        # plug depth
-CORK_D_BOT   = 37.0        # tapered so it seats
-CORK_D_TOP   = 39.6
-CORK_SEAT    = 12.0        # how far the plug sits down in the mouth
-CAP_H        = 8.0
-CAP_D        = 46.0
+# a natural cork: one gently tapered plug, no mushroom cap. It seats on the taper.
+CORK_H       = 27.0        # overall length of the cork
+CORK_D_BOT   = 36.6        # bottom, inside the neck
+CORK_D_TOP   = 41.0        # top, just proud of the rim
+CORK_SEAT    = 15.0        # how far it sits down in the mouth
 
 
 def build():
@@ -71,15 +70,12 @@ def stamp_pad(depth=7.0, wobble=0.15):
 
 
 def build_cork():
-    """Tapered plug plus the cap that sits proud of the rim."""
+    """One slightly tapered natural cork - wider at the top, softened at both ends."""
     z0 = HEIGHT - CORK_SEAT
-    plug = (cq.Workplane("XY").workplane(offset=z0)
+    cork = (cq.Workplane("XY").workplane(offset=z0)
               .circle(CORK_D_BOT / 2).workplane(offset=CORK_H).circle(CORK_D_TOP / 2)
               .loft(ruled=True))
-    cap = (cq.Workplane("XY").workplane(offset=z0 + CORK_H)
-             .circle(CAP_D / 2).extrude(CAP_H)
-             .edges(">Z or %CIRCLE").fillet(2.4))
-    return plug.union(cap)
+    return cork.edges(">Z").fillet(1.8)
 
 
 def radius_at(z):
@@ -133,4 +129,4 @@ if __name__ == "__main__":
     build_frit().export(os.path.join(out, "jar_frit.stl"))
     build_marbles().export(os.path.join(out, "jar_marbles.stl"))
     print("straight cylinder %.0f OD x %.0f, %d grains, %d marbles, cork %.0f tall"
-          % (OD, HEIGHT, GRAINS, N_MARBLES, CORK_H + CAP_H))
+          % (OD, HEIGHT, GRAINS, N_MARBLES, CORK_H))

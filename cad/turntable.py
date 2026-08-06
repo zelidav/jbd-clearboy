@@ -27,6 +27,27 @@ def spin(piece, key, n=72, W=None, H=None, out=None):
     return out
 
 
+TILTS = [-90.0, -68.0, -45.0, -23.0, 0.0]      # laid down -> standing
+
+
+def grid(piece, key, n=24, tilts=None, W=None, H=None, out=None):
+    """A roll x tilt sheet: dragging left/right rolls the piece on its own axis,
+    dragging up/down tips it between laid down and standing."""
+    tilts = TILTS if tilts is None else tilts
+    out = out or os.path.join(FRAMES, "%s_%s" % (piece, key))
+    os.makedirs(out, exist_ok=True)
+    W, H = mockups.size_of(piece, W, H)
+    r = mockups.build_renderer(piece, key, W, H)
+    t0 = time.time()
+    for j, tl in enumerate(tilts):
+        for i in range(n):
+            im = mockups.frame(r, piece, SIDE + 2 * math.pi * i / n, tilt=tl)
+            im.save(os.path.join(out, "t%02d_r%03d.png" % (j, i)))
+    print("  %s / %s: %d x %d grid in %.1fs"
+          % (piece, key, len(tilts), n, time.time() - t0), flush=True)
+    return out
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     n = next((int(a) for a in args if a.isdigit()), 72)
