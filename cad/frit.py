@@ -46,9 +46,32 @@ def build_frit(seed=7):
     return trimesh.util.concatenate(parts)
 
 
-def build_marbles():
+MARBLE_N = len(MARBLES)
+MARBLE_SEED = 0          # 0 keeps the hand-placed set; anything else re-scatters
+
+
+def marble_plan(n=None, seed=None):
+    """seed 0 = the placements above. Any other seed scatters n marbles over the
+    frit band, which is what a maker does anyway - no two pieces land the same."""
+    n = MARBLE_N if n is None else int(n)
+    seed = MARBLE_SEED if seed is None else int(seed)
+    if not seed:
+        return MARBLES[:n]
+    rng = np.random.RandomState(seed)
+    x0, x1 = FRIT_X1 - 26.0, FRIT_X1 - 4.0
+    plan = []
+    for i in range(n):
+        # spread them round the bowl, then jitter so it never reads as a pattern
+        th = 2 * math.pi * ((i + 0.5) / max(n, 1)) + rng.uniform(-0.55, 0.55)
+        x = rng.uniform(x0, x1)
+        plan.append((x, th, rng.uniform(3.0, 3.9)))
+    return plan
+
+
+def build_marbles(n=None, seed=None):
+    plan = marble_plan(n, seed) or [(0.0, 0.0, 0.001)]
     return trimesh.util.concatenate(
-        [_sphere(r, surface_pt(x, th, out=-r * 0.22), subdiv=2) for (x, th, r) in MARBLES])
+        [_sphere(r, surface_pt(x, th, out=-r * 0.22), subdiv=2) for (x, th, r) in plan])
 
 
 if __name__ == "__main__":

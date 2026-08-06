@@ -14,9 +14,10 @@ from mockups import PIECES, WAYS, SIDE
 FRAMES = "frames"
 
 
-def spin(piece, key, n=72, W=760, H=1000, out=None):
+def spin(piece, key, n=72, W=None, H=None, out=None):
     out = out or os.path.join(FRAMES, "%s_%s" % (piece, key))
     os.makedirs(out, exist_ok=True)
+    W, H = mockups.size_of(piece, W, H)
     r = mockups.build_renderer(piece, key, W, H)
     t0 = time.time()
     for i in range(n):

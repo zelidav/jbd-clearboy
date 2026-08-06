@@ -25,6 +25,11 @@ PIECES = {
      cam_r=700.0, target=(0, 0, 74), fov=17.0, shadow=(0.5, 0.30, 0.075),
      decal=(20.0, 74.0, 7.0),      # z0, z1, stem radius
      name="Clearboy hammer", note="140 mm \u00b7 hand-blown original"),
+ "hammer_flat": dict(
+     body="out/clearboy_hammer.stl", frit="out/frit.stl", marbles="out/marbles.stl",
+     cam_r=700.0, target=(0, 0, 12), fov=17.0, shadow=(0.5, 0.46, 0.10),
+     decal=(20.0, 74.0, 7.0), tilt=-90.0, shift=(70.0, 0.0, 8.0), size=(1000, 700),
+     name="Hammer, laid down", note="how it sits in the case"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
      cork="out/jar_cork.stl",
@@ -36,14 +41,16 @@ PIECES = {
 WAYS = {
  "teal_silver": dict(
      body=(0.135, 0.040, 0.050), frit=(0.42, 0.115, 0.16),
-     fume=1.0, fume_cool=(0.80, 0.87, 1.00), fume_warm=(0.95, 0.86, 1.00),
+     fume=1.15, fume_cool=(0.62, 0.78, 1.08), fume_warm=(0.90, 0.82, 1.10),
+     fume_pow=1.15,
      line=(0.02, 0.13, 0.14), fline=(0.01, 0.11, 0.12),
      label=(14, 122, 106), label_text=(255, 255, 255),
      name="Bluish teal \u00b7 silver fume",
      sub="teal frit \u00b7 clear marbles"),
  "magenta_gold": dict(
      body=(0.040, 0.170, 0.078), frit=(0.115, 0.44, 0.21),
-     fume=1.0, fume_cool=(0.97, 0.80, 0.88), fume_warm=(1.00, 0.80, 0.58),
+     fume=1.15, fume_cool=(1.08, 0.90, 0.55), fume_warm=(1.12, 0.72, 0.42),
+     fume_pow=1.15,
      line=(0.15, 0.02, 0.10), fline=(0.13, 0.01, 0.09),
      label=(150, 32, 108), label_text=(255, 255, 255),
      name="Magenta \u00b7 gold fume",
@@ -141,6 +148,7 @@ def build_renderer(piece, key, W, H):
     r = render.Renderer(W, H)
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
           fume_warm=c["fume_warm"], fume_cool=c["fume_cool"],
+          fume_pow=c.get("fume_pow", 1.4),
           line=c["line"], kAmt=0.38, kPow=2.6, spec=1.0,
           decal=p["decal"] is not None, solid=True, min_thick=2.2)
     r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],
@@ -161,11 +169,19 @@ def build_renderer(piece, key, W, H):
 def frame(r, piece, angle):
     p = PIECES[piece]
     return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
-                   shadow=p["shadow"])
+                   shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
 
 
-def shot(piece, key, angle=SIDE, W=900, H=1180, tag=""):
+def size_of(piece, W=None, H=None):
+    """Portrait for a standing piece, landscape for one on its side."""
+    if W and H:
+        return W, H
+    return PIECES[piece].get("size", (760, 1000))
+
+
+def shot(piece, key, angle=SIDE, W=None, H=None, tag=""):
     os.makedirs(OUT, exist_ok=True)
+    W, H = size_of(piece, W, H)
     im = frame(build_renderer(piece, key, W, H), piece, angle)
     im.save(f"{OUT}/{piece}_{key}{tag}.png")
     print("wrote", piece, key + tag, im.size)

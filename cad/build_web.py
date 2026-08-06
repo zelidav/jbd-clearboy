@@ -16,12 +16,14 @@ REPO = "zelidav/jbd-clearboy"
 RAW = "https://raw.githubusercontent.com/%s/main/" % REPO
 CONTACT = "david@canismajorpartners.com"
 
-PIECES = ["hammer", "jar"]
+PIECES = ["hammer", "hammer_flat", "jar"]
 WAYS = ["teal_silver", "magenta_gold"]
 
 PIECE_META = {
     "hammer": dict(name="Clearboy hammer", code="JBD-CB-140",
                    note="140 mm, from the measured original"),
+    "hammer_flat": dict(name="Hammer, laid down", code="JBD-CB-140",
+                   note="the same piece on its side, the way it sits in a case"),
     "jar":    dict(name="Nug jar", code="JBD-NJ-92",
                    note="92 mm straight cylinder, 38 mm opening, cork lid"),
 }
@@ -41,9 +43,22 @@ BASE = {
    dict(k="headlen", label="Head length",      v=68,   min=48,  max=95,  step=1,   unit="mm"),
    dict(k="headsec", label="Head max section", v=42,   min=30,  max=58,  step=1,   unit="mm"),
    dict(k="stemod",  label="Stem OD",          v=14,   min=10,  max=20,  step=0.5, unit="mm"),
+   dict(k="stemlen", label="Stem length",      v=88,   min=60,  max=120, step=1,   unit="mm"),
    dict(k="bowlid",  label="Bowl opening",     v=25,   min=18,  max=34,  step=1,   unit="mm"),
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
+   dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
+ ],
+ "hammer_flat": [
+   dict(k="height",  label="Overall height",   v=140,  min=110, max=180, step=1,   unit="mm"),
+   dict(k="headlen", label="Head length",      v=68,   min=48,  max=95,  step=1,   unit="mm"),
+   dict(k="headsec", label="Head max section", v=42,   min=30,  max=58,  step=1,   unit="mm"),
+   dict(k="stemod",  label="Stem OD",          v=14,   min=10,  max=20,  step=0.5, unit="mm"),
+   dict(k="stemlen", label="Stem length",      v=88,   min=60,  max=120, step=1,   unit="mm"),
+   dict(k="bowlid",  label="Bowl opening",     v=25,   min=18,  max=34,  step=1,   unit="mm"),
+   dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
+   dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
+   dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
  ],
  "jar": [
    dict(k="height",  label="Glass height",     v=92, min=70, max=130, step=1,   unit="mm"),
@@ -55,22 +70,43 @@ BASE = {
  ],
 }
 
-FILES = [
-  ("out/clearboy_hammer.step", "hammer", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"),
-  ("out/clearboy_hammer.stl",  "hammer", "Mesh - 3D print, mould master, wax pattern"),
-  ("out/frit.stl",             "hammer", "Frit grains, bowl end"),
-  ("out/marbles.stl",          "hammer", "The four clear marbles"),
-  ("out/hammer_teal_silver.glb",  "hammer", "Web / realtime - transmission, IOR 1.474, volume"),
-  ("out/hammer_magenta_gold.glb", "hammer", "Web / realtime - magenta build"),
-  ("out/jar.step",             "jar", "CAD hand-off - straight cylinder, 38 mm mouth, 3 mm wall, pressed JBD stamp"),
-  ("out/jar.stl",              "jar", "Mesh - print or mould"),
-  ("out/jar_cork.step",        "jar", "Cork lid - tapered plug plus cap"),
-  ("out/jar_cork.stl",         "jar", "Cork lid, meshed"),
-  ("out/jar_frit.stl",         "jar", "Frit grains, shoulder band"),
-  ("out/jar_marbles.stl",      "jar", "Seven marbles around the opening"),
-  ("out/jar_teal_silver.glb",  "jar", "Web / realtime"),
-  ("out/jar_magenta_gold.glb", "jar", "Web / realtime"),
-]
+USES = {
+    ".step": "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino",
+    ".stl": "Mesh - 3D print, mould master, wax pattern",
+    ".glb": "Web / realtime - transmission, IOR 1.474, volume",
+}
+PARTS = {
+    "_frit": "frit grains",
+    "_marbles": "the clear marbles",
+    "_cork": "the cork lid",
+}
+
+
+def files():
+    """Everything sitting in out/, grouped by the piece it belongs to."""
+    rows = []
+    for name in sorted(os.listdir("out")) if os.path.isdir("out") else []:
+        stem, ext = os.path.splitext(name)
+        if ext not in USES:
+            continue
+        if stem.startswith("jar"):
+            piece = "jar"
+        elif stem.startswith("v-"):
+            piece = "variant"
+        else:
+            piece = "hammer"
+        use = USES[ext]
+        for suffix, what in PARTS.items():
+            if stem.endswith(suffix):
+                use = "%s - %s" % (what[0].upper() + what[1:], ext.lstrip(".").upper())
+        for w in WAYS:
+            if stem.endswith(w):
+                use = "%s, %s build" % (USES[ext], WAY_META[w]["name"].lower())
+        rows.append(("out/" + name, piece, use))
+    return rows
+
+
+FILES = files()
 
 def variants():
     """Re-rendered remodel requests. They are added alongside the originals,
@@ -83,6 +119,9 @@ def variants():
 
 
 SPECS = {
+    "hammer_flat": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
+               ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
+               ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
     "hammer": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
                ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
                ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
@@ -116,13 +155,18 @@ def assets(inline):
             d = os.path.join(SITE, "spin", "%s_%s" % (pc, w))
             if not os.path.isdir(d):
                 continue                      # a variant is usually rendered in one colourway
-            out[pc][w] = {"frames": [ref(os.path.join(d, f))
-                                     for f in sorted(os.listdir(d)) if f.endswith(".webp")]}
+            names = [f for f in sorted(os.listdir(d)) if f.endswith(".webp")]
+            from PIL import Image
+            with Image.open(os.path.join(d, names[0])) as im:
+                aspect = "%d/%d" % im.size          # the laid-down set is landscape
+            out[pc][w] = {"frames": [ref(os.path.join(d, f)) for f in names],
+                          "aspect": aspect}
     return out
 
 
 def piece_meta():
-    m = dict(PIECE_META)
+    m = {k: dict(x) for k, x in PIECE_META.items()}
+    m["hammer_flat"]["variant_of"] = "hammer"    # requests from it rebuild the hammer
     for v in variants():
         m[v["id"]] = dict(name=v.get("label") or v["id"], code=v["id"].upper(),
                           note="variant of the " + PIECE_META[v["piece"]]["name"].lower(),
@@ -465,14 +509,13 @@ INDEX_BODY = r"""
         <label class="field" for="notes">What should change</label>
         <textarea id="notes" placeholder="Shorter stem, fatter lobe, marbles only on the carb side, colder teal, frit further down the body..."></textarea>
         <div class="actions">
-          <button class="btn primary" id="render" type="button">Request re-render</button>
+          <button class="btn primary" id="mail" type="button">Send the request</button>
           <button class="btn" id="copy" type="button">Copy spec</button>
-          <button class="btn" id="mail" type="button">Email it</button>
           <button class="btn" id="save" type="button">Keep on this device</button>
         </div>
-        <p class="fine">A request opens a build ticket with these numbers in it. The
-          re-render comes back under the name you gave it and joins the piece menu at the top
-          of this page &mdash; the original build is never replaced.</p>
+        <p class="fine">Sending mails the numbers straight through &mdash; no accounts, no
+          sign-in. The re-render comes back under the name you gave it and joins the piece
+          menu at the top of this page; the original build is never replaced.</p>
         <div class="log" id="log"></div>
       </div>
     </div>
@@ -679,6 +722,7 @@ function select(pc, w){
   N = layers[pc + "/" + w].imgs.length;
   Object.keys(layers).forEach(function(k){ layers[k].box.style.display = "none"; });
   layers[pc + "/" + w].box.style.display = "block";
+  framesEl.style.aspectRatio = ASSETS[pc][w].aspect || "520/684";
   document.querySelectorAll(".piece").forEach(function(b){
     b.setAttribute("aria-pressed", String(b.dataset.k === pc)); });
   document.querySelectorAll(".way").forEach(function(b){
@@ -742,6 +786,15 @@ stage.addEventListener("keydown", function(e){
 const slidersEl = document.getElementById("sliders"), draw = document.getElementById("drawing");
 let cur = {};
 
+function link(k, v){
+  const inp = document.getElementById("s_" + k), out = document.getElementById("o_" + k);
+  if(!inp) return;
+  cur[k] = v; inp.value = v;
+  const row = BASE[piece].filter(function(s){ return s.k === k; })[0];
+  out.textContent = v + (row && row.unit ? " " + row.unit : "");
+  out.classList.toggle("changed", !row || v !== row.v);
+}
+
 function baseOf(){ const o = {}; BASE[piece].forEach(function(s){ o[s.k] = s.v; }); return o; }
 
 function buildSliders(){
@@ -760,6 +813,8 @@ function buildSliders(){
       cur[s.k] = parseFloat(inp.value);
       out.textContent = cur[s.k] + (s.unit ? " " + s.unit : "");
       out.classList.toggle("changed", cur[s.k] !== s.v);
+      if(s.k === "stemlen") link("height", 140 + (cur.stemlen - 88));
+      if(s.k === "height")  link("stemlen", 88 + (cur.height - 140));
       render();
     });
   });
@@ -902,13 +957,6 @@ document.getElementById("mail").onclick = function(){
   location.href = "mailto:" + CONTACT + "?subject=" +
     encodeURIComponent("JBD remodel request - " + META.pieces[piece].name) +
     "&body=" + encodeURIComponent(specText());
-};
-document.getElementById("render").onclick = function(){
-  const r = requestJson();
-  const url = "https://github.com/" + REPO + "/issues/new?labels=variant&title=" +
-    encodeURIComponent("Re-render: " + r.label) + "&body=" + encodeURIComponent(specText());
-  window.open(url, "_blank", "noopener");
-  flash("render", "Ticket opened");
 };
 document.getElementById("save").onclick = function(){
   const all = loadLog();

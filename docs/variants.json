@@ -4,12 +4,14 @@
   "way": "teal_silver",
   "piece": "hammer",
   "label": "short stem fat lobe",
-  "notes": "test request",
+  "notes": "scattered marbles",
   "dims": {
-   "height": 124.0,
+   "stemlen": 72.0,
    "headlen": 76.0,
    "headsec": 46.0,
-   "stemod": 16.0
+   "stemod": 16.0,
+   "marbles": 6.0,
+   "scatter": 7.0
   }
  }
 ]

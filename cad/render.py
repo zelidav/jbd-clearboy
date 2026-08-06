@@ -74,7 +74,8 @@ in vec3 v_wpos; in vec3 v_wnorm; in float v_vdepth;
 out vec4 f_out;
 uniform sampler2D backTex; uniform vec2 res;
 uniform vec3 absorb; uniform float fume;
-uniform vec3 fumeWarm; uniform vec3 fumeCool; uniform float minThick; uniform float maxThick;
+uniform vec3 fumeWarm; uniform vec3 fumeCool; uniform float minThick;
+uniform float maxThick; uniform float fumePow;
 """ + COMMON + """
 void main(){
     vec2 uv = gl_FragCoord.xy/res;
@@ -83,9 +84,12 @@ void main(){
                                                // clear; ceiling makes opaque stock flat
     vec3 tint = exp(-absorb*thick);
     if(fume > 0.0){
-        // silver/gold fume is an interference coat: the shift follows viewing angle
-        float g = pow(1.0-ndotv(v_wnorm,v_wpos), 1.8);
-        tint *= mix(fumeCool, fumeWarm, g);
+        // silver/gold fume is an interference coat: the shift follows viewing angle,
+        // and a heavy coat pulls the whole body toward the metal
+        float g = pow(1.0-ndotv(v_wnorm,v_wpos), fumePow);
+        // the coat bites hardest where the light grazes, and only tints face-on
+        float infl = clamp(fume*(0.28 + 0.72*g), 0.0, 1.5);
+        tint *= mix(vec3(1.0), mix(fumeCool, fumeWarm, g), infl);
     }
     f_out = vec4(tint,1.0);
 }"""
@@ -176,6 +180,16 @@ def rotz(a):
     return np.array([[c, -s, 0, 0], [s, c, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], 'f4')
 
 
+def rotx(a):
+    c, s = math.cos(a), math.sin(a)
+    return np.array([[1, 0, 0, 0], [0, c, -s, 0], [0, s, c, 0], [0, 0, 0, 1]], 'f4')
+
+
+def roty(a):
+    c, s = math.cos(a), math.sin(a)
+    return np.array([[c, 0, s, 0], [0, 1, 0, 0], [-s, 0, c, 0], [0, 0, 0, 1]], 'f4')
+
+
 def make_decal(text, w=2400, h=300, color=(250, 250, 250), band=0.30):
     """u along the stem, v around it. Text sits in a band on one side."""
     img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
@@ -216,7 +230,8 @@ class Renderer:
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
             kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, min_thick=0.0, max_thick=60.0,
-            fume_warm=(1.00, 0.83, 0.58), fume_cool=(0.74, 0.83, 1.00), smooth=36.0):
+            fume_warm=(1.00, 0.83, 0.58), fume_cool=(0.74, 0.83, 1.00), fume_pow=1.4,
+            smooth=36.0):
         """solid=True depth-tests the density pass, so only the surface facing the
         camera draws contour - the piece stops reading as an X-ray of its own walls."""
         v, n, f = load(path, smooth)
@@ -227,7 +242,7 @@ class Renderer:
         self.objs.append(dict(vaos=vaos, absorb=absorb, fume=fume, line=line,
                               kAmt=kAmt, kPow=kPow, spec=spec, decal=decal,
                               solid=solid, min_thick=min_thick, max_thick=max_thick,
-                              fume_warm=fume_warm, fume_cool=fume_cool))
+                              fume_warm=fume_warm, fume_cool=fume_cool, fume_pow=fume_pow))
 
     def set_decal(self, img, z0, z1, r):
         t = self.ctx.texture(img.size, 4, img.tobytes())
@@ -235,18 +250,22 @@ class Renderer:
         t.repeat_x = False; t.repeat_y = True
         self.decal = (t, z0, z1, r)
 
-    def _mats(self, angle, cam_r, elev, target, fov):
+    def _mats(self, angle, cam_r, elev, target, fov, tilt=0.0, shift=None):
         el = math.radians(elev)
         eye = np.array([0.0, -cam_r*math.cos(el), target[2]+cam_r*math.sin(el)], 'f4')
         view = look_at(eye, target)
         proj = persp(fov, self.W/self.H, 10.0, 5000.0)
-        model = rotz(angle)
+        # spin the piece on its own axis, then lay it over toward the camera plane
+        model = roty(math.radians(tilt)) @ rotz(angle)
+        if shift:
+            model[0, 3] += shift[0]; model[1, 3] += shift[1]; model[2, 3] += shift[2]
         return eye, model, view, proj @ view @ model
 
     def frame(self, angle, cam_r=780.0, elev=5.0, target=(0, 0, 74), fov=17.0,
-              bg=((0.965, 0.968, 0.973), (0.795, 0.808, 0.822)), shadow=(0.5, 0.30, 0.075)):
+              bg=((0.965, 0.968, 0.973), (0.795, 0.808, 0.822)), shadow=(0.5, 0.30, 0.075),
+              tilt=0.0, shift=None):
         ctx = self.ctx
-        eye, model, view, mvp = self._mats(angle, cam_r, elev, target, fov)
+        eye, model, view, mvp = self._mats(angle, cam_r, elev, target, fov, tilt, shift)
 
         def setmats(p):
             p['mvp'].write(mvp.T.astype('f4').tobytes())
@@ -282,6 +301,7 @@ class Renderer:
         for o in self.objs:
             p['absorb'].value = o['absorb']; p['fume'].value = o['fume']
             p['fumeWarm'].value = o['fume_warm']; p['fumeCool'].value = o['fume_cool']
+            p['fumePow'].value = o['fume_pow']
             p['minThick'].value = o['min_thick']; p['maxThick'].value = o['max_thick']
             o['vaos']['tint'].render(moderngl.TRIANGLES)
 

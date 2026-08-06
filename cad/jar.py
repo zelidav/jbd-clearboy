@@ -22,6 +22,7 @@ STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stam
 STAMP_RX  = 13.0           # the pad is a squashed gather, wider than tall
 STAMP_RZ  = 9.0
 STAMP_TXT = "JBD"
+STAMP_SINK = 0.5           # how deep the stamp pad is pressed into the wall
 
 FRIT_Z    = (66.0, 90.5)   # frit band around the opening
 GRAINS    = 520
@@ -45,24 +46,25 @@ def build():
     body = body.cut(bore)
     body = body.edges("|Z or %CIRCLE").fillet(1.2)
 
-    # maker's stamp: a squashed gather of glass with the mark pressed into it.
-    # The pad starts inside the wall so it seats on the curve instead of floating.
-    body = body.union(cq.Workplane(obj=stamp_pad()))
-    face = OD / 2 + 2.4
+    # maker's stamp, pressed into the wall: a shallow blob-shaped depression with
+    # the letters struck deeper inside it. Nothing stands proud of the cylinder.
+    body = body.cut(cq.Workplane(obj=stamp_pad()))
+    face = OD / 2 - STAMP_SINK
     txt = (cq.Workplane("XZ").workplane(offset=face).center(0, STAMP_Z)
-             .text(STAMP_TXT, 10.5, -2.4, kind="bold", halign="center", valign="center"))
+             .text(STAMP_TXT, 10.0, -1.4, kind="bold", halign="center", valign="center"))
     return body.cut(txt)
 
 
 def stamp_pad(depth=7.0, wobble=0.15):
-    """Irregular, molten-edged blob - a hand-pressed stamp is never a clean circle."""
+    """Irregular, molten-edged blob - a hand-pressed stamp is never a clean circle.
+    Used as a cutter: it takes the outer skin off down to STAMP_SINK."""
     pts = []
     n = 72
     for i in range(n):
         t = 2 * math.pi * i / n
         k = 1.0 + wobble * math.sin(3 * t + 0.7) + 0.5 * wobble * math.sin(5 * t + 2.1)
         pts.append(cq.Vector(STAMP_RX * k * math.cos(t),
-                             -(OD / 2 - 4.6),
+                             -(OD / 2 - STAMP_SINK),
                              STAMP_Z + STAMP_RZ * k * math.sin(t)))
     wire = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts, periodic=True)])
     return cq.Solid.extrudeLinear(cq.Face.makeFromWires(wire), cq.Vector(0, -depth, 0))

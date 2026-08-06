@@ -19,7 +19,7 @@ import cadquery as cq
 VARIANTS = os.path.join("docs", "variants.json")
 
 HAMMER_BASE = dict(height=140.0, headlen=68.0, headsec=42.0, stemod=14.0,
-                   bowlid=25.0, footod=24.5, marbles=4)
+                   bowlid=25.0, footod=24.5, stemlen=88.0, marbles=4, scatter=0)
 JAR_BASE = dict(height=92.0, mouthid=38.0, wall=3.0, fritz=25.0, corkh=20.0, marbles=7)
 
 
@@ -32,6 +32,8 @@ def slug(text, fallback):
 def build_hammer(d, out, vid):
     import model, decor, frit
     p = dict(HAMMER_BASE); p.update(d)
+    if "stemlen" in d and "height" not in d:        # stem length drives the overall height
+        p["height"] = HAMMER_BASE["height"] + (p["stemlen"] - HAMMER_BASE["stemlen"])
     k_len = p["headlen"] / HAMMER_BASE["headlen"]
     k_sec = p["headsec"] / HAMMER_BASE["headsec"]
     dz = p["height"] - HAMMER_BASE["height"]
@@ -58,16 +60,12 @@ def build_hammer(d, out, vid):
     frit.FRIT_X1 = decor.RIM_X + 0.5
     frit.FRIT_X0 *= k_len
     n = int(p["marbles"])
-    frit.MARBLES = [(x * k_len, th, r) for (x, th, r) in frit.MARBLES][:n]
+    frit.MARBLES = [(x * k_len, th, r) for (x, th, r) in frit.MARBLES]
 
     frit_path = os.path.join(out, "%s_frit.stl" % vid)
     marb_path = os.path.join(out, "%s_marbles.stl" % vid)
     frit.build_frit().export(frit_path)
-    if n:
-        frit.build_marbles().export(marb_path)
-    else:                                   # no marbles: keep a valid, empty-ish mesh
-        frit.MARBLES = [(0.0, 0.0, 0.001)]
-        frit.build_marbles().export(marb_path)
+    frit.build_marbles(n=n, seed=int(p["scatter"])).export(marb_path)
     return dict(body=body_path, frit=frit_path, marbles=marb_path,
                 cam_r=700.0 + max(dz, 0) * 2.2, target=(0, 0, 74 + dz * 0.55),
                 fov=17.0, shadow=(0.5, 0.30, 0.075), decal=(20.0, 74.0, p["stemod"] / 2))
