@@ -31,33 +31,33 @@ PIECE_META = {
 }
 # sampled off assets/northstar_rods.jpg - what the shop can actually pull
 STOCK = {
-    "teal_silver":  dict(body="Teal", body_hex="#4E8483", rod="rod 10",
-                         accent="Teal", accent_hex="#2E9C86",
+    "teal_silver":  dict(body="Mint", body_hex="#C9E8E1", rod="rod 13 (4th from bottom)",
+                         accent="Mint", accent_hex="#8FC8BC",
                          fume="Silver (silver nitrate)"),
-    "magenta_gold": dict(body="Magenta", body_hex="#C0348A", rod="rod 3 family",
-                         accent="Magenta", accent_hex="#BF3E96",
+    "magenta_gold": dict(body="Pink", body_hex="#D7BFC7", rod="rod 3 (3rd from top)",
+                         accent="Pink", accent_hex="#C77E96",
                          fume="Gold (gold chloride)"),
     "clear_silver": dict(body="Clear", body_hex="#F7F8FA", rod="rod 9",
-                         accent="Teal", accent_hex="#2E9C86",
+                         accent="Mint", accent_hex="#8FC8BC",
                          fume="Silver, heavy"),
     "clear_gold":   dict(body="Clear", body_hex="#F7F8FA", rod="rod 9",
-                         accent="Magenta", accent_hex="#BF3E96",
+                         accent="Pink", accent_hex="#C77E96",
                          fume="Gold, heavy"),
 }
 
 WAY_META = {
-    "teal_silver":  dict(name="Bluish teal", sub="silver fume",
-                         dot="linear-gradient(145deg,#7FD8D0,#1C8C7C 62%,#0C6154)",
-                         ring="#1C8C7C"),
-    "magenta_gold": dict(name="Magenta", sub="gold fume",
+    "teal_silver":  dict(name="Mint (rod 13)", sub="silver fume",
+                         dot="linear-gradient(145deg,#E4F5EF,#C9E8E1 60%,#8FC8BC)",
+                         ring="#8FC8BC"),
+    "magenta_gold": dict(name="Pink (rod 3)", sub="gold fume",
                          dot="linear-gradient(145deg,#F0A0C8,#C0348A 62%,#7E1E5C)",
                          ring="#C0348A"),
     "clear_silver": dict(name="Clear, heavy silver fume", sub="teal accents, linework",
                          dot="linear-gradient(145deg,#EDF2F6,#9FB6E0 55%,#6E8CC4)",
-                         ring="#1C8C7C"),
+                         ring="#8FC8BC"),
     "clear_gold": dict(name="Clear, heavy gold fume", sub="magenta accents, linework",
                        dot="linear-gradient(145deg,#FBF3E4,#E0BE7A 55%,#C08A3E)",
-                       ring="#C0348A"),
+                       ring="#C77E96"),
 }
 
 # what the remodeller starts from, and always keeps as the ghost outline

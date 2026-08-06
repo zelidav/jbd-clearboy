@@ -4,7 +4,7 @@
   "way": "clear_silver",
   "piece": "jar",
   "label": "no marbles",
-  "notes": "just remove marbles",
+  "notes": "",
   "dims": {
    "marbles": 0.0
   }
@@ -14,7 +14,7 @@
   "way": "clear_silver",
   "piece": "hammer",
   "label": "tighter spiral",
-  "notes": "spun linework 10, spacing 4mm",
+  "notes": "",
   "dims": {
    "lines": 10.0,
    "linepitch": 4.0

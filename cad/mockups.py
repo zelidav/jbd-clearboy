@@ -44,7 +44,7 @@ PIECES = {
 
 WAYS = {
  "teal_silver": dict(
-     body=(0.135, 0.040, 0.050), frit=(0.42, 0.115, 0.16),
+     body=(0.0372, 0.0157, 0.0213), frit=(0.175, 0.0797, 0.0908),
      fume=1.05, fume_pow=1.05,
      # silver: near-white face on, then steel, violet, and a warm flash at the edge
      fume_stops=((1.00, 1.00, 1.00), (0.90, 0.95, 1.04),
@@ -55,7 +55,7 @@ WAYS = {
      name="Bluish teal \u00b7 silver fume",
      sub="teal frit \u00b7 clear marbles \u00b7 clear linework"),
  "magenta_gold": dict(
-     body=(0.040, 0.170, 0.078), frit=(0.115, 0.44, 0.21),
+     body=(0.0251, 0.0548, 0.0414), frit=(0.0797, 0.2122, 0.1446),
      fume=1.05, fume_pow=1.05,
      # gold: pale metal, then straw, rose, and violet where it turns over
      fume_stops=((1.00, 0.99, 0.96), (1.06, 0.99, 0.84),
@@ -67,22 +67,22 @@ WAYS = {
      sub="magenta frit \u00b7 clear marbles \u00b7 clear linework"),
 
  "clear_silver": dict(
-     body=(0.0045, 0.0040, 0.0038), frit=(0.42, 0.115, 0.16),
+     body=(0.0045, 0.0040, 0.0038), frit=(0.175, 0.0797, 0.0908),
      fume=1.35, fume_pow=0.90,
      fume_stops=((1.00, 1.00, 1.00), (0.88, 0.94, 1.06),
                  (0.92, 0.86, 1.10), (1.08, 0.98, 0.84)),
      line=(0.09, 0.11, 0.14), fline=(0.01, 0.11, 0.12),
-     marble=(0.17, 0.048, 0.068), wrap=(0.30, 0.085, 0.12), lines="body",
+     marble=(0.105, 0.047819999999999994, 0.05448), wrap=(0.175, 0.0797, 0.0908), lines="body",
      label=(14, 122, 106), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy silver fume",
      sub="teal frit, marbles \u00b7 wrapped linework"),
  "clear_gold": dict(
-     body=(0.0045, 0.0040, 0.0038), frit=(0.115, 0.44, 0.21),
+     body=(0.0045, 0.0040, 0.0038), frit=(0.0797, 0.2122, 0.1446),
      fume=1.35, fume_pow=0.90,
      fume_stops=((1.00, 0.99, 0.95), (1.08, 1.00, 0.82),
                  (1.08, 0.86, 0.82), (0.92, 0.86, 1.08)),
      line=(0.14, 0.10, 0.06), fline=(0.13, 0.01, 0.09),
-     marble=(0.048, 0.19, 0.09), wrap=(0.085, 0.34, 0.16), lines="body",
+     marble=(0.047819999999999994, 0.12732, 0.08676), wrap=(0.0797, 0.2122, 0.1446), lines="body",
      label=(150, 32, 108), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy gold fume",
      sub="magenta frit, marbles \u00b7 wrapped linework"),
