@@ -19,10 +19,10 @@ HEIGHT    = 92.0           # glass body, rim to bench
 FLOOR     = 3.0            # flat closed bottom, same wall
 
 STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stamp
-STAMP_RX  = 13.0           # the pad is a squashed gather, wider than tall
-STAMP_RZ  = 9.0
+STAMP_RX  = 11.0           # the die face - only a little larger than the mark
+STAMP_RZ  = 5.4
 STAMP_TXT = "JBD"
-STAMP_SINK = 0.5           # how deep the stamp pad is pressed into the wall
+STAMP_SINK = 0.22          # the die barely sinks - a reheat and a press, no dent
 
 FRIT_Z    = (66.0, 90.5)   # frit band around the opening
 GRAINS    = 520
@@ -50,18 +50,18 @@ def build():
     body = body.cut(cq.Workplane(obj=stamp_pad()))
     face = OD / 2 - STAMP_SINK
     txt = (cq.Workplane("XZ").workplane(offset=face).center(0, STAMP_Z)
-             .text(STAMP_TXT, 10.0, -1.4, kind="bold", halign="center", valign="center"))
+             .text(STAMP_TXT, 9.0, -1.3, kind="bold", halign="center", valign="center"))
     return body.cut(txt)
 
 
-def stamp_pad(depth=7.0, wobble=0.15):
+def stamp_pad(depth=7.0, wobble=0.07):
     """Irregular, molten-edged blob - a hand-pressed stamp is never a clean circle.
     Used as a cutter: it takes the outer skin off down to STAMP_SINK."""
     pts = []
     n = 72
     for i in range(n):
         t = 2 * math.pi * i / n
-        k = 1.0 + wobble * math.sin(3 * t + 0.7) + 0.5 * wobble * math.sin(5 * t + 2.1)
+        k = 1.0 + wobble * math.sin(3 * t + 0.7) + 0.4 * wobble * math.sin(5 * t + 2.1)
         pts.append(cq.Vector(STAMP_RX * k * math.cos(t),
                              -(OD / 2 - STAMP_SINK),
                              STAMP_Z + STAMP_RZ * k * math.sin(t)))
