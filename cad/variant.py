@@ -71,7 +71,7 @@ def build_hammer(d, out, vid):
 
     import linework
     lines_path = os.path.join(out, "%s_lines.stl" % vid)
-    linework.hammer_rings(n=p["lines"], pitch=p["linepitch"]).export(lines_path)
+    linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"]).export(lines_path)
     return dict(body=body_path, frit=frit_path, marbles=marb_path,
                 lines_body=lines_path, lines_frit=lines_path,
                 cam_r=700.0 + max(dz, 0) * 2.2, target=(0, 0, 74 + dz * 0.55),
@@ -110,9 +110,10 @@ def build_jar(d, out, vid):
     import linework
     body_lines = os.path.join(out, "%s_lines.stl" % vid)
     frit_lines = os.path.join(out, "%s_lines_frit.stl" % vid)
-    linework.build(linework.bands(n=p["lines"], pitch=p["linepitch"],
-                                  top=p["height"] - 4.0)).export(body_lines)
-    linework.build(linework.GROUPS_FRIT, proud=1.15).export(frit_lines)
+    linework.spiral(turns=p["lines"], pitch=p["linepitch"],
+                    top=p["height"] - 4.0).export(body_lines)
+    linework.spiral(turns=9, pitch=2.4, minor=0.30, top=p["height"] - 2.0,
+                    bottom=p["height"] - 26.0, seed=12, proud=1.15).export(frit_lines)
     top = p["height"] + p["corkh"]
     return dict(body=body_path, frit=frit_path, marbles=marb_path, cork=cork_path,
                 lines_body=body_lines, lines_frit=frit_lines,

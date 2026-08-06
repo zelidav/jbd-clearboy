@@ -45,11 +45,26 @@ def build():
     body = body.cut(bore)
     body = body.edges("|Z or %CIRCLE").fillet(1.2)
 
-    # maker's stamp: only the mark is struck in. Sinking a die face around it as well
-    # turned the whole area into a lens - the glass either side of the strike stays flat.
-    for cutter in stamp_art_cutters():
-        body = body.cut(cq.Workplane(obj=cutter))
+    # no stamp geometry: cutting it bent light around the mark whatever the depth.
+    # The mark is carried as a shading pass instead (see mockups.make_stamp_decal).
+    # stamp_outline_cutter() and stamp_art_cutters() still build it if we want it back.
     return body
+
+
+def stamp_outline_cutter(inset=0.955, depth=0.35):
+    """A thin scribed line following the traced stamp outline - no depression, so the
+    wall stays flat and the glass reads clean."""
+    import stamp_shape
+    raw = stamp_shape.load()[::2]
+    k = STAMP_RX / max(abs(x) for (x, _) in raw)
+    y = -(OD / 2 + 1.0)
+
+    def wire(scale):
+        pts = [cq.Vector(x * k * scale, y, STAMP_Z + v * k * scale) for (x, v) in raw]
+        return cq.Wire.assembleEdges([cq.Edge.makeSpline(pts, periodic=True)])
+
+    face = cq.Face.makeFromWires(wire(1.0), [wire(inset)])
+    return cq.Solid.extrudeLinear(face, cq.Vector(0, 1.0 + depth, 0))
 
 
 def stamp_art_cutters(depth=1.0):
@@ -130,7 +145,7 @@ def build_frit(seed=11):
 def build_marbles():
     return trimesh.util.concatenate([
         _sphere(MARBLE_R, surface_pt(MARBLE_Z, 2 * math.pi * i / N_MARBLES,
-                                     out=-MARBLE_R * 0.30), subdiv=2)
+                                     out=-MARBLE_R * 0.44), subdiv=2)
         for i in range(N_MARBLES)])
 
 

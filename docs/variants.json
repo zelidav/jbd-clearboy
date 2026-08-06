@@ -1,61 +1,23 @@
 [
  {
-  "id": "v-short-stem-fat-lobe",
-  "way": "teal_silver",
-  "piece": "hammer",
-  "label": "short stem fat lobe",
-  "notes": "scattered marbles",
-  "dims": {
-   "stemlen": 72.0,
-   "headlen": 76.0,
-   "headsec": 46.0,
-   "stemod": 16.0,
-   "marbles": 6.0,
-   "scatter": 7.0
-  }
- },
- {
-  "id": "v-ci-smoke-tall-jar",
+  "id": "v-no-marbles",
   "way": "clear_silver",
   "piece": "jar",
-  "label": "ci smoke tall jar",
-  "notes": "",
+  "label": "no marbles",
+  "notes": "just remove marbles",
   "dims": {
-   "height": 104.0,
-   "marbles": 9.0
+   "marbles": 0.0
   }
  },
  {
-  "id": "v-api-trigger-check",
-  "way": "clear_gold",
-  "piece": "jar",
-  "label": "api trigger check",
-  "notes": "",
-  "dims": {
-   "height": 96.0
-  }
- },
- {
-  "id": "v-service-smoke-stubby",
-  "way": "magenta_gold",
+  "id": "v-tighter-spiral",
+  "way": "clear_silver",
   "piece": "hammer",
-  "label": "service smoke stubby",
-  "notes": "end to end retest",
+  "label": "tighter spiral",
+  "notes": "spun linework 10, spacing 4mm",
   "dims": {
-   "stemlen": 70.0,
-   "headsec": 48.0,
-   "marbles": 6.0,
-   "scatter": 5.0
-  }
- },
- {
-  "id": "v-cors-check",
-  "way": "clear_gold",
-  "piece": "jar",
-  "label": "cors check",
-  "notes": "",
-  "dims": {
-   "height": 95.0
+   "lines": 10.0,
+   "linepitch": 4.0
   }
  }
 ]

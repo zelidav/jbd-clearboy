@@ -36,6 +36,7 @@ PIECES = {
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
      lines_frit="out/jar_lines_frit.stl",
+     stamp=(16.0, 44.0, 22.0),      # z0, z1, projector radius
      cam_r=455.0, target=(0, 0, 56), fov=17.0, shadow=(0.5, 0.32, 0.115),
      decal=None,
      name="Nug jar", note="92 mm \u00b7 38 mm opening \u00b7 cork lid"),
@@ -71,7 +72,7 @@ WAYS = {
      fume_stops=((1.00, 1.00, 1.00), (0.88, 0.94, 1.06),
                  (0.92, 0.86, 1.10), (1.08, 0.98, 0.84)),
      line=(0.09, 0.11, 0.14), fline=(0.01, 0.11, 0.12),
-     marble=(0.30, 0.085, 0.12), wrap=(0.30, 0.085, 0.12), lines="body",
+     marble=(0.17, 0.048, 0.068), wrap=(0.30, 0.085, 0.12), lines="body",
      label=(14, 122, 106), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy silver fume",
      sub="teal frit, marbles \u00b7 wrapped linework"),
@@ -81,13 +82,13 @@ WAYS = {
      fume_stops=((1.00, 0.99, 0.95), (1.08, 1.00, 0.82),
                  (1.08, 0.86, 0.82), (0.92, 0.86, 1.08)),
      line=(0.14, 0.10, 0.06), fline=(0.13, 0.01, 0.09),
-     marble=(0.085, 0.34, 0.16), wrap=(0.085, 0.34, 0.16), lines="body",
+     marble=(0.048, 0.19, 0.09), wrap=(0.085, 0.34, 0.16), lines="body",
      label=(150, 32, 108), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy gold fume",
      sub="magenta frit, marbles \u00b7 wrapped linework"),
 }
 
-MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.14, 0.15, 0.17))
+MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.62, 0.66, 0.70))
 # cork is not glass: a thickness floor plus heavy absorption gives it a flat, matte body
 CORK = dict(absorb=(0.0225, 0.0430, 0.0790), line=(0.42, 0.33, 0.22),
             min_thick=6.0, max_thick=8.5, kAmt=0.50, kPow=1.9, spec=0.16)
@@ -173,18 +174,38 @@ def make_label(text, fill, ink, w=2400, h=420, pad=0.13):
     return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
+def make_stamp_decal(w=1400, h=900, size=0.62, ink=(236, 240, 244), alpha=104):
+    """The JB mark as a shading difference rather than cut glass: its outline drawn
+    faintly, so it reads as a mark in the surface without bending anything.
+    u runs up the jar, v across the face - the same projector the stem label uses."""
+    import stamp_art
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for sh in stamp_art.load():
+        for ring in [sh["outer"]] + sh["holes"]:
+            if len(ring) < 3:
+                continue
+            pts = [(w * (0.5 + p[1] * size * (h / float(w)) * 1.9),
+                    h * (0.5 - p[0] * size)) for p in ring]
+            d.line(pts + [pts[0]], fill=ink + (alpha,), width=max(int(h * 0.010), 3))
+    return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+
+
 def build_renderer(piece, key, W, H):
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
           fume_stops=c["fume_stops"], fume_pow=c.get("fume_pow", 1.4),
           line=c["line"], kAmt=0.38, kPow=2.6, spec=1.0,
-          decal=p["decal"] is not None, solid=True, min_thick=2.2)
+          decal=(p["decal"] is not None) or (p.get("stamp") is not None),
+          solid=True, min_thick=2.2)
     r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],
           kAmt=0.22, kPow=2.0, spec=1.25, solid=True, min_thick=3.4, smooth=0.0)
+    # marbles are clear glass: barely any contour, or the ones on the far side read
+    # as hard outlines through the body
     r.add(p["marbles"], absorb=c.get("marble", MARBLE["absorb"]), fume=0.0,
-          line=MARBLE["line"], kAmt=0.70, kPow=3.0, spec=1.60, smooth=60.0,
-          solid="marble" in c, min_thick=2.0 if "marble" in c else 0.0)
+          line=MARBLE["line"], kAmt=0.16, kPow=4.4, spec=1.30, smooth=60.0,
+          solid="marble" in c, min_thick=0.8 if "marble" in c else 0.0)
     which = c.get("lines")
     lines = p.get("lines_%s" % which) if which else None
     if lines:
@@ -203,6 +224,9 @@ def build_renderer(piece, key, W, H):
     if p["decal"]:
         z0, z1, rad = p["decal"]
         r.set_decal(make_label(TEXT, c["label"], c["label_text"]), z0, z1, rad)
+    elif p.get("stamp"):
+        z0, z1, rad = p["stamp"]
+        r.set_decal(make_stamp_decal(), z0, z1, rad)
     return r
 
 

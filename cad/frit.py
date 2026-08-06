@@ -71,7 +71,7 @@ def marble_plan(n=None, seed=None):
 def build_marbles(n=None, seed=None):
     plan = marble_plan(n, seed) or [(0.0, 0.0, 0.001)]
     return trimesh.util.concatenate(
-        [_sphere(r, surface_pt(x, th, out=-r * 0.22), subdiv=2) for (x, th, r) in plan])
+        [_sphere(r, surface_pt(x, th, out=-r * 0.36), subdiv=2) for (x, th, r) in plan])
 
 
 FOOT_Z = (0.5, 9.0)        # the foot disc and the first of the stem

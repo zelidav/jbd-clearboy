@@ -9,7 +9,7 @@ docs/ is what GitHub Pages serves. Run from the repo root.
 
     python build_web.py
 """
-import base64, json, mimetypes, os
+import base64, json, mimetypes, os, shutil
 
 SITE = "docs"
 REPO = "zelidav/jbd-clearboy"
@@ -56,8 +56,8 @@ BASE = {
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
    dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
-   dict(k="lines",   label="Spun linework",    v=5,    min=0,   max=14,  step=1,   unit="lines"),
-   dict(k="linepitch", label="Line spacing",   v=6,    min=2,   max=14,  step=0.5, unit="mm"),
+   dict(k="lines",   label="Spiral turns",     v=13,   min=0,   max=30,  step=1,   unit="turns"),
+   dict(k="linepitch", label="Drop per turn",  v=2.4,  min=1.0, max=8.0, step=0.2, unit="mm"),
  ],
  "hammer_flat": [
    dict(k="height",  label="Overall height",   v=140,  min=110, max=180, step=1,   unit="mm"),
@@ -77,8 +77,8 @@ BASE = {
    dict(k="fritz",   label="Frit band depth",  v=25, min=10, max=50,  step=1,   unit="mm"),
    dict(k="corkh",   label="Cork above rim",   v=20, min=10, max=34,  step=1,   unit="mm"),
    dict(k="marbles", label="Marbles at rim",   v=7,  min=0,  max=12,  step=1,   unit=""),
-   dict(k="lines",   label="Line density",     v=18, min=0,  max=40,  step=1,   unit="lines"),
-   dict(k="linepitch", label="Line spacing",   v=1.9, min=1.0, max=5.0, step=0.1, unit="mm"),
+   dict(k="lines",   label="Spiral turns",     v=42, min=0,  max=80,  step=1,   unit="turns"),
+   dict(k="linepitch", label="Drop per turn",  v=1.9, min=0.8, max=5.0, step=0.1, unit="mm"),
  ],
 }
 
@@ -515,11 +515,13 @@ INDEX_BODY = r"""
         <button class="btn step" id="fwd" type="button" aria-label="Roll forward one step">&#9654;</button>
         <input id="scrub" type="range" min="0" max="35" value="0" step="1"
                aria-label="Rotation">
+        <button class="btn step" id="png2" type="button">Save PNG</button>
       </div>
       <div class="controls" id="tiltrow" hidden>
         <button class="btn step" id="stand" type="button">&#9650; Stand up</button>
         <button class="btn step" id="lay" type="button">&#9660; Lay down</button>
         <span class="tiltnote" id="tiltnote">standing</span>
+        <button class="btn step" id="png" type="button" style="margin-left:auto">Save PNG</button>
       </div>
     </div>
     <div class="sidecol">
@@ -698,7 +700,16 @@ DOWNLOADS_BODY = r"""
   </section>
 
   <section>
-    <div class="sechead"><span class="n">02</span><h2>Turntable loops</h2>
+    <div class="sechead"><span class="n">02</span><h2>Stills</h2>
+      <span class="note">Full resolution, straight off the renderer</span></div>
+    <div class="tablewrap"><table class="files">
+      <thead><tr><th>File</th><th>Piece &middot; colourway</th></tr></thead>
+      <tbody id="stillrows"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">03</span><h2>Turntable loops</h2>
       <span class="note">72 frames &middot; 24 fps &middot; seamless</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Size</th><th>Piece &middot; colourway</th></tr></thead>
@@ -707,7 +718,7 @@ DOWNLOADS_BODY = r"""
   </section>
 
   <section>
-    <div class="sechead"><span class="n">03</span><h2>Rebuild from source</h2>
+    <div class="sechead"><span class="n">04</span><h2>Rebuild from source</h2>
       <span class="note">Python 3.12</span></div>
     <pre>
 <b># CadQuery has no 3.13/3.14 wheels yet</b>
@@ -782,6 +793,8 @@ function select(pc, w){
   document.getElementById("hint").textContent =
     ROWS > 1 ? "Drag \u2194 to spin, \u2195 to tip it over" : "Drag to spin";
   document.getElementById("tiltrow").hidden = ROWS < 2;
+  document.getElementById("png").hidden = ROWS < 2;
+  document.getElementById("png2").hidden = ROWS >= 2;
   paintTilt();
   document.querySelectorAll(".piece").forEach(function(b){
     b.setAttribute("aria-pressed", String(b.dataset.k === pc)); });
@@ -837,6 +850,25 @@ document.getElementById("fwd").onclick = function(){ stopSpin(); show(idx + 1); 
 document.getElementById("scrub").addEventListener("input", function(e){
   stopSpin(); show(parseInt(e.target.value, 10));
 });
+function savePng(){
+  const img = layers[piece + "/" + way].imgs[row * N + idx];
+  const c = document.createElement("canvas");
+  c.width = img.naturalWidth || 520;
+  c.height = img.naturalHeight || 684;
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const name = piece + "_" + way + "_" +
+    String(Math.round(idx * 360 / N)).padStart(3, "0") + "deg.png";
+  c.toBlob(function(b){
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b);
+    a.download = name;
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+  });
+}
+document.getElementById("png").onclick = savePng;
+document.getElementById("png2").onclick = savePng;
+
 function paintTilt(){
   const n = document.getElementById("tiltnote");
   if(!n || ROWS < 2) return;
@@ -1112,10 +1144,14 @@ if(!reduced) startSpin();
 
 DOWNLOADS_JS = r"""
 const FILES = __FILES__, SIZES = __SIZES__, RAW = "__RAW__", VIDEOS = __VIDEOS__;
+const STILLS = __STILLS__;
 document.getElementById("filerows").innerHTML = FILES.map(function(f){
   return "<tr><td><a href='" + RAW + f[0] + "'>" + f[0].replace("out/", "") + "</a></td>" +
     "<td class='num'>" + f[1] + "</td><td class='num'>" + (SIZES[f[0]] || "-") +
     "</td><td class='use'>" + f[2] + "</td></tr>"; }).join("");
+document.getElementById("stillrows").innerHTML = STILLS.map(function(v){
+  return "<tr><td><a href='still/" + v[0] + "'>" + v[0] + "</a></td>" +
+    "<td class='use'>" + v[1] + "</td></tr>"; }).join("");
 document.getElementById("videorows").innerHTML = VIDEOS.map(function(v){
   return "<tr><td><a href='video/" + v[0] + "'>" + v[0] + "</a></td>" +
     "<td class='num'>" + (SIZES["video/" + v[0]] || "-") + "</td>" +
@@ -1137,6 +1173,21 @@ def build_index(inline):
                  INDEX_BODY, js, "index", standalone=inline)
 
 
+def stills():
+    """Copy the hero stills into the site and list them."""
+    src, dst = "shots", os.path.join(SITE, "still")
+    os.makedirs(dst, exist_ok=True)
+    rows = []
+    for pc in PIECES:
+        for w in WAYS:
+            name = "%s_%s.png" % (pc, w)
+            if os.path.exists(os.path.join(src, name)):
+                shutil.copyfile(os.path.join(src, name), os.path.join(dst, name))
+                rows.append((name, "%s / %s %s" % (PIECE_META[pc]["name"],
+                                                   WAY_META[w]["name"], WAY_META[w]["sub"])))
+    return rows
+
+
 def build_downloads():
     vids = [("%s_%s.mp4" % (pc, w),
              "%s / %s %s" % (PIECE_META[pc]["name"], WAY_META[w]["name"], WAY_META[w]["sub"]))
@@ -1145,7 +1196,8 @@ def build_downloads():
           .replace("__FILES__", json.dumps(FILES))
           .replace("__SIZES__", json.dumps(sizes()))
           .replace("__RAW__", RAW)
-          .replace("__VIDEOS__", json.dumps(vids)))
+          .replace("__VIDEOS__", json.dumps(vids))
+          .replace("__STILLS__", json.dumps(stills())))
     return shell("Downloads | Jerome Baker Designs", DOWNLOADS_BODY, js, "downloads")
 
 
