@@ -21,6 +21,10 @@ GLASS = {
                          atten=(0.32, 0.78, 0.76), dist=13.0),
     "magenta_gold": dict(body=(0.82, 0.30, 0.62), frit=(0.60, 0.10, 0.42),
                          atten=(0.86, 0.30, 0.62), dist=13.0),
+    "clear_silver": dict(body=(0.90, 0.93, 0.99), frit=(0.10, 0.50, 0.47),
+                         atten=(0.80, 0.88, 1.00), dist=45.0),
+    "clear_gold":   dict(body=(0.99, 0.95, 0.88), frit=(0.60, 0.10, 0.42),
+                         atten=(1.00, 0.88, 0.72), dist=45.0),
 }
 MARBLE_COLOUR = (0.94, 0.96, 0.97)
 CORK_COLOUR = (0.78, 0.63, 0.42)      # opaque - the cork is not glass
@@ -36,7 +40,7 @@ def load(path, smooth_angle=36.0):
     return m
 
 
-def build_scene(piece, colour):
+def build_scene(piece, colour, key_name=None):
     """Y-up, centred, in metres - the glTF convention."""
     p = PIECES[piece]
     T = trimesh.transformations.rotation_matrix(-math.pi / 2, [1, 0, 0])
@@ -47,6 +51,10 @@ def build_scene(piece, colour):
              ("marbles", p["marbles"], MARBLE_COLOUR)]
     if p.get("cork"):
         parts.append(("cork", p["cork"], CORK_COLOUR))
+    which = WAYS.get(key_name, {}).get("lines") if key_name else None
+    lines = p.get("lines_%s" % which) if which else None
+    if lines and os.path.exists(lines):
+        parts.append(("lines", lines, colour["frit"]))
     for name, path, c in parts:
         mesh = load(path)
         mesh.apply_transform(T)
@@ -78,6 +86,9 @@ def patch_glass(glb_bytes, colour):
 
     for m in j.get("materials", []):
         name = (m.get("name") or "")
+        if name.startswith("lines"):
+            m["alphaMode"] = "OPAQUE"
+            continue                                   # the wrapped lines stay solid colour
         if name.startswith("cork"):
             m["alphaMode"] = "OPAQUE"
             m["pbrMetallicRoughness"]["roughnessFactor"] = 0.85
@@ -106,7 +117,7 @@ def patch_glass(glb_bytes, colour):
 
 def export(piece, key):
     colour = GLASS[key]
-    raw = trimesh.exchange.gltf.export_glb(build_scene(piece, colour),
+    raw = trimesh.exchange.gltf.export_glb(build_scene(piece, colour, key),
                                            include_normals=True)
     path = os.path.join(OUT, "%s_%s.glb" % (piece, key))
     with open(path, "wb") as f:

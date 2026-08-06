@@ -105,6 +105,8 @@ section{padding:52px 0}
 .controls{display:flex;align-items:center;gap:8px}
 .controls .step{padding:9px 13px;line-height:1}
 .controls .roll{min-width:96px}
+.tiltnote{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3)}
 .controls input[type="range"]{flex:1;min-width:80px;margin:0;accent-color:var(--accent);
   background:transparent}
 .pieces{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
@@ -216,7 +218,14 @@ footer .r{margin-left:auto}
   .stagewrap{grid-template-columns:minmax(0,1fr)}
   .stagecol{max-width:620px;width:100%;margin:0 auto}
 }
-@media (max-width:640px){.wrap{padding:0 18px}section{padding:38px 0}nav{gap:12px}}
+@media (max-width:640px){
+  .wrap{padding:0 18px}
+  section{padding:38px 0}
+  nav{gap:12px}
+  .stagecol{margin:0 -18px;max-width:none}
+  .stage{border-left:0;border-right:0}
+  .controls{padding:0 18px}
+}
 </style>
 <header class="masthead"><div class="wrap">
   <a class="marque" href="index.html">Jerome Baker Designs <span>/ New York</span></a>

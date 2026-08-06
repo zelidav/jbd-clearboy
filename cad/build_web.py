@@ -16,14 +16,12 @@ REPO = "zelidav/jbd-clearboy"
 RAW = "https://raw.githubusercontent.com/%s/main/" % REPO
 CONTACT = "david@canismajorpartners.com"
 
-PIECES = ["hammer", "hammer_flat", "jar"]
+PIECES = ["hammer", "jar"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
 PIECE_META = {
     "hammer": dict(name="Clearboy hammer", code="JBD-CB-140",
                    note="140 mm, from the measured original"),
-    "hammer_flat": dict(name="Hammer, laid down", code="JBD-CB-140",
-                   note="the same piece on its side, the way it sits in a case"),
     "jar":    dict(name="Nug jar", code="JBD-NJ-92",
                    note="92 mm straight cylinder, 38 mm opening, cork lid"),
 }
@@ -174,7 +172,6 @@ def assets(inline):
 
 def piece_meta():
     m = {k: dict(x) for k, x in PIECE_META.items()}
-    m["hammer_flat"]["variant_of"] = "hammer"    # requests from it rebuild the hammer
     for v in variants():
         m[v["id"]] = dict(name=v.get("label") or v["id"], code=v["id"].upper(),
                           note="variant of the " + PIECE_META[v["piece"]]["name"].lower(),
@@ -331,6 +328,8 @@ section{padding:52px 0}
 .controls{display:flex;align-items:center;gap:8px}
 .controls .step{padding:9px 13px;line-height:1}
 .controls .roll{min-width:96px}
+.tiltnote{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3)}
 .controls input[type="range"]{flex:1;min-width:80px;margin:0;accent-color:var(--accent);
   background:transparent}
 .pieces{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
@@ -442,7 +441,14 @@ footer .r{margin-left:auto}
   .stagewrap{grid-template-columns:minmax(0,1fr)}
   .stagecol{max-width:620px;width:100%;margin:0 auto}
 }
-@media (max-width:640px){.wrap{padding:0 18px}section{padding:38px 0}nav{gap:12px}}
+@media (max-width:640px){
+  .wrap{padding:0 18px}
+  section{padding:38px 0}
+  nav{gap:12px}
+  .stagecol{margin:0 -18px;max-width:none}
+  .stage{border-left:0;border-right:0}
+  .controls{padding:0 18px}
+}
 """
 
 
@@ -501,6 +507,11 @@ INDEX_BODY = r"""
         <button class="btn step" id="fwd" type="button" aria-label="Roll forward one step">&#9654;</button>
         <input id="scrub" type="range" min="0" max="35" value="0" step="1"
                aria-label="Rotation">
+      </div>
+      <div class="controls" id="tiltrow" hidden>
+        <button class="btn step" id="stand" type="button">&#9650; Stand up</button>
+        <button class="btn step" id="lay" type="button">&#9660; Lay down</button>
+        <span class="tiltnote" id="tiltnote">standing</span>
       </div>
     </div>
     <div class="sidecol">
@@ -735,6 +746,7 @@ function show(i, r){
   idx = ((i % N) + N) % N;
   if(r !== undefined) row = Math.max(0, Math.min(ROWS - 1, r));
   const active = row * N + idx;
+  if(typeof paintTilt === "function") paintTilt();
   layers[piece + "/" + way].imgs.forEach(function(im, k){ im.classList.toggle("on", k === active); });
   const deg = Math.round(idx * 360 / N);
   readout.textContent = String(deg).padStart(3, "0") + DEG;
@@ -754,7 +766,9 @@ function select(pc, w){
   layers[pc + "/" + w].box.style.display = "block";
   framesEl.style.aspectRatio = a.aspect || "520/684";
   document.getElementById("hint").textContent =
-    ROWS > 1 ? "Drag \u2194 to roll, \u2195 to stand it up" : "Drag to spin";
+    ROWS > 1 ? "Drag \u2194 to spin, \u2195 to tip it over" : "Drag to spin";
+  document.getElementById("tiltrow").hidden = ROWS < 2;
+  paintTilt();
   document.querySelectorAll(".piece").forEach(function(b){
     b.setAttribute("aria-pressed", String(b.dataset.k === pc)); });
   document.querySelectorAll(".way").forEach(function(b){
@@ -809,6 +823,17 @@ document.getElementById("fwd").onclick = function(){ stopSpin(); show(idx + 1); 
 document.getElementById("scrub").addEventListener("input", function(e){
   stopSpin(); show(parseInt(e.target.value, 10));
 });
+function paintTilt(){
+  const n = document.getElementById("tiltnote");
+  if(!n || ROWS < 2) return;
+  n.textContent = row === 0 ? "standing"
+                : row === ROWS - 1 ? "laid down"
+                : "tipped " + Math.round(row * 90 / (ROWS - 1)) + "\u00B0";
+  document.getElementById("stand").disabled = row === 0;
+  document.getElementById("lay").disabled = row === ROWS - 1;
+}
+document.getElementById("stand").onclick = function(){ stopSpin(); show(idx, row - 1); };
+document.getElementById("lay").onclick = function(){ stopSpin(); show(idx, row + 1); };
 
 let dragging = false, x0 = 0, y0 = 0, i0 = 0, r0 = 0;
 stage.addEventListener("pointerdown", function(e){

@@ -24,6 +24,7 @@ PIECES = {
      body="out/clearboy_hammer.stl", frit="out/frit.stl", marbles="out/marbles.stl",
      cam_r=545.0, target=(0, 0, 72), fov=17.0, shadow=(0.5, 0.30, 0.055),
      decal=(20.0, 74.0, 7.0),      # z0, z1, stem radius
+     size=(900, 760),              # one frame size for the whole standing->flat sweep
      name="Clearboy hammer", note="140 mm \u00b7 hand-blown original"),
  "hammer_flat": dict(
      body="out/clearboy_hammer.stl", frit="out/frit.stl", marbles="out/marbles.stl",
@@ -208,7 +209,7 @@ def frame(r, piece, angle, tilt=None):
         return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
                        shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
     t = abs(tilt) / 90.0                      # 0 standing, 1 flat on its side
-    cam_r = 640.0 - 245.0 * t
+    cam_r = 545.0 - 150.0 * t
     target = (0, 0, 74.0 - 64.0 * t)
     shift = (70.0 * t, 0.0, 8.0 * t)
     shadow = (0.5, 0.30 + 0.16 * t, 0.055 + 0.045 * t)

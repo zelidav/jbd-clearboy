@@ -27,7 +27,7 @@ def spin(piece, key, n=72, W=None, H=None, out=None):
     return out
 
 
-TILTS = [-90.0, -68.0, -45.0, -23.0, 0.0]      # laid down -> standing
+TILTS = [0.0, -23.0, -45.0, -68.0, -90.0]      # standing -> laid down
 
 
 def grid(piece, key, n=24, tilts=None, W=None, H=None, out=None):
