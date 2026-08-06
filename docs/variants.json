@@ -34,5 +34,18 @@
   "dims": {
    "height": 96.0
   }
+ },
+ {
+  "id": "v-service-smoke-stubby",
+  "way": "magenta_gold",
+  "piece": "hammer",
+  "label": "service smoke stubby",
+  "notes": "end to end retest",
+  "dims": {
+   "stemlen": 70.0,
+   "headsec": 48.0,
+   "marbles": 6.0,
+   "scatter": 5.0
+  }
  }
 ]
