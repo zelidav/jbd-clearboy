@@ -15,6 +15,10 @@ SITE = "docs"
 REPO = "zelidav/jbd-clearboy"
 RAW = "https://raw.githubusercontent.com/%s/main/" % REPO
 CONTACT = "david@canismajorpartners.com"
+# the trigger service holds the GitHub token; the page only knows the URL and a
+# throwaway key that keeps casual traffic off it
+RENDER_URL = "https://jbd-clearboy-render-804083036164.us-east1.run.app/render"
+RENDER_KEY = "NBvIvBZfVeFWVrIYSBqy6Sa-"
 
 PIECES = ["hammer", "jar"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
@@ -541,12 +545,16 @@ INDEX_BODY = r"""
         <label class="field" for="notes">What should change</label>
         <textarea id="notes" placeholder="Shorter stem, fatter lobe, marbles only on the carb side, colder teal, frit further down the body..."></textarea>
         <div class="actions">
-          <button class="btn primary" id="copy" type="button">Copy spec</button>
+          <button class="btn primary" id="render" type="button">Re-render it</button>
+          <button class="btn" id="copy" type="button">Copy spec</button>
           <button class="btn" id="dl" type="button">Download request</button>
           <a class="btn" id="mail" href="#">Email it</a>
           <button class="btn" id="save" type="button">Keep on this device</button>
         </div>
-        <p class="fine">Copy or download drops the exact request &mdash; numbers, notes and
+        <p class="fine" id="renderstate" hidden></p>
+        <p class="fine">Re-render sends it straight to the build. It takes a couple of
+          minutes; reload this page when it lands and the variant is in the piece menu under
+          the name you gave it. Copy or download drops the exact request &mdash; numbers, notes and
           the one-line render command &mdash; wherever you want it. Email works too where the
           browser allows it. No accounts, no sign-in.</p>
         <p class="fine" hidden>Sending mails the numbers straight through &mdash; no accounts, no
@@ -716,6 +724,7 @@ python3.12 -m venv cadenv && ./cadenv/Scripts/python -m pip install -r requireme
 INDEX_JS = r"""
 const ASSETS = __ASSETS__, META = __META__, BASE = __BASE__, SPECS = __SPECS__;
 const CONTACT = "__CONTACT__", REPO = "__REPO__";
+const RENDER_URL = "__RENDER_URL__", RENDER_KEY = "__RENDER_KEY__";
 const PIECES = Object.keys(META.pieces), WAYS = Object.keys(META.ways);
 const MID = "·", DEG = "°", ARROW = "→";
 
@@ -1051,6 +1060,32 @@ document.getElementById("dl").onclick = function(){
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
   flash("dl", "Downloaded");
 };
+document.getElementById("render").onclick = function(){
+  const btn = document.getElementById("render"), note = document.getElementById("renderstate");
+  const req = requestJson();
+  btn.disabled = true; btn.textContent = "Sending";
+  note.hidden = false; note.textContent = "Sending " + req.label + " to the build...";
+  fetch(RENDER_URL, {method: "POST",
+                     headers: {"content-type": "application/json",
+                               "X-Render-Key": RENDER_KEY},
+                     body: JSON.stringify(req)})
+    .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+    .then(function(res){
+      if(res.ok && res.j.ok){
+        btn.textContent = "Sent";
+        note.textContent = '"' + req.label + '" is building. Give it a couple of minutes, ' +
+          'then reload - it will be in the piece menu.';
+      } else {
+        btn.textContent = "Re-render it"; btn.disabled = false;
+        note.textContent = "Build did not take it: " + (res.j.error || "unknown error") +
+          ". Copy the spec and send it across instead.";
+      }
+    })
+    .catch(function(){
+      btn.textContent = "Re-render it"; btn.disabled = false;
+      note.textContent = "Could not reach the build service. Copy the spec and send it across.";
+    });
+};
 document.getElementById("save").onclick = function(){
   const all = loadLog();
   all.unshift({piece: piece, way: way, spec: specText(), changes: deltas().length,
@@ -1084,7 +1119,9 @@ def build_index(inline):
           .replace("__BASE__", json.dumps(base_dims()))
           .replace("__SPECS__", json.dumps(piece_specs()))
           .replace("__REPO__", REPO)
-          .replace("__CONTACT__", CONTACT))
+          .replace("__CONTACT__", CONTACT)
+          .replace("__RENDER_URL__", RENDER_URL)
+          .replace("__RENDER_KEY__", RENDER_KEY))
     return shell("Mockups &middot; Clearboy programme | Jerome Baker Designs",
                  INDEX_BODY, js, "index", standalone=inline)
 
