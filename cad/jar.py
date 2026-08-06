@@ -19,7 +19,7 @@ HEIGHT    = 92.0           # glass body, rim to bench
 FLOOR     = 3.0            # flat closed bottom, same wall
 
 STAMP_Z   = 28.0           # lower middle of the jar, like the real maker's stamp
-STAMP_RX  = 11.0           # the die face - only a little larger than the mark
+STAMP_RX  = 12.5           # half-width of the die face; height follows the traced shape
 STAMP_RZ  = 5.4
 STAMP_TXT = "JBD"
 STAMP_SINK = 0.22          # the die barely sinks - a reheat and a press, no dent
@@ -54,17 +54,14 @@ def build():
     return body.cut(txt)
 
 
-def stamp_pad(depth=7.0, wobble=0.07):
-    """Irregular, molten-edged blob - a hand-pressed stamp is never a clean circle.
-    Used as a cutter: it takes the outer skin off down to STAMP_SINK."""
-    pts = []
-    n = 72
-    for i in range(n):
-        t = 2 * math.pi * i / n
-        k = 1.0 + wobble * math.sin(3 * t + 0.7) + 0.4 * wobble * math.sin(5 * t + 2.1)
-        pts.append(cq.Vector(STAMP_RX * k * math.cos(t),
-                             -(OD / 2 - STAMP_SINK),
-                             STAMP_Z + STAMP_RZ * k * math.sin(t)))
+def stamp_pad(depth=7.0, every=3):
+    """The die face, traced off the photograph of the real stamp
+    (cad/stamp_shape.py). Used as a cutter: it takes the outer skin off down to
+    STAMP_SINK, so the mark sits in the wall rather than on it."""
+    import stamp_shape
+    raw = stamp_shape.load()[::every]
+    k = STAMP_RX / max(abs(x) for (x, _) in raw)      # scale on width, keep the aspect
+    pts = [cq.Vector(x * k, -(OD / 2 - STAMP_SINK), STAMP_Z + y * k) for (x, y) in raw]
     wire = cq.Wire.assembleEdges([cq.Edge.makeSpline(pts, periodic=True)])
     return cq.Solid.extrudeLinear(cq.Face.makeFromWires(wire), cq.Vector(0, -depth, 0))
 
