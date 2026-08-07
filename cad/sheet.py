@@ -26,11 +26,29 @@ _FONTS = {
 }
 
 
+CJK = {
+    True: ("C:/Windows/Fonts/msyhbd.ttc",
+           "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+           "/System/Library/Fonts/PingFang.ttc"),
+    False: ("C:/Windows/Fonts/msyh.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/System/Library/Fonts/PingFang.ttc"),
+}
+_FACE = _FONTS
+
+
+def use_cjk(on=True):
+    """Swap the whole sheet onto a CJK face. It sets Latin correctly too, so the mixed
+    lines a spec sheet is full of - 140 mm, boro 3.3 - stay in one face."""
+    global _FACE
+    _FACE = CJK if on else _FONTS
+
+
 def font(bold, size):
-    for c in _FONTS[bool(bold)]:
+    for c in _FACE[bool(bold)]:
         if os.path.exists(c):
             return ImageFont.truetype(c, size)
-    raise RuntimeError("no sans font found - install DejaVu or Liberation")
+    raise RuntimeError("no font found for the current face")
 
 
 def lockup(d, cx, cy, h, ink):
@@ -59,16 +77,40 @@ def fit(im, box):
                      Image.LANCZOS)
 
 
+def _tokens(text):
+    """Split into things a line may break between. Chinese has no spaces, so every han
+    character is its own break opportunity; Latin runs stay whole."""
+    out, run = [], ""
+    for c in text:
+        han = "　" <= c <= "鿿" or "＀" <= c <= "￯"
+        if han or c == " ":
+            if run:
+                out.append(run); run = ""
+            if han:
+                out.append(c)
+            else:
+                out.append(" ")
+        else:
+            run += c
+    if run:
+        out.append(run)
+    return out
+
+
 def wrap(d, text, f, width):
     """Greedy wrap to a pixel width. Returns (text, line count)."""
     out, line = [], ""
-    for word in text.split():
-        trial = (line + " " + word).strip()
-        if line and d.textlength(trial, font=f) > width:
-            out.append(line); line = word
+    for tok in _tokens(text):
+        if tok == " ":
+            if line:
+                line += " "
+            continue
+        trial = line + tok
+        if line.strip() and d.textlength(trial, font=f) > width:
+            out.append(line.rstrip()); line = tok
         else:
             line = trial
-    out.append(line)
+    out.append(line.rstrip())
     return "\n".join(out), len(out)
 
 

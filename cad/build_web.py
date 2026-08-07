@@ -1331,6 +1331,8 @@ def stills():
 SPECFILES = [
     ("JBD_Clearboy_spec.pdf",
      "Manufacturing spec - dimensions, dimensioned closeups, decoration and the survey"),
+    ("JBD_Clearboy_spec_ZH.pdf",
+     "Manufacturing spec, Chinese - the same sheet for the glass shop"),
     ("JBD_Clearboy_pack.zip",
      "The whole hand-off - spec sheet, STEP / STL, closeups, survey and the box plates"),
     ("JBD_x_Boutiq_Deck.pdf",

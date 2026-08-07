@@ -17,6 +17,7 @@ from sheet import INK, PAPER, RULE, GREY, RED, PAGE
 
 OUT = os.path.join("shots", "JBD_Clearboy_spec.pdf")
 SITE = os.path.join("docs", "JBD_Clearboy_spec.pdf")
+LANG = "en"
 PACK = os.path.join("shots", "JBD_Clearboy_pack.zip")
 PACK_SITE = os.path.join("docs", "JBD_Clearboy_pack.zip")
 REV = "Rev A"
@@ -92,17 +93,72 @@ WAYS = [("teal_silver", "Bluish teal body, silver fume. Teal frit, clear marbles
         ("magenta_gold", "Magenta body, gold fume. Magenta frit, clear marbles.")]
 
 
+PAGES = {
+    "hammer": ("Clearboy hammer bubbler",
+               "Hand-blown boro 3.3 \u00b7 140 mm \u00b7 one-piece head, stem and foot"),
+    "survey": ("Dimensional survey",
+               "The original piece, measured photogrammetrically against a stainless "
+               "rule \u2014 the reference the build was drawn from"),
+    "jar": ("Nug jar and cork",
+            "Straight cylinder, flat closed bottom, tapered natural cork "
+            "\u00b7 92 mm glass"),
+    "decor": ("Decoration and colourways",
+              "Frit, marbles, the enamel label and the pressed mark \u2014 both "
+              "colourways carry the same work"),
+    "sop_hammer": ("Process \u2014 hammer bubbler",
+                   "Bench sequence. The shop's working order governs where it differs "
+                   "\u2014 the numbered checks do not move."),
+    "sop_jar": ("Process \u2014 nug jar and cork",
+                "Same order of work: shape, fume, colour, frit, linework, marbles, "
+                "mark."),
+    "sop_finish": ("Anneal, decoration and QC",
+                   "What happens after the torch, and what gets measured before a "
+                   "piece is passed."),
+}
+
+NOTES_TITLE = "NOTES"
+COLOURWAYS_TITLE = "COLOURWAYS"
+HEADER = "%s  \u00b7  Clearboy programme  \u00b7  %d / %d"
+FOOTER = ("Jerome Baker Designs \u00b7 manufacturing spec \u2014 figures in "
+          "millimetres unless marked")
+TITLE = "JBD Clearboy \u2014 manufacturing spec"
+
+T = {}
+
+
+def use(lang):
+    """Point every string at one language, and the sheet at a face that can set it."""
+    global T, LANG, OUT, SITE
+    LANG = lang
+    here = globals()
+    if lang == "zh":
+        import specsheet_zh as z
+        T = {k: getattr(z, k) for k in
+             ("HAMMER", "JAR", "DECOR", "NOTES", "WAYS", "PAGES", "CLOSEUPS",
+              "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER", "FOOTER", "TITLE",
+              "WAY_NAMES")}
+        OUT = os.path.join("shots", "JBD_Clearboy_spec_ZH.pdf")
+        SITE = os.path.join("docs", "JBD_Clearboy_spec_ZH.pdf")
+    else:
+        T = {k: here[k] for k in
+             ("HAMMER", "JAR", "DECOR", "NOTES", "WAYS", "PAGES",
+              "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER", "FOOTER", "TITLE")}
+        T["CLOSEUPS"] = {k: (t, sub) for k, t, sub in CLOSEUPS}
+        OUT = os.path.join("shots", "JBD_Clearboy_spec.pdf")
+        SITE = os.path.join("docs", "JBD_Clearboy_spec.pdf")
+    sheet.use_cjk(lang == "zh")
+
+
 def _head(d, title, sub, page_no, pages=None):
     sheet.lockup(d, 250, 78, 26, INK)
     d.line([(96, 122), (PAGE[0] - 96, 122)], fill=RULE, width=2)
     d.text((96, 158), title, font=sheet.font(True, 46), fill=INK)
     d.text((96, 222), sub, font=sheet.font(False, 25), fill=GREY)
-    tag = "%s  ·  Clearboy programme  ·  %d / %d" % (REV, page_no, pages or TOTAL)
+    tag = T["HEADER"] % (REV, page_no, pages or TOTAL)
     f = sheet.font(False, 20)
     d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
     d.line([(96, PAGE[1] - 74), (PAGE[0] - 96, PAGE[1] - 74)], fill=RULE, width=1)
-    d.text((96, PAGE[1] - 60), "Jerome Baker Designs · manufacturing spec — "
-           "figures in millimetres unless marked", font=sheet.font(False, 19), fill=GREY)
+    d.text((96, PAGE[1] - 60), T["FOOTER"], font=sheet.font(False, 19), fill=GREY)
 
 
 def _table(d, rows, x, y, w, lead=42, notes=True):
@@ -133,16 +189,14 @@ def _table(d, rows, x, y, w, lead=42, notes=True):
 
 def _page_hammer(n):
     pg, d = sheet.blank()
-    _head(d, "Clearboy hammer bubbler", "Hand-blown boro 3.3 · 140 mm · "
-          "one-piece head, stem and foot", n)
-    _table(d, HAMMER, 96, 290, 1460)
+    _head(d, T["PAGES"]["hammer"][0], T["PAGES"]["hammer"][1], n)
+    _table(d, T["HAMMER"], 96, 290, 1460)
     return pg
 
 
 def _page_survey(n):
     pg, d = sheet.blank()
-    _head(d, "Dimensional survey", "The original piece, measured photogrammetrically "
-          "against a stainless rule — the reference the build was drawn from", n)
+    _head(d, T["PAGES"]["survey"][0], T["PAGES"]["survey"][1], n)
     p = "JBD_Clearboy_dimensions.png"
     if os.path.exists(p):
         im = sheet.fit(Image.open(p).convert("RGB"), (PAGE[0] - 192, PAGE[1] - 400))
@@ -155,9 +209,8 @@ def _page_survey(n):
 
 def _page_jar(n):
     pg, d = sheet.blank()
-    _head(d, "Nug jar and cork", "Straight cylinder, flat closed bottom, tapered "
-          "natural cork · 92 mm glass", n)
-    y = _table(d, JAR, 96, 290, 1000)
+    _head(d, T["PAGES"]["jar"][0], T["PAGES"]["jar"][1], n)
+    y = _table(d, T["JAR"], 96, 290, 1000)
     p = os.path.join("shots", "jar_teal_silver.png")
     if os.path.exists(p):
         im = sheet.fit(Image.open(p).convert("RGB"), (380, 640))
@@ -168,12 +221,11 @@ def _page_jar(n):
 
 def _page_decor(n):
     pg, d = sheet.blank()
-    _head(d, "Decoration and colourways", "Frit, marbles, the enamel label and the "
-          "pressed mark — both colourways carry the same work", n)
+    _head(d, T["PAGES"]["decor"][0], T["PAGES"]["decor"][1], n)
     f = sheet.font(False, 21)
     y = 300
     last = None
-    for who, what, how in DECOR:
+    for who, what, how in T["DECOR"]:
         if who != last:
             d.text((96, y), who.upper(), font=sheet.font(True, 19), fill=RED)
             y += 32
@@ -188,10 +240,11 @@ def _page_decor(n):
     sys.path.insert(0, "cad")
     import mockups
     y += 26
-    d.text((96, y), "COLOURWAYS", font=sheet.font(True, 19), fill=RED)
+    d.text((96, y), T["COLOURWAYS_TITLE"], font=sheet.font(True, 19), fill=RED)
     y += 34
-    for key, text in WAYS:
-        d.text((114, y), mockups.WAYS[key]["name"], font=sheet.font(True, 22), fill=INK)
+    for key, text in T["WAYS"]:
+        name = T.get("WAY_NAMES", {}).get(key) or mockups.WAYS[key]["name"]
+        d.text((114, y), name, font=sheet.font(True, 22), fill=INK)
         d.text((520, y + 2), text, font=f, fill=GREY)
         y += 44
 
@@ -207,8 +260,8 @@ def _page_decor(n):
 
 def _notes(d, y):
     f = sheet.font(False, 21)
-    d.text((96, y - 40), "NOTES", font=sheet.font(True, 19), fill=RED)
-    for i, n in enumerate(NOTES):
+    d.text((96, y - 40), T["NOTES_TITLE"], font=sheet.font(True, 19), fill=RED)
+    for i, n in enumerate(T["NOTES"]):
         txt, lines = sheet.wrap(d, n, f, 1400)
         d.text((96, y), "%d" % (i + 1), font=sheet.font(True, 21), fill=RED)
         d.multiline_text((126, y), txt, font=f, fill=INK, spacing=8)
@@ -232,8 +285,12 @@ CLOSEUPS = [
 
 def _page_closeup(n, key, title, sub):
     pg, d = sheet.blank()
+    title, sub = T["CLOSEUPS"].get(key, (title, sub))
     _head(d, title, sub, n)
-    p = os.path.join("shots", "spec", key + ".png")
+    folder = "spec_zh" if LANG == "zh" else "spec"
+    p = os.path.join("shots", folder, key + ".png")
+    if not os.path.exists(p):
+        p = os.path.join("shots", "spec", key + ".png")
     if os.path.exists(p):
         im = sheet.fit(Image.open(p).convert("RGB"), (PAGE[0] - 220, PAGE[1] - 400))
         pg.paste(im, ((PAGE[0] - im.width) // 2, 280))
@@ -356,7 +413,7 @@ SOP_FINISH = [
 ]
 
 
-def _page_sop(n, title, sub, groups):
+def _page_sop(n, title, sub, groups=None):
     pg, d = sheet.blank()
     _head(d, title, sub, n)
     fh, ft, fn = sheet.font(True, 19), sheet.font(False, 21), sheet.font(True, 21)
@@ -384,21 +441,18 @@ def _page_sop(n, title, sub, groups):
 
 
 def _page_sop_hammer(n):
-    return _page_sop(n, "Process — hammer bubbler",
-                     "Bench sequence. The shop's working order governs where it differs "
-                     "— the numbered checks do not move.", SOP_HAMMER)
+    return _page_sop(n, T["PAGES"]["sop_hammer"][0], T["PAGES"]["sop_hammer"][1],
+                     _sop("SOP_HAMMER"))
 
 
 def _page_sop_jar(n):
-    return _page_sop(n, "Process — nug jar and cork",
-                     "Same order of work: shape, fume, colour, frit, marbles, mark.",
-                     SOP_JAR)
+    return _page_sop(n, T["PAGES"]["sop_jar"][0], T["PAGES"]["sop_jar"][1],
+                     _sop("SOP_JAR"))
 
 
 def _page_sop_finish(n):
-    return _page_sop(n, "Anneal, decoration and QC",
-                     "What happens after the torch, and what gets measured before a "
-                     "piece is passed.", SOP_FINISH)
+    return _page_sop(n, T["PAGES"]["sop_finish"][0], T["PAGES"]["sop_finish"][1],
+                     _sop("SOP_FINISH"))
 
 
 PLAN = ([_page_hammer]
@@ -419,7 +473,15 @@ def publish(src, dst):
         print("LOCKED, not updated:", dst, "- close it and re-run")
 
 
-def build():
+def _sop(name):
+    if LANG == "zh":
+        import specsheet_zh as z
+        return getattr(z, name)
+    return globals()[name]
+
+
+def build(lang="en"):
+    use(lang)
     os.makedirs("shots", exist_ok=True)
     pages = [fn(i + 1) for i, fn in enumerate(PLAN)]
     sheet.save(pages, OUT, "JBD Clearboy — manufacturing spec")
@@ -475,5 +537,8 @@ def build_pack():
 
 
 if __name__ == "__main__":
-    build()
+    langs = [a for a in sys.argv[1:] if a in ("en", "zh")] or ["en", "zh"]
+    for lg in langs:
+        build(lg)
+    build("en")
     build_pack()
