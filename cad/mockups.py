@@ -37,7 +37,7 @@ PIECES = {
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
      lines_frit="out/jar_lines_frit.stl",
      stamp=(16.0, 44.0, 22.0),      # z0, z1, projector radius
-     boutiq=(26.0, 50.0, 22.0),    # the Boutiq sticker, opposite face
+     boutiq=(19.5, 26.5, 13.0),    # the printed sticker, low on the back face
      cam_r=455.0, target=(0, 0, 56), fov=17.0, shadow=(0.5, 0.32, 0.115),
      decal=None,
      name="Nug jar", note="92 mm \u00b7 38 mm opening \u00b7 cork lid"),
@@ -179,7 +179,7 @@ def make_label(text, fill, ink, w=2400, h=420, pad=0.13):
     return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
-def make_stamp_decal(w=1400, h=900, size=0.62, ink=(236, 240, 244), alpha=104):
+def make_stamp_decal(w=1400, h=900, size=0.62, ink=(46, 52, 58), alpha=168):
     """The JB mark as a shading difference rather than cut glass: its outline drawn
     faintly, so it reads as a mark in the surface without bending anything.
     u runs up the jar, v across the face - the same projector the stem label uses."""
@@ -192,7 +192,7 @@ def make_stamp_decal(w=1400, h=900, size=0.62, ink=(236, 240, 244), alpha=104):
                 continue
             pts = [(w * (0.5 + p[1] * size * (h / float(w)) * 1.9),
                     h * (0.5 - p[0] * size)) for p in ring]
-            d.line(pts + [pts[0]], fill=ink + (alpha,), width=max(int(h * 0.010), 3))
+            d.line(pts + [pts[0]], fill=ink + (alpha,), width=max(int(h * 0.014), 4))
     return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
@@ -203,26 +203,10 @@ def load_sticker(path):
     return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
-def make_boutiq_sticker(fill, w=1500, h=560, pad=0.12):
-    """The Boutiq glitch mark on an enamel band, colour-matched to the piece and
-    knocked out in white - the same treatment as the pipe sticker."""
-    logo = Image.open("assets/boutiq_logo.png").convert("RGBA")
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    m = int(h * pad)
-    d.rounded_rectangle([0, m, w - 1, h - m - 1], radius=int((h - 2 * m) * 0.28),
-                        fill=fill + (255,))
-    # the artwork is dark-on-white; take its ink as a mask and lay it down in white
-    g = logo.convert("L")
-    mask = g.point(lambda v: 255 if v < 150 else 0).convert("L")
-    tw = int(w * 0.74)
-    th = max(int(tw * logo.height / logo.width), 1)
-    mask = mask.resize((tw, th), Image.LANCZOS)
-    white = Image.new("RGBA", (tw, th), (255, 255, 255, 255))
-    img.paste(white, ((w - tw) // 2, (h - th) // 2), mask)
-    # the projector runs u up the jar, so turn the band to read round the body
-    img = img.rotate(90, expand=True)
-    return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+def make_jar_sticker(path):
+    """The same printed sticker the pipes carry, turned to read round the jar."""
+    im = Image.open(path).convert("RGBA").rotate(90, expand=True)
+    return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
 def build_renderer(piece, key, W, H):
@@ -239,9 +223,9 @@ def build_renderer(piece, key, W, H):
     # needs a whisper - too much and the far side rings through the body
     tinted = "marble" in c
     r.add(p["marbles"], absorb=c.get("marble", MARBLE["absorb"]), fume=0.0,
-          line=(0.30, 0.34, 0.38) if not tinted else MARBLE["line"],
-          kAmt=0.16 if tinted else 0.46, kPow=4.4 if tinted else 3.0,
-          spec=1.30 if tinted else 1.85, smooth=60.0,
+          line=(0.52, 0.56, 0.60) if not tinted else MARBLE["line"],
+          kAmt=0.10 if tinted else 0.26, kPow=5.0 if tinted else 3.8,
+          spec=1.30 if tinted else 1.85, smooth=60.0, lens=0.055,
           solid=tinted, min_thick=0.8 if tinted else 0.0)
     which = c.get("lines")
     lines = p.get("lines_%s" % which) if which else None
@@ -268,7 +252,9 @@ def build_renderer(piece, key, W, H):
         r.set_decal(make_stamp_decal(), z0, z1, rad)              # JB mark, front
         if p.get("boutiq"):
             b0, b1, brad = p["boutiq"]
-            r.set_decal(make_boutiq_sticker(c["label"]), b0, b1, brad, face=-1.0)
+            art = c.get("sticker")
+            if art:
+                r.set_decal(make_jar_sticker(art), b0, b1, brad, face=-1.0)
     return r
 
 

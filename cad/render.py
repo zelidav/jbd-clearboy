@@ -125,6 +125,21 @@ void main(){
     f_out = vec4(hi*specAmt*(0.35+F), 1.0);
 }"""
 
+LENS_FRAG = """
+#version 330
+in vec3 v_wpos; in vec3 v_wnorm; out vec4 f_out;
+uniform sampler2D sceneTex; uniform vec2 res; uniform float lensAmt;
+""" + COMMON + """
+void main(){
+    // a marble is a ball of glass sitting on the work: it bends whatever is under it
+    vec3 N = normalize(v_wnorm);
+    vec3 V = normalize(camPos - v_wpos);
+    if(dot(N,V) < 0.0) N = -N;
+    vec3 R = refract(-V, N, 1.0/1.474);
+    vec2 uv = gl_FragCoord.xy/res + R.xy*lensAmt;
+    f_out = vec4(texture(sceneTex, clamp(uv, 0.002, 0.998)).rgb, 1.0);
+}"""
+
 DECAL_FRAG = """
 #version 330
 in vec3 v_wpos; in vec3 v_wnorm; in vec3 v_opos; in vec3 v_onorm; out vec4 f_out;
@@ -235,7 +250,7 @@ class Renderer:
         self.ctx = ctx = make_context()
         self.progs = {}
         for k, fs in (('back', BACK_FRAG), ('tint', TINT_FRAG), ('dens', DENS_FRAG),
-                      ('spec', SPEC_FRAG), ('decal', DECAL_FRAG)):
+                      ('spec', SPEC_FRAG), ('decal', DECAL_FRAG), ('lens', LENS_FRAG)):
             self.progs[k] = ctx.program(vertex_shader=VERT, fragment_shader=fs)
         self.bg_prog = ctx.program(vertex_shader=BG_VERT, fragment_shader=BG_FRAG)
         quad = np.array([-1, -1, 3, -1, -1, 3], 'f4')
@@ -246,6 +261,8 @@ class Renderer:
         self.back_tex.filter = (moderngl.NEAREST, moderngl.NEAREST)
         self.back_fbo = ctx.framebuffer([self.back_tex],
                                         ctx.depth_texture((self.W, self.H)))
+        self.scene_tex = ctx.texture((self.W, self.H), 3, dtype='f2')
+        self.scene_fbo = ctx.framebuffer([self.scene_tex])
         self.main_tex = ctx.texture((self.W, self.H), 3, dtype='f2')
         self.main_fbo = ctx.framebuffer([self.main_tex],
                                         ctx.depth_renderbuffer((self.W, self.H)))
@@ -253,7 +270,8 @@ class Renderer:
         self.decals = []
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
-            kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, min_thick=0.0, max_thick=60.0,
+            kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, lens=0.0,
+            min_thick=0.0, max_thick=60.0,
             fume_stops=((1.0, 1.0, 1.0), (0.92, 0.95, 1.02),
                         (0.95, 0.90, 1.05), (1.02, 0.95, 0.86)),
             fume_pow=1.4, smooth=36.0):
@@ -266,7 +284,8 @@ class Renderer:
                 for k, p in self.progs.items()}
         self.objs.append(dict(vaos=vaos, absorb=absorb, fume=fume, line=line,
                               kAmt=kAmt, kPow=kPow, spec=spec, decal=decal,
-                              solid=solid, min_thick=min_thick, max_thick=max_thick,
+                              solid=solid, lens=lens,
+                              min_thick=min_thick, max_thick=max_thick,
                               fume_stops=fume_stops, fume_pow=fume_pow))
 
     def set_decal(self, img, z0, z1, r, face=1.0):
@@ -351,6 +370,22 @@ class Renderer:
             set_u(p, 'lineCol', o['line']); set_u(p, 'kAmt', o['kAmt'])
             set_u(p, 'kPow', o['kPow'])
             o['vaos']['dens'].render(moderngl.TRIANGLES)
+
+        # 3b2 lens: marbles refract the frit and linework under them
+        lenses = [o for o in self.objs if o['lens']]
+        if lenses:
+            ctx.disable(moderngl.BLEND)
+            ctx.copy_framebuffer(dst=self.scene_fbo, src=self.main_fbo)
+            self.main_fbo.use()
+            ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE); ctx.cull_face = 'back'
+            ctx.depth_func = '<='
+            p = self.progs['lens']; setmats(p)
+            self.scene_tex.use(4); set_u(p, 'sceneTex', 4)
+            set_u(p, 'res', (self.W, self.H))
+            for o in lenses:
+                set_u(p, 'lensAmt', o['lens'])
+                o['vaos']['lens'].render(moderngl.TRIANGLES)
+            ctx.enable(moderngl.BLEND)
 
         # 3c specular (front faces, additive)
         ctx.blend_func = (moderngl.ONE, moderngl.ONE)
