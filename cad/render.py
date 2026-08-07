@@ -129,11 +129,12 @@ DECAL_FRAG = """
 #version 330
 in vec3 v_wpos; in vec3 v_wnorm; in vec3 v_opos; in vec3 v_onorm; out vec4 f_out;
 uniform sampler2D decalTex; uniform vec2 decalZ; uniform float decalR;
+uniform float faceDir;   // -1 puts the print on the far side of the piece
 """ + COMMON + """
 void main(){
     // object-space planar decal projector: prints on the -Y face of the stem
     vec3 ON = normalize(v_onorm);
-    if(ON.y > -0.34) discard;
+    if(ON.y * faceDir > -0.34) discard;
     if(v_opos.z < decalZ.x || v_opos.z > decalZ.y) discard;
     float halfW = decalR*0.80;
     if(abs(v_opos.x) > halfW) discard;
@@ -145,7 +146,7 @@ void main(){
     float face = clamp(dot(N,V), 0.0, 1.0);
     if(face < 0.10) discard;
     float sh = 0.86 + 0.48*pow(max(dot(N,normalize(vec3(0.28,-0.74,0.61))),0.0),6.0);
-    f_out = vec4(clamp(dc.rgb*sh,0.0,1.0), dc.a*smoothstep(0.10,0.34,face)*(-ON.y));
+    f_out = vec4(clamp(dc.rgb*sh,0.0,1.0), dc.a*smoothstep(0.10,0.34,face)*(-ON.y*faceDir));
 }"""
 
 
@@ -249,7 +250,7 @@ class Renderer:
         self.main_fbo = ctx.framebuffer([self.main_tex],
                                         ctx.depth_renderbuffer((self.W, self.H)))
         self.objs = []
-        self.decal = None
+        self.decals = []
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
             kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, min_thick=0.0, max_thick=60.0,
@@ -268,11 +269,16 @@ class Renderer:
                               solid=solid, min_thick=min_thick, max_thick=max_thick,
                               fume_stops=fume_stops, fume_pow=fume_pow))
 
-    def set_decal(self, img, z0, z1, r):
+    def set_decal(self, img, z0, z1, r, face=1.0):
+        """face 1.0 prints on the camera side, -1.0 on the opposite face."""
+        if face < 0:
+            # seen from the far side the across-the-face axis reverses, and that axis
+            # is the texture's height here
+            img = img.transpose(Image.FLIP_TOP_BOTTOM)
         t = self.ctx.texture(img.size, 4, img.tobytes())
         t.filter = (moderngl.LINEAR, moderngl.LINEAR)
         t.repeat_x = False; t.repeat_y = True
-        self.decal = (t, z0, z1, r)
+        self.decals.append((t, z0, z1, r, face))
 
     def _mats(self, angle, cam_r, elev, target, fov, tilt=0.0, shift=None):
         el = math.radians(elev)
@@ -355,15 +361,16 @@ class Renderer:
             set_u(p, 'specAmt', o['spec'])
             o['vaos']['spec'].render(moderngl.TRIANGLES)
 
-        # 3d enamel print
-        if self.decal:
+        # 3d enamel prints
+        if self.decals:
             ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA)
-            t, z0, z1, r = self.decal
             p = self.progs['decal']; setmats(p)
-            t.use(3); set_u(p, 'decalTex', 3)
-            set_u(p, 'decalZ', (z0, z1)); set_u(p, 'decalR', r)
-            for o in self.objs:
-                if o['decal']: o['vaos']['decal'].render(moderngl.TRIANGLES)
+            for (t, z0, z1, r, face) in self.decals:
+                t.use(3); set_u(p, 'decalTex', 3)
+                set_u(p, 'decalZ', (z0, z1)); set_u(p, 'decalR', r)
+                set_u(p, 'faceDir', float(face))
+                for o in self.objs:
+                    if o['decal']: o['vaos']['decal'].render(moderngl.TRIANGLES)
 
         ctx.disable(moderngl.BLEND)
         img = np.frombuffer(self.main_fbo.read(components=3, dtype='f2'), 'f2') \

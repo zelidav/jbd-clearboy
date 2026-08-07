@@ -37,6 +37,7 @@ PIECES = {
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
      lines_frit="out/jar_lines_frit.stl",
      stamp=(16.0, 44.0, 22.0),      # z0, z1, projector radius
+     boutiq=(26.0, 50.0, 22.0),    # the Boutiq sticker, opposite face
      cam_r=455.0, target=(0, 0, 56), fov=17.0, shadow=(0.5, 0.32, 0.115),
      decal=None,
      name="Nug jar", note="92 mm \u00b7 38 mm opening \u00b7 cork lid"),
@@ -202,6 +203,28 @@ def load_sticker(path):
     return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
+def make_boutiq_sticker(fill, w=1500, h=560, pad=0.12):
+    """The Boutiq glitch mark on an enamel band, colour-matched to the piece and
+    knocked out in white - the same treatment as the pipe sticker."""
+    logo = Image.open("assets/boutiq_logo.png").convert("RGBA")
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    m = int(h * pad)
+    d.rounded_rectangle([0, m, w - 1, h - m - 1], radius=int((h - 2 * m) * 0.28),
+                        fill=fill + (255,))
+    # the artwork is dark-on-white; take its ink as a mask and lay it down in white
+    g = logo.convert("L")
+    mask = g.point(lambda v: 255 if v < 150 else 0).convert("L")
+    tw = int(w * 0.74)
+    th = max(int(tw * logo.height / logo.width), 1)
+    mask = mask.resize((tw, th), Image.LANCZOS)
+    white = Image.new("RGBA", (tw, th), (255, 255, 255, 255))
+    img.paste(white, ((w - tw) // 2, (h - th) // 2), mask)
+    # the projector runs u up the jar, so turn the band to read round the body
+    img = img.rotate(90, expand=True)
+    return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+
+
 def build_renderer(piece, key, W, H):
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
@@ -242,7 +265,10 @@ def build_renderer(piece, key, W, H):
                     else make_label(TEXT, c["label"], c["label_text"]), z0, z1, rad)
     elif p.get("stamp"):
         z0, z1, rad = p["stamp"]
-        r.set_decal(make_stamp_decal(), z0, z1, rad)
+        r.set_decal(make_stamp_decal(), z0, z1, rad)              # JB mark, front
+        if p.get("boutiq"):
+            b0, b1, brad = p["boutiq"]
+            r.set_decal(make_boutiq_sticker(c["label"]), b0, b1, brad, face=-1.0)
     return r
 
 
