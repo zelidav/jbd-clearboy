@@ -310,6 +310,17 @@ class Renderer:
             model[0, 3] += shift[0]; model[1, 3] += shift[1]; model[2, 3] += shift[2]
         return eye, model, view, proj @ view @ model
 
+    def project(self, pts, angle=0.0, cam_r=780.0, elev=5.0, target=(0, 0, 74),
+                fov=17.0, tilt=0.0, shift=None):
+        """Model-space points -> pixel coordinates in the image frame() hands back.
+        Same matrices the draw uses, so a dimension line lands on the feature."""
+        _, _, _, mvp = self._mats(angle, cam_r, elev, target, fov, tilt, shift)
+        p = np.asarray(pts, "f8").reshape(-1, 3)
+        q = mvp @ np.concatenate([p, np.ones((len(p), 1))], 1).T
+        ndc = q[:2] / q[3]
+        W, H = self.W / SS, self.H / SS
+        return np.stack([(ndc[0] * 0.5 + 0.5) * W, (1 - (ndc[1] * 0.5 + 0.5)) * H], 1)
+
     def frame(self, angle, cam_r=780.0, elev=5.0, target=(0, 0, 74), fov=17.0,
               bg=((0.965, 0.968, 0.973), (0.795, 0.808, 0.822)), shadow=(0.5, 0.30, 0.075),
               tilt=0.0, shift=None):

@@ -12,11 +12,11 @@ up in two fumed colourways.
 |---|---|---|
 | Overall | 140 mm | 92 mm glass + cork lid |
 | Section | head 68 long, 42 × 37 oval | straight cylinder, ø44 |
-| Opening | bowl ø25 → ø5 throat | mouth ø38, cork plug |
+| Opening | bowl ø25, ø3 hole in the bottom of the bowl | mouth ø38, cork plug |
 | Wall | ≈ 3 mm chamber (inferred) | 3 mm, flat closed bottom |
 | Stem | ø14 OD / ø8 bore (thickened from the original's ø11 to carry the enamel label) | — |
 | Mark | enamel label, JBD × Boutiq dropped out in white | JBD pressed into a molten stamp pad, lower middle |
-| Glass | ≈ 83 g in boro 3.3 | ≈ 90 g + ≈ 10 g cork |
+| Glass | ≈ 81 g in boro 3.3 | ≈ 90 g + ≈ 10 g cork |
 | Frit + marbles | bowl end, 4 clear marbles | band under the rim, 7 marbles around the opening |
 
 Colourways: **bluish teal / silver fume** and **magenta / gold fume**, both frit-rolled with
@@ -32,7 +32,7 @@ scaling) moves if they come back different.
     JBD_Clearboy_dimensions.png   five-view dimensional survey
     cad/            model + render + build scripts
     out/            STEP / STL / GLB
-    shots/          hero stills
+    shots/          hero stills, box/ composites, spec/ dimensioned closeups, the PDFs
     docs/           the site GitHub Pages serves (spinner frames, mp4 loops)
     frames/         72-position turntable masters (gitignored, regenerate with turntable.py)
 
@@ -49,6 +49,10 @@ scaling) moves if they come back different.
 | `cad/encode.py` | mp4 loops, posters, WebP spinner frames. |
 | `cad/glb_export.py` | GLB with `KHR_materials_transmission` / `_ior` / `_volume` so it reads as glass in three.js / model-viewer / Blender. |
 | `cad/build_web.py` | Builds the site into `docs/`. |
+| `cad/callouts.py` | Dimensioned closeups. Witness lines are projected from model coordinates through the render camera, so they follow the constants. |
+| `cad/specsheet.py` | The manufacturing spec sheet PDF and the hand-off zip: dimensions, closeups, survey, decoration, bench process + QC. |
+| `cad/boxshot.py` | Seats the pieces into the Boutiq box plates and lays them out as the leave-behind PDF. |
+| `cad/sheet.py` | Page furniture shared by the two PDFs. |
 
 ## Rebuild
 
@@ -67,6 +71,16 @@ python3.12 -m venv cadenv
 ./cadenv/Scripts/python cad/encode.py
 ./cadenv/Scripts/python cad/build_web.py
 ```
+
+The hand-off is built on top of that:
+
+```sh
+./cadenv/Scripts/python cad/callouts.py    # dimensioned closeups -> shots/spec/
+./cadenv/Scripts/python cad/specsheet.py   # spec sheet PDF + the zip, into docs/
+./cadenv/Scripts/python cad/boxshot.py     # box composites + the leave-behind PDF
+```
+
+`cad/boxshot.py` needs the Boutiq box plates; the path is at the top of the file.
 
 Run from the repo root — paths (`out/`, `frames/`, `docs/`) are relative to it.
 

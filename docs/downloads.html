@@ -55,6 +55,11 @@ nav{display:flex;gap:16px;margin-left:auto;font-family:var(--font-mono);font-siz
 nav a{color:var(--ink-3);text-decoration:none;padding-bottom:2px;border-bottom:1px solid transparent}
 nav a:hover{color:var(--ink)}
 nav a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav a.dl{color:var(--ink);border:1px solid var(--line);border-radius:999px;
+  padding:5px 11px;white-space:nowrap}
+nav a.dl:hover{border-color:var(--accent);color:var(--accent)}
+nav a.dl span{color:var(--ink-3);margin-left:5px}
+@media (max-width:640px){nav a.dl span{display:none}}
 
 .hero{padding:40px 0 6px}
 .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.19em;
@@ -230,7 +235,7 @@ footer .r{margin-left:auto}
 </style>
 <header class="masthead"><div class="wrap">
   <a class="marque" href="index.html">Jerome Baker Designs <span>/ New York</span></a>
-  <nav><a href="index.html">Mockups</a><a href="survey.html">Survey</a><a href="downloads.html" aria-current="page">Downloads</a></nav>
+  <nav><a href="index.html">Mockups</a><a href="survey.html">Survey</a><a href="downloads.html" aria-current="page">Downloads</a><a class="dl" href="JBD_Clearboy_spec.pdf" download>Spec sheet <span>PDF</span></a><a class="dl" href="JBD_Clearboy_pack.zip" download>All specs <span>ZIP</span></a></nav>
 </div></header>
 <main><div class="wrap">
 
@@ -242,7 +247,16 @@ footer .r{margin-left:auto}
   </div>
 
   <section>
-    <div class="sechead"><span class="n">01</span><h2>Geometry</h2>
+    <div class="sechead"><span class="n">01</span><h2>Spec sheet</h2>
+      <span class="note">What goes to the shop</span></div>
+    <div class="tablewrap"><table class="files">
+      <thead><tr><th>File</th><th>Size</th><th>What it's for</th></tr></thead>
+      <tbody id="specrows"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">02</span><h2>Geometry</h2>
       <span class="note">STEP &middot; STL &middot; GLB</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Piece</th><th>Size</th><th>What it's for</th></tr></thead>
@@ -251,7 +265,7 @@ footer .r{margin-left:auto}
   </section>
 
   <section>
-    <div class="sechead"><span class="n">02</span><h2>Stills</h2>
+    <div class="sechead"><span class="n">03</span><h2>Stills</h2>
       <span class="note">Full resolution, straight off the renderer</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Piece &middot; colourway</th></tr></thead>
@@ -260,7 +274,7 @@ footer .r{margin-left:auto}
   </section>
 
   <section>
-    <div class="sechead"><span class="n">03</span><h2>Turntable loops</h2>
+    <div class="sechead"><span class="n">04</span><h2>Turntable loops</h2>
       <span class="note">72 frames &middot; 24 fps &middot; seamless</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Size</th><th>Piece &middot; colourway</th></tr></thead>
@@ -269,7 +283,7 @@ footer .r{margin-left:auto}
   </section>
 
   <section>
-    <div class="sechead"><span class="n">04</span><h2>Rebuild from source</h2>
+    <div class="sechead"><span class="n">05</span><h2>Rebuild from source</h2>
       <span class="note">Python 3.12</span></div>
     <pre>
 <b># CadQuery has no 3.13/3.14 wheels yet</b>
@@ -288,13 +302,17 @@ python3.12 -m venv cadenv && ./cadenv/Scripts/python -m pip install -r requireme
 
 </div></main>
 <footer><div class="wrap">
-  <span>Jerome Baker Designs &middot; Clearboy programme &middot; build 29d67a35</span>
+  <span>Jerome Baker Designs &middot; Clearboy programme &middot; build 68d33000</span>
   <span class="r">Renders are proposals &mdash; the original piece stays the reference</span>
 </div></footer>
 <script>
 
-const FILES = [["out/clearboy_hammer.step", "hammer", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/clearboy_hammer.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/frit.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/hammer_clear_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy gold fume build"], ["out/hammer_clear_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy silver fume build"], ["out/hammer_lines.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/hammer_magenta_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, pink (rod 3) build"], ["out/hammer_teal_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, mint (rod 13) build"], ["out/jar.step", "jar", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/jar.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_clear_gold.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy gold fume build"], ["out/jar_clear_silver.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy silver fume build"], ["out/jar_cork.step", "jar", "The cork lid - STEP"], ["out/jar_cork.stl", "jar", "The cork lid - STL"], ["out/jar_frit.stl", "jar", "Frit grains - STL"], ["out/jar_lines.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_lines_frit.stl", "jar", "Frit grains - STL"], ["out/jar_magenta_gold.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, pink (rod 3) build"], ["out/jar_marbles.stl", "jar", "The clear marbles - STL"], ["out/jar_teal_silver.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, mint (rod 13) build"], ["out/marbles.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/v-raked-stem.step", "variant", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/v-raked-stem.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-raked-stem_frit.stl", "variant", "Frit grains - STL"], ["out/v-raked-stem_lines.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-raked-stem_marbles.stl", "variant", "The clear marbles - STL"], ["out/v-tighter-spiral.step", "variant", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/v-tighter-spiral.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-tighter-spiral_frit.stl", "variant", "Frit grains - STL"], ["out/v-tighter-spiral_lines.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-tighter-spiral_marbles.stl", "variant", "The clear marbles - STL"]], SIZES = {"out/clearboy_hammer.step": "2.6 MB", "out/clearboy_hammer.stl": "1.6 MB", "out/frit.stl": "10.4 MB", "out/hammer_clear_gold.glb": "7.9 MB", "out/hammer_clear_silver.glb": "7.9 MB", "out/hammer_lines.stl": "2.4 MB", "out/hammer_magenta_gold.glb": "7.9 MB", "out/hammer_teal_silver.glb": "7.9 MB", "out/jar.step": "0.0 MB", "out/jar.stl": "1.2 MB", "out/jar_clear_gold.glb": "4.5 MB", "out/jar_clear_silver.glb": "4.5 MB", "out/jar_cork.step": "0.0 MB", "out/jar_cork.stl": "0.3 MB", "out/jar_frit.stl": "2.1 MB", "out/jar_lines.stl": "5.5 MB", "out/jar_lines_frit.stl": "1.2 MB", "out/jar_magenta_gold.glb": "2.4 MB", "out/jar_marbles.stl": "0.1 MB", "out/jar_teal_silver.glb": "2.4 MB", "out/marbles.stl": "0.1 MB", "out/v-raked-stem.step": "2.5 MB", "out/v-raked-stem.stl": "1.6 MB", "out/v-raked-stem_frit.stl": "10.4 MB", "out/v-raked-stem_lines.stl": "1.3 MB", "out/v-raked-stem_marbles.stl": "0.1 MB", "out/v-tighter-spiral.step": "2.6 MB", "out/v-tighter-spiral.stl": "1.6 MB", "out/v-tighter-spiral_frit.stl": "10.4 MB", "out/v-tighter-spiral_lines.stl": "2.0 MB", "out/v-tighter-spiral_marbles.stl": "0.1 MB", "video/hammer_teal_silver.mp4": "0.2 MB", "video/hammer_magenta_gold.mp4": "0.2 MB", "video/hammer_clear_silver.mp4": "0.2 MB", "video/hammer_clear_gold.mp4": "0.2 MB", "video/jar_teal_silver.mp4": "0.6 MB", "video/jar_magenta_gold.mp4": "0.6 MB", "video/jar_clear_silver.mp4": "0.6 MB", "video/jar_clear_gold.mp4": "0.6 MB"}, RAW = "https://raw.githubusercontent.com/zelidav/jbd-clearboy/main/", VIDEOS = [["hammer_teal_silver.mp4", "Clearboy hammer / Mint (rod 13) silver fume"], ["hammer_magenta_gold.mp4", "Clearboy hammer / Pink (rod 3) gold fume"], ["hammer_clear_silver.mp4", "Clearboy hammer / Clear, heavy silver fume teal accents, linework"], ["hammer_clear_gold.mp4", "Clearboy hammer / Clear, heavy gold fume magenta accents, linework"], ["jar_teal_silver.mp4", "Nug jar / Mint (rod 13) silver fume"], ["jar_magenta_gold.mp4", "Nug jar / Pink (rod 3) gold fume"], ["jar_clear_silver.mp4", "Nug jar / Clear, heavy silver fume teal accents, linework"], ["jar_clear_gold.mp4", "Nug jar / Clear, heavy gold fume magenta accents, linework"]];
-const STILLS = [["hammer_teal_silver.png", "Clearboy hammer / Mint (rod 13) silver fume"], ["hammer_magenta_gold.png", "Clearboy hammer / Pink (rod 3) gold fume"], ["hammer_clear_silver.png", "Clearboy hammer / Clear, heavy silver fume teal accents, linework"], ["hammer_clear_gold.png", "Clearboy hammer / Clear, heavy gold fume magenta accents, linework"], ["jar_teal_silver.png", "Nug jar / Mint (rod 13) silver fume"], ["jar_magenta_gold.png", "Nug jar / Pink (rod 3) gold fume"], ["jar_clear_silver.png", "Nug jar / Clear, heavy silver fume teal accents, linework"], ["jar_clear_gold.png", "Nug jar / Clear, heavy gold fume magenta accents, linework"]], BUILD = "29d67a35";
+const FILES = [["out/clearboy_hammer.step", "hammer", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/clearboy_hammer.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/frit.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/hammer_clear_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy gold fume build"], ["out/hammer_clear_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy silver fume build"], ["out/hammer_lines.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/hammer_magenta_gold.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, pink (rod 3) build"], ["out/hammer_teal_silver.glb", "hammer", "Web / realtime - transmission, IOR 1.474, volume, mint (rod 13) build"], ["out/jar.step", "jar", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/jar.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_clear_gold.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy gold fume build"], ["out/jar_clear_silver.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, clear, heavy silver fume build"], ["out/jar_cork.step", "jar", "The cork lid - STEP"], ["out/jar_cork.stl", "jar", "The cork lid - STL"], ["out/jar_frit.stl", "jar", "Frit grains - STL"], ["out/jar_lines.stl", "jar", "Mesh - 3D print, mould master, wax pattern"], ["out/jar_lines_frit.stl", "jar", "Frit grains - STL"], ["out/jar_magenta_gold.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, pink (rod 3) build"], ["out/jar_marbles.stl", "jar", "The clear marbles - STL"], ["out/jar_teal_silver.glb", "jar", "Web / realtime - transmission, IOR 1.474, volume, mint (rod 13) build"], ["out/marbles.stl", "hammer", "Mesh - 3D print, mould master, wax pattern"], ["out/v-raked-stem.step", "variant", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/v-raked-stem.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-raked-stem_frit.stl", "variant", "Frit grains - STL"], ["out/v-raked-stem_lines.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-raked-stem_marbles.stl", "variant", "The clear marbles - STL"], ["out/v-tighter-spiral.step", "variant", "CAD hand-off - solid B-rep for Fusion / SolidWorks / Rhino"], ["out/v-tighter-spiral.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-tighter-spiral_frit.stl", "variant", "Frit grains - STL"], ["out/v-tighter-spiral_lines.stl", "variant", "Mesh - 3D print, mould master, wax pattern"], ["out/v-tighter-spiral_marbles.stl", "variant", "The clear marbles - STL"]], SIZES = {"out/clearboy_hammer.step": "2.7 MB", "out/clearboy_hammer.stl": "1.6 MB", "out/frit.stl": "10.4 MB", "out/hammer_clear_gold.glb": "7.1 MB", "out/hammer_clear_silver.glb": "7.1 MB", "out/hammer_lines.stl": "2.4 MB", "out/hammer_magenta_gold.glb": "7.1 MB", "out/hammer_teal_silver.glb": "7.1 MB", "out/jar.step": "0.0 MB", "out/jar.stl": "1.2 MB", "out/jar_clear_gold.glb": "4.5 MB", "out/jar_clear_silver.glb": "4.5 MB", "out/jar_cork.step": "0.0 MB", "out/jar_cork.stl": "0.3 MB", "out/jar_frit.stl": "2.1 MB", "out/jar_lines.stl": "5.5 MB", "out/jar_lines_frit.stl": "1.2 MB", "out/jar_magenta_gold.glb": "2.4 MB", "out/jar_marbles.stl": "0.1 MB", "out/jar_teal_silver.glb": "2.4 MB", "out/marbles.stl": "0.1 MB", "out/v-raked-stem.step": "2.5 MB", "out/v-raked-stem.stl": "1.6 MB", "out/v-raked-stem_frit.stl": "10.4 MB", "out/v-raked-stem_lines.stl": "1.3 MB", "out/v-raked-stem_marbles.stl": "0.1 MB", "out/v-tighter-spiral.step": "2.6 MB", "out/v-tighter-spiral.stl": "1.6 MB", "out/v-tighter-spiral_frit.stl": "10.4 MB", "out/v-tighter-spiral_lines.stl": "2.0 MB", "out/v-tighter-spiral_marbles.stl": "0.1 MB", "video/hammer_teal_silver.mp4": "0.2 MB", "video/hammer_magenta_gold.mp4": "0.2 MB", "video/hammer_clear_silver.mp4": "0.2 MB", "video/hammer_clear_gold.mp4": "0.2 MB", "video/jar_teal_silver.mp4": "0.6 MB", "video/jar_magenta_gold.mp4": "0.6 MB", "video/jar_clear_silver.mp4": "0.6 MB", "video/jar_clear_gold.mp4": "0.6 MB", "JBD_Clearboy_spec.pdf": "1.7 MB", "JBD_Clearboy_pack.zip": "12.0 MB", "JBD_x_Boutiq.pdf": "0.8 MB"}, RAW = "https://raw.githubusercontent.com/zelidav/jbd-clearboy/main/", VIDEOS = [["hammer_teal_silver.mp4", "Clearboy hammer / Mint (rod 13) silver fume"], ["hammer_magenta_gold.mp4", "Clearboy hammer / Pink (rod 3) gold fume"], ["hammer_clear_silver.mp4", "Clearboy hammer / Clear, heavy silver fume teal accents, linework"], ["hammer_clear_gold.mp4", "Clearboy hammer / Clear, heavy gold fume magenta accents, linework"], ["jar_teal_silver.mp4", "Nug jar / Mint (rod 13) silver fume"], ["jar_magenta_gold.mp4", "Nug jar / Pink (rod 3) gold fume"], ["jar_clear_silver.mp4", "Nug jar / Clear, heavy silver fume teal accents, linework"], ["jar_clear_gold.mp4", "Nug jar / Clear, heavy gold fume magenta accents, linework"]];
+const STILLS = [["hammer_teal_silver.png", "Clearboy hammer / Mint (rod 13) silver fume"], ["hammer_magenta_gold.png", "Clearboy hammer / Pink (rod 3) gold fume"], ["hammer_clear_silver.png", "Clearboy hammer / Clear, heavy silver fume teal accents, linework"], ["hammer_clear_gold.png", "Clearboy hammer / Clear, heavy gold fume magenta accents, linework"], ["jar_teal_silver.png", "Nug jar / Mint (rod 13) silver fume"], ["jar_magenta_gold.png", "Nug jar / Pink (rod 3) gold fume"], ["jar_clear_silver.png", "Nug jar / Clear, heavy silver fume teal accents, linework"], ["jar_clear_gold.png", "Nug jar / Clear, heavy gold fume magenta accents, linework"]], BUILD = "68d33000", SPECFILES = [["JBD_Clearboy_spec.pdf", "Manufacturing spec - dimensions, dimensioned closeups, decoration and the survey"], ["JBD_Clearboy_pack.zip", "The whole hand-off - spec sheet, STEP / STL, closeups, survey and the box plates"], ["JBD_x_Boutiq.pdf", "The collaboration box, plate by plate - the leave-behind"]];
+document.getElementById("specrows").innerHTML = SPECFILES.map(function(f){
+  return "<tr><td><a href='" + f[0] + "' download>" + f[0] + "</a></td>" +
+    "<td class='num'>" + (SIZES[f[0]] || "-") + "</td>" +
+    "<td class='use'>" + f[1] + "</td></tr>"; }).join("");
 document.getElementById("filerows").innerHTML = FILES.map(function(f){
   return "<tr><td><a href='" + RAW + f[0] + "'>" + f[0].replace("out/", "") + "</a></td>" +
     "<td class='num'>" + f[1] + "</td><td class='num'>" + (SIZES[f[0]] || "-") +

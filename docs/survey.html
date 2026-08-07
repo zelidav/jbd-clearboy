@@ -55,6 +55,11 @@ nav{display:flex;gap:16px;margin-left:auto;font-family:var(--font-mono);font-siz
 nav a{color:var(--ink-3);text-decoration:none;padding-bottom:2px;border-bottom:1px solid transparent}
 nav a:hover{color:var(--ink)}
 nav a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav a.dl{color:var(--ink);border:1px solid var(--line);border-radius:999px;
+  padding:5px 11px;white-space:nowrap}
+nav a.dl:hover{border-color:var(--accent);color:var(--accent)}
+nav a.dl span{color:var(--ink-3);margin-left:5px}
+@media (max-width:640px){nav a.dl span{display:none}}
 
 .hero{padding:40px 0 6px}
 .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.19em;
@@ -230,7 +235,7 @@ footer .r{margin-left:auto}
 </style>
 <header class="masthead"><div class="wrap">
   <a class="marque" href="index.html">Jerome Baker Designs <span>/ New York</span></a>
-  <nav><a href="index.html">Mockups</a><a href="survey.html" aria-current="page">Survey</a><a href="downloads.html">Downloads</a></nav>
+  <nav><a href="index.html">Mockups</a><a href="survey.html" aria-current="page">Survey</a><a href="downloads.html">Downloads</a><a class="dl" href="JBD_Clearboy_spec.pdf" download>Spec sheet <span>PDF</span></a><a class="dl" href="JBD_Clearboy_pack.zip" download>All specs <span>ZIP</span></a></nav>
 </div></header>
 <main><div class="wrap">
 
@@ -337,14 +342,14 @@ footer .r{margin-left:auto}
     <div class="sechead"><span class="n">03</span><h2>The survey sheet</h2>
       <span class="note">Five set-ups &middot; four cross-checks</span></div>
     <figure>
-      <img src="dims.jpg?v=29d67a35" alt="Five-view dimensional survey of the Clearboy hammer with a measured schedule">
+      <img src="dims.jpg?v=68d33000" alt="Five-view dimensional survey of the Clearboy hammer with a measured schedule">
       <figcaption>Scale set from the stainless rule in IMG_5855&ndash;5859, resolved to &plusmn;0.5 px/mm and corrected for stand-off parallax</figcaption>
     </figure>
   </section>
 
 </div></main>
 <footer><div class="wrap">
-  <span>Jerome Baker Designs &middot; Clearboy programme &middot; build 29d67a35</span>
+  <span>Jerome Baker Designs &middot; Clearboy programme &middot; build 68d33000</span>
   <span class="r">Renders are proposals &mdash; the original piece stays the reference</span>
 </div></footer>
 <script>

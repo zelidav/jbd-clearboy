@@ -265,6 +265,9 @@ def sizes():
             p = os.path.join(SITE, "video", "%s_%s.mp4" % (pc, w))
             if os.path.exists(p):
                 s["video/%s_%s.mp4" % (pc, w)] = "%.1f MB" % (os.path.getsize(p) / 1e6)
+    for name, _ in SPECFILES:
+        p = os.path.join(SITE, name)
+        s[name] = ("%.1f MB" % (os.path.getsize(p) / 1e6)) if os.path.exists(p) else "-"
     return s
 
 
@@ -322,6 +325,11 @@ nav{display:flex;gap:16px;margin-left:auto;font-family:var(--font-mono);font-siz
 nav a{color:var(--ink-3);text-decoration:none;padding-bottom:2px;border-bottom:1px solid transparent}
 nav a:hover{color:var(--ink)}
 nav a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav a.dl{color:var(--ink);border:1px solid var(--line);border-radius:999px;
+  padding:5px 11px;white-space:nowrap}
+nav a.dl:hover{border-color:var(--accent);color:var(--accent)}
+nav a.dl span{color:var(--ink-3);margin-left:5px}
+@media (max-width:640px){nav a.dl span{display:none}}
 
 .hero{padding:40px 0 6px}
 .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.19em;
@@ -500,9 +508,14 @@ footer .r{margin-left:auto}
 def shell(title, body, script="", nav="index", standalone=False):
     links = [("index.html", "Mockups", "index"), ("survey.html", "Survey", "survey"),
              ("downloads.html", "Downloads", "downloads")]
+    # the spec sheet and the whole hand-off pack hang off every page, not just Downloads
+    grabs = ('<a class="dl" href="JBD_Clearboy_spec.pdf" download>Spec sheet'
+             ' <span>PDF</span></a>'
+             '<a class="dl" href="JBD_Clearboy_pack.zip" download>All specs'
+             ' <span>ZIP</span></a>')
     navhtml = "" if standalone else "<nav>" + "".join(
         '<a href="%s"%s>%s</a>' % (h, ' aria-current="page"' if k == nav else "", t)
-        for (h, t, k) in links) + "</nav>"
+        for (h, t, k) in links) + grabs + "</nav>"
     marque = ('<span class="marque">' if standalone else '<a class="marque" href="index.html">') + \
              'Jerome Baker Designs <span>/ New York</span>' + \
              ('</span>' if standalone else '</a>')
@@ -730,7 +743,16 @@ DOWNLOADS_BODY = r"""
   </div>
 
   <section>
-    <div class="sechead"><span class="n">01</span><h2>Geometry</h2>
+    <div class="sechead"><span class="n">01</span><h2>Spec sheet</h2>
+      <span class="note">What goes to the shop</span></div>
+    <div class="tablewrap"><table class="files">
+      <thead><tr><th>File</th><th>Size</th><th>What it's for</th></tr></thead>
+      <tbody id="specrows"></tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <div class="sechead"><span class="n">02</span><h2>Geometry</h2>
       <span class="note">STEP &middot; STL &middot; GLB</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Piece</th><th>Size</th><th>What it's for</th></tr></thead>
@@ -739,7 +761,7 @@ DOWNLOADS_BODY = r"""
   </section>
 
   <section>
-    <div class="sechead"><span class="n">02</span><h2>Stills</h2>
+    <div class="sechead"><span class="n">03</span><h2>Stills</h2>
       <span class="note">Full resolution, straight off the renderer</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Piece &middot; colourway</th></tr></thead>
@@ -748,7 +770,7 @@ DOWNLOADS_BODY = r"""
   </section>
 
   <section>
-    <div class="sechead"><span class="n">03</span><h2>Turntable loops</h2>
+    <div class="sechead"><span class="n">04</span><h2>Turntable loops</h2>
       <span class="note">72 frames &middot; 24 fps &middot; seamless</span></div>
     <div class="tablewrap"><table class="files">
       <thead><tr><th>File</th><th>Size</th><th>Piece &middot; colourway</th></tr></thead>
@@ -757,7 +779,7 @@ DOWNLOADS_BODY = r"""
   </section>
 
   <section>
-    <div class="sechead"><span class="n">04</span><h2>Rebuild from source</h2>
+    <div class="sechead"><span class="n">05</span><h2>Rebuild from source</h2>
       <span class="note">Python 3.12</span></div>
     <pre>
 <b># CadQuery has no 3.13/3.14 wheels yet</b>
@@ -1257,7 +1279,11 @@ if(!reduced) startSpin();
 
 DOWNLOADS_JS = r"""
 const FILES = __FILES__, SIZES = __SIZES__, RAW = "__RAW__", VIDEOS = __VIDEOS__;
-const STILLS = __STILLS__, BUILD = "__BUILD__";
+const STILLS = __STILLS__, BUILD = "__BUILD__", SPECFILES = __SPECFILES__;
+document.getElementById("specrows").innerHTML = SPECFILES.map(function(f){
+  return "<tr><td><a href='" + f[0] + "' download>" + f[0] + "</a></td>" +
+    "<td class='num'>" + (SIZES[f[0]] || "-") + "</td>" +
+    "<td class='use'>" + f[1] + "</td></tr>"; }).join("");
 document.getElementById("filerows").innerHTML = FILES.map(function(f){
   return "<tr><td><a href='" + RAW + f[0] + "'>" + f[0].replace("out/", "") + "</a></td>" +
     "<td class='num'>" + f[1] + "</td><td class='num'>" + (SIZES[f[0]] || "-") +
@@ -1302,6 +1328,15 @@ def stills():
     return rows
 
 
+SPECFILES = [
+    ("JBD_Clearboy_spec.pdf",
+     "Manufacturing spec - dimensions, dimensioned closeups, decoration and the survey"),
+    ("JBD_Clearboy_pack.zip",
+     "The whole hand-off - spec sheet, STEP / STL, closeups, survey and the box plates"),
+    ("JBD_x_Boutiq.pdf", "The collaboration box, plate by plate - the leave-behind"),
+]
+
+
 def build_downloads():
     vids = [("%s_%s.mp4" % (pc, w),
              "%s / %s %s" % (PIECE_META[pc]["name"], WAY_META[w]["name"], WAY_META[w]["sub"]))
@@ -1311,7 +1346,8 @@ def build_downloads():
           .replace("__SIZES__", json.dumps(sizes()))
           .replace("__RAW__", RAW)
           .replace("__VIDEOS__", json.dumps(vids))
-          .replace("__STILLS__", json.dumps(stills())))
+          .replace("__STILLS__", json.dumps(stills()))
+          .replace("__SPECFILES__", json.dumps(SPECFILES)))
     return shell("Downloads | Jerome Baker Designs", DOWNLOADS_BODY, js, "downloads")
 
 

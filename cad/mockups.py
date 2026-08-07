@@ -221,13 +221,21 @@ def make_stamp_decal(w=1400, h=900, size=0.62):
     return img.transpose(Image.FLIP_TOP_BOTTOM)
 
 
+def load_sticker(path):
+    """The printed sticker art, oriented for the stem projector."""
+    im = Image.open(path).convert("RGBA")
+    return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+
+
 def make_jar_sticker(path):
     """The same printed sticker the pipes carry, turned to read round the jar."""
     im = Image.open(path).convert("RGBA").rotate(90, expand=True)
     return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
-def build_renderer(piece, key, W, H):
+def build_renderer(piece, key, W, H, decal_turn=0):
+    """decal_turn=180 prints the stem label the other way along the stem, for a piece
+    laid in a case with its head at the other end."""
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
@@ -263,8 +271,11 @@ def build_renderer(piece, key, W, H):
     if p["decal"]:
         z0, z1, rad = p["decal"]
         art = c.get("sticker")
-        r.set_decal(load_sticker(art) if art
-                    else make_label(TEXT, c["label"], c["label_text"]), z0, z1, rad)
+        art = (load_sticker(art) if art
+               else make_label(TEXT, c["label"], c["label_text"]))
+        if decal_turn:
+            art = art.rotate(decal_turn, expand=True)
+        r.set_decal(art, z0, z1, rad)
     elif p.get("stamp"):
         z0, z1, rad = p["stamp"]
         r.set_decal(make_stamp_decal(), z0, z1, rad)              # JB mark, front

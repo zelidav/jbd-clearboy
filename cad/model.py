@@ -16,7 +16,7 @@ COLLAR_OD    = 17.5
 COLLAR_H     = 9.0
 WALL         = 3.0          # chamber wall
 BOWL_ID      = 25.0         # opening at the rim
-BOWL_THROAT  = 5.0
+BOWL_THROAT  = 3.0          # the hole in the bottom of the bowl
 BOWL_DEPTH   = 19.0
 CARB_D       = 3.5
 CARB_BOSS_D  = 11.0
@@ -132,7 +132,7 @@ def build():
                 .loft(ruled=False).translate((0, 0, _interp(0, 0)[2])))
     body = body.union(funnel)
 
-    # bowl bore: cone Ø25 -> Ø5, then the throat down into the chamber
+    # bowl bore: cone Ø25 -> Ø3, then the throat down into the chamber
     czb = _interp(0, 0)[2]
     bore = (cq.Workplane("YZ").workplane(offset=xt)
               .circle(BOWL_THROAT / 2).workplane(offset=(HEAD_X1 + 2 - xt))
