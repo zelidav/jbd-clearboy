@@ -179,28 +179,46 @@ def make_label(text, fill, ink, w=2400, h=420, pad=0.13):
     return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
-def make_stamp_decal(w=1400, h=900, size=0.62, ink=(46, 52, 58), alpha=168):
-    """The JB mark as a shading difference rather than cut glass: its outline drawn
-    faintly, so it reads as a mark in the surface without bending anything.
-    u runs up the jar, v across the face - the same projector the stem label uses."""
+def make_stamp_decal(w=1400, h=900, size=0.62):
+    """The JB mark as a hazy patch in the surface rather than a drawn outline: a
+    sandblasted-looking bloom with a soft shadow under it, so it sits in the glass
+    with some depth instead of floating on top."""
     import stamp_art
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
+    from PIL import ImageFilter
+    def poly(p):
+        return [(w * (0.5 + q[1] * size * (h / float(w)) * 1.9),
+                 h * (0.5 - q[0] * size)) for q in p]
+
+    fill = Image.new("L", (w, h), 0)
+    fd = ImageDraw.Draw(fill)
+    line = Image.new("L", (w, h), 0)
+    ld = ImageDraw.Draw(line)
     for sh in stamp_art.load():
+        if len(sh["outer"]) > 2:
+            fd.polygon(poly(sh["outer"]), fill=255)
+        for k in sh["holes"]:
+            if len(k) > 2:
+                fd.polygon(poly(k), fill=0)
         for ring in [sh["outer"]] + sh["holes"]:
-            if len(ring) < 3:
-                continue
-            pts = [(w * (0.5 + p[1] * size * (h / float(w)) * 1.9),
-                    h * (0.5 - p[0] * size)) for p in ring]
-            d.line(pts + [pts[0]], fill=ink + (alpha,), width=max(int(h * 0.014), 4))
-    return img.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+            if len(ring) > 2:
+                pts = poly(ring)
+                ld.line(pts + [pts[0]], fill=255, width=max(int(h * 0.012), 4))
 
+    haze = fill.filter(ImageFilter.GaussianBlur(h * 0.020))
+    edge = line.filter(ImageFilter.GaussianBlur(h * 0.006))
+    shade = fill.filter(ImageFilter.GaussianBlur(h * 0.030))
 
-def load_sticker(path):
-    """The printed sticker art itself - same projector as the drawn label, so it
-    lands on the stem the right way round."""
-    im = Image.open(path).convert("RGBA")
-    return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    # a soft dark bed, offset down, reads as depth in the wall
+    img.paste(Image.new("RGBA", (w, h), (24, 30, 34, 255)),
+              (0, int(h * 0.012)), shade.point(lambda v: int(v * 0.30)))
+    # the frosted face of the mark
+    img.paste(Image.new("RGBA", (w, h), (236, 242, 246, 255)), (0, 0),
+              haze.point(lambda v: int(v * 0.34)))
+    # just enough edge to keep it legible
+    img.paste(Image.new("RGBA", (w, h), (54, 62, 68, 255)), (0, 0),
+              edge.point(lambda v: int(v * 0.42)))
+    return img.transpose(Image.FLIP_TOP_BOTTOM)
 
 
 def make_jar_sticker(path):
