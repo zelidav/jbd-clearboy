@@ -1333,6 +1333,8 @@ SPECFILES = [
      "Manufacturing spec - dimensions, dimensioned closeups, decoration and the survey"),
     ("JBD_Clearboy_pack.zip",
      "The whole hand-off - spec sheet, STEP / STL, closeups, survey and the box plates"),
+    ("JBD_x_Boutiq_Deck.pdf",
+     "Boutiq review deck - the set, the SKUs, the lids, open items and the timeline"),
     ("JBD_x_Boutiq.pdf", "The collaboration box, plate by plate - the leave-behind"),
 ]
 
