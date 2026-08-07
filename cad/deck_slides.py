@@ -1,12 +1,12 @@
-"""The slides. Copy follows the 4 August call; anything left open on that call stays on
-the open-items page rather than being quietly presented as settled."""
+"""The slides. Customer-facing: the glass and the case, and nothing about what it costs,
+how many are being made, or what is still being settled internally."""
 import os, shutil
 
 from PIL import Image, ImageDraw
 
 import sheet
 from deck import (PAGE, PINK, TEAL, BLACK, WHITE, PAPER, MUTE, OUT, SITE,
-                  badge, check, eyebrow, font, foot, head, lockup, para, shot,
+                  check, eyebrow, font, foot, head, lockup, para, shot, tag,
                   stickers)
 
 
@@ -16,234 +16,200 @@ def s01_cover():
     d = ImageDraw.Draw(pg)
     art = shot("Boutique_Colab_Three_Boxes_R2_C2", (980, 980))
     pg.paste(art, (PAGE[0] - art.width - 40, (PAGE[1] - art.height) // 2))
-    eyebrow(d, (110, 214), "COLLECTORS BOX SET", TEAL)
-    lockup(d, (110, 262), 52, WHITE)
-    head(d, (110, 400), "Limited\nedition\ncollab", 92, WHITE, 760)
-    para(d, (110, 770), "Hand-blown glass by Jerome Baker Designs, boxed for Boutiq. "
-         "Massachusetts launch.", "b", 30, (176, 176, 180), 690)
-    eyebrow(d, (110, 900), "DESIGN REVIEW  7 AUG 2026", (120, 120, 126), 20, 5)
+    eyebrow(d, (110, 228), "LIMITED EDITION", TEAL)
+    lockup(pg, d, (110, 268), 52, WHITE)
+    head(d, (110, 414), "The\ncollectors\nbox set", 92, WHITE, 760)
+    para(d, (110, 784), "Hand-blown glass by Jerome Baker Designs, in a stitched "
+         "leatherette case.", "b", 30, (176, 176, 180), 680)
     foot(d, 1, (90, 90, 96))
     return pg
 
 
-def s02_where():
-    pg = Image.new("RGB", PAGE, PINK)
+def s02_box():
+    pg = Image.new("RGB", PAGE, WHITE)
     d = ImageDraw.Draw(pg)
-    eyebrow(d, (110, 130), "WHERE WE LANDED  4 AUG CALL", WHITE)
-    head(d, (110, 184), "Agreed on the call", 78, WHITE, 1400)
-    cards = [("28", "ALL IN", "25 base plus the 3 royalty. Everyone aligned. Final quote "
-                              "follows the locked layout."),
-             ("10000", "UNITS", "All into Massachusetts. 500 committed off the launch, "
-                                "three salespeople on it."),
-             ("2", "SKUS", "Indica and Sativa. Hybrid is out - they are all hybridised "
-                           "anyway, and it only split the run."),
-             ("NOV 1", "LANDED", "Ten weeks out. Samples in hand for the buyers golf "
-                                 "tournament on 27 October.")]
-    x, y, w, gap = 110, 350, 400, 24
-    for big, cap, body in cards:
-        pg.paste(Image.new("RGB", (w, 430), WHITE), (x, y))
-        dd = ImageDraw.Draw(pg)
-        dd.text((x + 36, y + 50), check(big, "px"),
-                font=font("px", 62 if len(big) <= 5 else 44), fill=PINK)
-        eyebrow(dd, (x + 36, y + 170), cap, TEAL, 22, 5)
-        para(dd, (x + 36, y + 232), body, "b", 25, BLACK, w - 72)
-        x += w + gap
-    foot(d, 2, (250, 200, 226))
+    art = shot("Boutique_Colab_Box_Closed_C3_R1", (960, 960))
+    pg.paste(art, (PAGE[0] - art.width - 40, (PAGE[1] - art.height) // 2))
+    eyebrow(d, (110, 150), "THE CASE", PINK)
+    head(d, (110, 204), "Black leatherette,\nstitched and\nnumbered", 60, BLACK, 740)
+    y = para(d, (110, 486), "A hard case with a leather grain, punched seams and a "
+             "hinged lid. The mark is struck into the lid itself.", "b", 27, BLACK, 690)
+    y += 44
+    for k, v in (("Finish", "Blind emboss, colour emboss or foil."),
+                 ("Lid", "Hinged, with the lockup on the face."),
+                 ("Edition", "Numbered on the side panel."),
+                 ("After", "Keeps its job once the glass comes out.")):
+        d.text((110, y), check(k, "h"), font=font("h", 25), fill=PINK)
+        para(d, (290, y - 2), v, "b", 24, BLACK, 520)
+        y += 64
+    foot(d, 2)
     return pg
 
 
-def s03_set():
-    pg = Image.new("RGB", PAGE, WHITE)
+def s03_series():
+    pg = Image.new("RGB", PAGE, PAPER)
     d = ImageDraw.Draw(pg)
-    art = shot("Boutique_Colab_Box_Open_R5_C3_Indica", (1000, 1000))
-    pg.paste(art, (PAGE[0] - art.width - 60, (PAGE[1] - art.height) // 2))
-    eyebrow(d, (110, 130), "THE SET", PINK)
-    head(d, (110, 184), "Four pieces,\none box", 70, BLACK, 700)
-    items = [("Flower jar", "7 g, JBD x Boutiq label, Indica or Sativa. Supplied by "
-                            "Jerome Baker."),
-             ("Clearboy hammer", "Hand-blown boro 3.3, 140 mm, fumed and frit-rolled "
-                                 "with clear marbles."),
-             ("Nug jar", "92 mm glass, 38 mm mouth, cork lid, pressed JBD mark."),
-             ("Matches", "Flat-pack wood matches. Not rolling papers - the big "
-                         "matchbook is the insert.")]
-    y = 430
-    for name, body in items:
-        d.text((110, y), check(name, "h"), font=font("h", 30), fill=PINK)
-        y = para(d, (110, y + 46), body, "b", 24, BLACK, 660) + 28
-        d.line([(110, y - 16), (770, y - 16)], fill=(226, 226, 228), width=1)
-    para(d, (110, 950), "Renders show a slim insert in the top tray - confirm it reads "
-         "as the matchbook and not a pre-roll.", "b", 21, MUTE, 660)
+    eyebrow(d, (110, 120), "THE SERIES", PINK)
+    head(d, (110, 174), "One case, two sleeves", 66, BLACK, 1500)
+    for i, (nm, label, col) in enumerate(
+            (("Boutique_Colab_Box_Closed_C2_R1_Indica", "TEAL", TEAL),
+             ("Boutique_Colab_Box_Closed_C2_R1_Sativa", "MAGENTA", PINK))):
+        art = shot(nm, (700, 540))
+        x = 150 + i * 830
+        pg.paste(art, (x, 300))
+        tag(d, (x + 10, 312 + art.height), label, 30, fill=col)
+    para(d, (150, 920), "The case does not change. The printed sleeve does, and that is "
+         "what makes the set collectable - two colourways to a series, each one "
+         "numbered, with the glass inside matched to the sleeve it ships in.",
+         "b", 27, BLACK, 1620)
     foot(d, 3)
     return pg
 
 
-def s04_skus():
-    pg = Image.new("RGB", PAGE, PAPER)
+def s04_inside():
+    pg = Image.new("RGB", PAGE, WHITE)
     d = ImageDraw.Draw(pg)
-    eyebrow(d, (110, 120), "TWO SKUS", PINK)
-    head(d, (110, 174), "Indica and Sativa", 66, BLACK, 1400)
-    for i, (nm, tag, col) in enumerate(
-            (("Boutique_Colab_Box_Open_R5_C2_Indica", "INDICA", PINK),
-             ("Boutique_Colab_Box_Open_R5_C2_Sativa", "SATIVA", TEAL))):
-        art = shot(nm, (660, 560))
-        x = 170 + i * 830
-        pg.paste(art, (x, 310))
-        badge(d, (x + 10, 320 + art.height), tag, 32, fill=col, ink=WHITE)
-    para(d, (170, 930), "The bulk market swings between Indica-heavy and Sativa-heavy "
-         "month to month, so the set covers both and skips hybrid. Accents carry the "
-         "difference. The inner box stays one tooling.", "b", 27, BLACK, 1580)
+    art = shot("Boutique_Colab_Box_Open_R5_C3_Indica", (1020, 1020))
+    pg.paste(art, (PAGE[0] - art.width - 50, (PAGE[1] - art.height) // 2))
+    eyebrow(d, (110, 140), "INSIDE", PINK)
+    head(d, (110, 194), "Cut to fit,\npiece by piece", 62, BLACK, 700)
+    items = [("Hammer bubbler", "Hand-blown boro, fumed and frit-rolled, set with "
+                                "clear marbles."),
+             ("Nug jar", "Thick-walled glass with a tapered cork and a pressed "
+                         "JBD mark."),
+             ("Flower jar", "Labelled and sealed, in the colourway of the set."),
+             ("Matches", "Flat-pack wood matches.")]
+    y = 430
+    for name, body in items:
+        d.text((110, y), check(name, "h"), font=font("h", 28), fill=PINK)
+        y = para(d, (110, y + 44), body, "b", 24, BLACK, 640) + 26
+        d.line([(110, y - 16), (750, y - 16)], fill=(226, 226, 228), width=1)
+    para(d, (110, 900), "Every piece sits in its own cut recess, so the set travels and "
+         "displays the way it was packed.", "b", 24, BLACK, 640)
     foot(d, 4)
     return pg
 
 
-def s05_lids():
-    pg = Image.new("RGB", PAGE, WHITE)
-    d = ImageDraw.Draw(pg)
-    eyebrow(d, (110, 120), "LID TREATMENTS", PINK)
-    head(d, (110, 174), "Three ways to close it", 66, BLACK, 1400)
-    opts = [("Boutique_Colab_Box_Closed_C1_R1_Sativa", "C1",
-             "Full pattern lid, black body."),
-            ("Boutique_Colab_Box_Closed_C2_R1_Sativa", "C2",
-             "Pattern top, black sides and sleeve."),
-            ("Boutique_Colab_Box_Closed_C3_R1", "C3",
-             "Black lid, lockup only. Quietest of the three.")]
-    for i, (nm, tag, body) in enumerate(opts):
-        art = shot(nm, (520, 440))
-        x = 110 + i * 570
-        pg.paste(art, (x, 300))
-        badge(d, (x, 780), tag, 30, fill=BLACK, ink=WHITE)
-        para(d, (x, 866), body, "b", 24, BLACK, 500)
-    d.rectangle([110, 976, 1810, 980], fill=PINK)
-    para(d, (110, 1004), "Emboss blind, in colour, or in foil. Foil was the preference "
-         "in the room.", "b", 25, BLACK, 1700)
-    foot(d, 5)
-    return pg
-
-
-def s06_build():
+def s05_hammer():
     pg = Image.new("RGB", PAGE, BLACK)
     pg.paste(stickers(PAGE, (28, 28, 32), BLACK, 0.9), (0, 0))
     d = ImageDraw.Draw(pg)
-    art = shot("Boutique_Colab_Three_Boxes_R2_C1", (940, 940))
-    pg.paste(art, (PAGE[0] - art.width - 50, (PAGE[1] - art.height) // 2))
-    eyebrow(d, (110, 150), "CONSTRUCTION", TEAL)
-    head(d, (110, 204), "Static box,\nvariable skin", 66, WHITE, 760)
-    y = para(d, (110, 410), "Hard leather-look box with a leather texture and punched "
-             "seams. Inner box plus an outer sleeve.", "b", 27, (196, 196, 200), 720)
-    y += 44
-    for k, v in (("Static", "Inner box, foam tray tooling, glass."),
-                 ("Variable", "Sleeve, beauty card, the printed layer over the foam, "
-                              "and the inner lining.")):
-        d.text((110, y), check(k, "h"), font=font("h", 28), fill=TEAL)
-        y = para(d, (110, y + 44), v, "b", 25, (210, 210, 214), 720) + 36
-    para(d, (110, 910), "That split is what lets one box carry two SKUs, and lets the "
-         "artwork move without retooling.", "b", 23, (150, 150, 156), 720)
-    foot(d, 6, (90, 90, 96))
+    for i, p in enumerate(("shots/hammer_teal_silver.png",
+                           "shots/hammer_magenta_gold.png")):
+        if os.path.exists(p):
+            art = sheet.fit(Image.open(p).convert("RGB"), (450, 700))
+            pg.paste(art, (960 + i * 480, 200))
+    eyebrow(d, (110, 190), "THE PIECE", TEAL)
+    head(d, (110, 244), "Clearboy\nhammer bubbler", 58, WHITE, 760)
+    y = para(d, (110, 440), "Worked from one hand-blown original. Silver or gold fume "
+             "under a transparent wash, frit rolled into the bowl end, and clear "
+             "marbles set into the band by hand.", "b", 27, (196, 196, 200), 740)
+    y += 40
+    for k, v in (("Length", "140 mm, standing on its own foot."),
+                 ("Chamber", "68 mm, shaped oval rather than blown round."),
+                 ("Glass", "Borosilicate, thick-walled, no seams.")):
+        d.text((110, y), check(k, "h"), font=font("h", 25), fill=TEAL)
+        para(d, (300, y - 2), v, "b", 24, (210, 210, 214), 540)
+        y += 62
+    foot(d, 5, (90, 90, 96))
     return pg
 
 
-def s07_glass():
+def s06_jar():
     pg = Image.new("RGB", PAGE, WHITE)
     d = ImageDraw.Draw(pg)
-    eyebrow(d, (110, 120), "THE GLASS", PINK)
-    head(d, (110, 174), "Reverse-engineered\nfrom one original", 60, BLACK, 900)
-    for i, (p, nm, spec) in enumerate((
-            ("shots/hammer_teal_silver.png", "Clearboy hammer",
-             "140 mm overall. Head 68 long, 42 x 37 oval section. Bowl 25 opening to a "
-             "3 hole. Stem 14 OD on an 8 bore."),
-            ("shots/jar_teal_silver.png", "Nug jar",
-             "92 mm glass on a 44 straight cylinder. 38 mm mouth, tapered cork. Frit "
-             "band and seven clear marbles at the rim."))):
-        x = 1010 + i * 450
+    for i, p in enumerate(("shots/jar_teal_silver.png", "shots/jar_magenta_gold.png")):
         if os.path.exists(p):
-            art = sheet.fit(Image.open(p).convert("RGB"), (400, 450))
-            pg.paste(art, (x, 180))
-        d.text((x, 660), check(nm, "h"), font=font("h", 27), fill=PINK)
-        para(d, (x, 706), spec, "b", 22, BLACK, 390)
-    para(d, (110, 450), "Both pieces come off a solid model measured from the "
-         "hand-blown original, so the shop gets STEP rather than a picture. Fumed and "
-         "frit-rolled, with the linework spun on before the marbles are set.",
-         "b", 27, BLACK, 800)
-    pg.paste(Image.new("RGB", (800, 200), PAPER), (110, 680))
-    dd = ImageDraw.Draw(pg)
-    eyebrow(dd, (146, 722), "COLOUR IS NOT LOCKED", PINK, 22, 5)
-    para(dd, (146, 774), "The teal shown is indicative. Jason is confirming which hues "
-         "the factory can actually pull, and fuming shifts the colour again.",
-         "b", 23, BLACK, 730)
-    foot(d, 7)
+            art = sheet.fit(Image.open(p).convert("RGB"), (420, 690))
+            pg.paste(art, (990 + i * 450, 210))
+    eyebrow(d, (110, 190), "THE PIECE", PINK)
+    head(d, (110, 244), "Nug jar\nand cork", 58, BLACK, 760)
+    y = para(d, (110, 430), "A straight cylinder in the same glass, closed with a "
+             "tapered natural cork. A band of frit under the rim, seven clear marbles "
+             "around the opening, and the JBD mark pressed into the wall.",
+             "b", 27, BLACK, 780)
+    y += 40
+    for k, v in (("Height", "92 mm of glass, plus the cork."),
+                 ("Mouth", "Wide enough to reach into, corked to keep it fresh."),
+                 ("Mark", "Pressed into the glass while it is still molten.")):
+        d.text((110, y), check(k, "h"), font=font("h", 25), fill=PINK)
+        para(d, (300, y - 2), v, "b", 24, BLACK, 560)
+        y += 62
+    foot(d, 6)
     return pg
 
 
-def s08_open():
+def s07_ways():
     pg = Image.new("RGB", PAGE, TEAL)
     d = ImageDraw.Draw(pg)
-    eyebrow(d, (110, 130), "OPEN ITEMS", BLACK)
-    head(d, (110, 184), "What has to close next", 66, BLACK, 1500)
-    items = [("Pattern", "The art on these renders is the Jerome Baker New York Drop 1, "
-                         "used to mock up size and shape. It is not locked. Boutiq "
-                         "pixel and Game Boy artwork replaces it."),
-             ("Glass colour", "Jason to come back with the hues the factory can actually "
-                              "make. The tray and the jar then follow that colour."),
-             ("Boutiq mark", "The lid carries the Boston mark. High-resolution logo pack "
-                             "needed before artwork goes final."),
-             ("Insert", "Confirm the slim tray item is the flat-pack matchbook.")]
-    y = 350
-    for k, v in items:
-        pg.paste(Image.new("RGB", (1700, 4), BLACK), (110, y - 22))
-        d.text((110, y), check(k, "h"), font=font("h", 32), fill=BLACK)
-        para(d, (530, y - 2), v, "b", 26, BLACK, 1280)
-        y += 160
-    foot(d, 8, (10, 100, 98))
+    eyebrow(d, (110, 130), "COLOURWAYS", BLACK)
+    head(d, (110, 184), "Fumed, so no two match", 62, BLACK, 1500)
+    art = shot("Boutique_Colab_Box_Open_R5_C1_Sativa", (700, 700))
+    pg.paste(art, (PAGE[0] - art.width - 110, 310))
+    y = para(d, (110, 360), "Fume is metal laid onto hot glass. It sits under the "
+             "colour and shifts as the piece is used, so the surface keeps moving "
+             "between silver, violet and a warm edge.", "b", 28, BLACK, 880)
+    y += 40
+    for k, v in (("Teal and silver", "Bluish teal body, silver fume, teal frit."),
+                 ("Magenta and gold", "Magenta body, gold fume, magenta frit.")):
+        d.text((110, y), check(k, "h"), font=font("h", 30), fill=BLACK)
+        para(d, (110, y + 48), v, "b", 25, BLACK, 860)
+        y += 124
+    para(d, (110, 930), "Renders shown. Every piece is worked by hand, so the fume and "
+         "the marbles fall differently on each one.", "b", 23, (12, 92, 90), 880)
+    foot(d, 7, (10, 100, 98))
     return pg
 
 
-def s09_timeline():
+def s08_timeline():
     pg = Image.new("RGB", PAGE, WHITE)
     d = ImageDraw.Draw(pg)
     eyebrow(d, (110, 120), "TIMELINE", PINK)
-    head(d, (110, 174), "Ten weeks, working back", 66, BLACK, 1500)
-    steps = [("1 WK", "Final design", "Layout locked, artwork swapped, final quote."),
-             ("8 WKS", "Production", "Made and landed in Massachusetts."),
-             ("1 WK", "Slack", "For the surprises that always come."),
-             ("27 OCT", "Samples", "Full-size mock-ups at the buyers golf tournament, "
-                                   "air-shipped. Pre-sale opens."),
-             ("1 NOV", "Launch", "On shelf ahead of Black Friday.")]
-    x, y, w = 110, 430, 342
-    for i, (when, what, body) in enumerate(steps):
-        col = PINK if i < 3 else TEAL
-        d.rectangle([x, y, x + w - 32, y + 8], fill=col)
-        d.text((x, y + 46), check(when, "px"), font=font("px", 32), fill=col)
-        d.text((x, y + 116), check(what, "h"), font=font("h", 29), fill=BLACK)
-        para(d, (x, y + 164), body, "b", 23, BLACK, w - 46)
+    head(d, (110, 174), "From sign-off to shelf", 66, BLACK, 1500)
+    steps = [("SIGN OFF", "This week", "Design approved as shown, artwork goes final."),
+             ("EIGHT WEEKS", "Production", "Glass blown, cases made, sets packed and "
+                                            "shipped."),
+             ("27 OCT", "Samples", "Full-size sets in hand, air-shipped, ahead of the "
+                                   "buyers tournament."),
+             ("1 NOV", "On shelf", "In store for the holiday run.")]
+    x, y, w = 110, 400, 430
+    for i, (when, sub, body) in enumerate(steps):
+        col = PINK if i < 2 else TEAL
+        d.rectangle([x, y, x + w - 40, y + 8], fill=col)
+        d.text((x, y + 48), check(when, "px"), font=font("px", 30), fill=col)
+        d.text((x, y + 116), check(sub, "h"), font=font("h", 32), fill=BLACK)
+        para(d, (x, y + 170), body, "b", 24, BLACK, w - 60)
         x += w
-    para(d, (110, 800), "Eight weeks of production is the long pole, and the design "
-         "lock is what starts that clock. Pattern and colour are the critical path, "
-         "not the tooling.", "b", 27, BLACK, 1600)
-    foot(d, 9)
+    para(d, (110, 760), "Eight weeks of production is the long pole, and it does not "
+         "start until the design is locked. Sign-off is what puts the set on shelf for "
+         "the holidays.", "b", 27, BLACK, 1600)
+    foot(d, 8)
     return pg
 
 
-def s10_close():
+def s09_close():
     pg = Image.new("RGB", PAGE, BLACK)
     pg.paste(stickers(PAGE, (32, 32, 36), BLACK, 0.9), (0, 0))
     d = ImageDraw.Draw(pg)
-    lockup(d, (110, 372), 64, WHITE)
-    head(d, (110, 530), "Lets level up", 90, WHITE, 1400)
-    para(d, (110, 720), "Send the Boutiq artwork and the Boston logo pack and the "
-         "layout can be locked this week.", "b", 30, (186, 186, 190), 900)
-    eyebrow(d, (110, 890), "JEROME BAKER DESIGNS  BOUTIQ  2026", (110, 110, 116), 20, 5)
-    foot(d, 10, (90, 90, 96))
+    art = shot("Boutique_Colab_Three_Boxes_R2_C1", (740, 740))
+    pg.paste(art, (PAGE[0] - art.width - 90, (PAGE[1] - art.height) // 2))
+    lockup(pg, d, (110, 396), 60, WHITE)
+    head(d, (110, 580), "Ready for\nyour sign-off", 72, WHITE, 800)
+    para(d, (110, 776), "Approve the design as shown and artwork goes final "
+         "this week.", "b", 30, (186, 186, 190), 700)
+    eyebrow(d, (110, 860), "JEROME BAKER DESIGNS  BOUTIQ", (110, 110, 116), 20, 5)
+    foot(d, 9, (90, 90, 96))
     return pg
 
 
-SLIDES = [s01_cover, s02_where, s03_set, s04_skus, s05_lids,
-          s06_build, s07_glass, s08_open, s09_timeline, s10_close]
+SLIDES = [s01_cover, s02_box, s03_series, s04_inside,
+          s05_hammer, s06_jar, s07_ways, s08_timeline, s09_close]
 
 
 def build():
     os.makedirs("shots", exist_ok=True)
     pages = [fn() for fn in SLIDES]
-    sheet.save(pages, OUT, "JBD x Boutiq - collector box review")
+    sheet.save(pages, OUT, "JBD x Boutiq - collector box set")
     if os.path.isdir("docs"):
         try:
             shutil.copyfile(OUT, SITE)

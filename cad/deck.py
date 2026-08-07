@@ -6,16 +6,19 @@ the sticker pile behind the section breaks. Urbane Rounded sets the headings and
 Silkscreen sets every number, eyebrow and badge - which is also how the brand handles
 its own wordmarks, and conveniently the one face here with a full character set.
 
-Content follows the 4 August call: 25 + 3 at 28 all in, 10,000 units into Massachusetts,
-Indica and Sativa with no hybrid, November 1. Nothing is claimed as settled that was
-left open on that call - the pattern swap, the glass colour and the Boston logo pack
-all sit on the open-items page, where they belong.
+The deck exists to get the design signed off, so it carries the case, the sleeves, the
+glass and the schedule - and none of the commercial terms, volumes or open internal
+questions that belong in the call rather than in front of the partner.
+
+The Boutiq wordmark is their glitchmark artwork lifted from the guide and placed as
+supplied. It is never redrawn, recoloured or stretched, and the pixel container shape is
+not borrowed for any label of ours.
 
     python cad/deck.py     -> shots/JBD_x_Boutiq_Deck.pdf, docs/
 """
 import os, shutil, sys
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sheet
@@ -24,6 +27,7 @@ SHOTS = "C:/Users/zelid/Downloads"
 OUT = os.path.join("shots", "JBD_x_Boutiq_Deck.pdf")
 SITE = os.path.join("docs", "JBD_x_Boutiq_Deck.pdf")
 PATTERN = os.path.join("assets", "boutiq_stickers.png")
+GLITCH = os.path.join("assets", "boutiq_glitchmark.png")
 
 PAGE = (1920, 1080)
 PINK = (218, 25, 132)
@@ -123,15 +127,48 @@ def badge(d, xy, text, h=34, fill=None, ink=WHITE, track=None):
     return box[2] - box[0]
 
 
-def lockup(d, xy, h=44, ink=WHITE):
-    """JBD x BOUTIQ, the way the lid carries it."""
+def tag(d, xy, text, h=32, fill=PINK, ink=WHITE):
+    """Our own label pill. Deliberately not the Boutiq container shape - that shape is
+    their wordmark's and does not get borrowed for anything else."""
     x, y = xy
     f = font("px", h)
-    d.text((x, y + h * 0.52), "JBD", font=f, fill=ink)
-    x += d.textlength("JBD", font=f) + h * 0.7
-    d.text((x, y + h * 0.52), "x", font=f, fill=ink)
-    x += d.textlength("x", font=f) + h * 0.7
-    return x + badge(d, (x, y), "BOUTIQ", h, ink=ink)
+    track = h * 0.22
+    w = sum(d.textlength(c, font=f) for c in text) + track * (len(text) - 1)
+    pad, box_h = h * 0.70, h * 1.8
+    d.rounded_rectangle([x, y, x + w + 2 * pad, y + box_h],
+                        radius=box_h / 2, fill=fill)
+    bb = f.getbbox(text)
+    cx = x + pad
+    for c in text:
+        d.text((cx, y + (box_h - (bb[3] - bb[1])) / 2 - bb[1]), c, font=f, fill=ink)
+        cx += d.textlength(c, font=f) + track
+    return w + 2 * pad
+
+
+def lockup(pg, d, xy, h=44, ink=WHITE):
+    """JBD x BOUTIQ. The Boutiq half is their glitchmark artwork, placed as supplied -
+    not redrawn, not recoloured, not stretched. It ships knocked out of black, so it
+    goes down with a lighten so the panel disappears into a dark slide and the mark
+    itself is untouched.
+
+    Returns the right edge, and centres JBD and the mark on one optical axis."""
+    x, y = xy
+    f = font("px", h)
+    mark = Image.open(GLITCH).convert("RGB")
+    mh = int(h * 2.05)
+    mark = mark.resize((max(int(mark.width * mh / mark.height), 1), mh), Image.LANCZOS)
+    mid = y + mh / 2
+
+    bb = f.getbbox("JBD")
+    d.text((x, mid - (bb[3] + bb[1]) / 2), "JBD", font=f, fill=ink)
+    x += d.textlength("JBD", font=f) + h * 0.78
+    bx = f.getbbox("x")
+    d.text((x, mid - (bx[3] + bx[1]) / 2), "x", font=f, fill=ink)
+    x += d.textlength("x", font=f) + h * 0.78
+
+    box = (int(x), int(y), int(x) + mark.width, int(y) + mark.height)
+    pg.paste(ImageChops.lighter(pg.crop(box), mark), box)
+    return box[2]
 
 
 def shot(name, box):
