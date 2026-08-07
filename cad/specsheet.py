@@ -93,6 +93,49 @@ WAYS = [("teal_silver", "Bluish teal body, silver fume. Teal frit, clear marbles
         ("magenta_gold", "Magenta body, gold fume. Magenta frit, clear marbles.")]
 
 
+# Every mark that is fired onto the glass. Two of them, and they are easy to miss on a
+# drawing because neither is a shape you can measure with a caliper.
+DECALS = [
+    ("Hammer stem", "Artwork", "JBD x Boutiq lockup, dropped out in white on the "
+                               "colourway ground. Supplied as vector."),
+    ("Hammer stem", "Position", "Band round the stem, 20-74 mm up from the foot face, "
+                                "wrapped on the 14 mm OD tube."),
+    ("Hammer stem", "Height", "54 mm on the stem, wrapping the camera side of the tube."),
+    ("Hammer stem", "Reading", "Reads along the stem one way only. Strike it to read "
+                               "with the head to the LEFT - that is how the case lays it."),
+    ("Jar back", "Artwork", "Boutiq mark on the same colourway ground as the stem band."),
+    ("Jar back", "Position", "Opposite the pressed JBD mark, 19.5-26.5 mm up from the "
+                             "base, on the 44 mm OD body."),
+    ("Jar back", "Height", "7 mm band, centred on the back face."),
+    ("Both", "Method", "Fired ceramic / enamel decal, applied AFTER annealing and kiln "
+                       "cured onto the glass. Not a pressure-sensitive sticker, not a "
+                       "UV or pad print sitting on the surface."),
+    ("Both", "Firing", "Per the decal supplier's schedule for borosilicate. Fire a "
+                       "sample first and confirm the cure does not shift the fume - "
+                       "fume moves with heat and the colour is the product."),
+    ("Both", "Durability", "Must survive handling and washing. Any peel, scratch-off "
+                           "or edge lift is a reject, not a touch-up."),
+    ("Both", "Registration", "Square to the piece axis and centred within 1 mm. No "
+                             "stretching or distortion of the lockup at any size."),
+]
+
+# One line per thing that goes in the case, so nothing is assumed to be somebody else's
+# job. Quantities are per set.
+BOM = [
+    ("Glass", "Clearboy hammer bubbler", "1 per set", "fumed to the set colourway"),
+    ("Glass", "Nug jar", "1 per set", "same colourway as the hammer"),
+    ("Glass", "Natural cork", "1 per set", "fitted to its own jar"),
+    ("Glass", "Flower jar, 7 g, labelled", "1 per set", "must fit its tray recess"),
+    ("Insert", "Flat-pack wood matches", "1 per set", "matches, not rolling papers"),
+    ("Case", "Leatherette case, hinged lid", "1 per set", "numbered on the side panel"),
+    ("Case", "Die-cut foam tray", "1 per set", "one cut recess per item"),
+    ("Case", "Printed layer over the foam", "1 per set", "artwork varies by colourway"),
+    ("Case", "Inner lining", "1 per set", ""),
+    ("Print", "Outer sleeve", "1 per set", "teal or magenta - the set colourway"),
+    ("Print", "Beauty card", "1 per set", ""),
+]
+
+
 PAGES = {
     "hammer": ("Clearboy hammer bubbler",
                "Hand-blown boro 3.3 \u00b7 140 mm \u00b7 one-piece head, stem and foot"),
@@ -102,6 +145,10 @@ PAGES = {
     "jar": ("Nug jar and cork",
             "Straight cylinder, flat closed bottom, tapered natural cork "
             "\u00b7 92 mm glass"),
+    "decals": ("Decals and printed marks",
+               "Everything fired onto the glass, and how it is registered"),
+    "bom": ("Box contents",
+            "One line per item in the set - quantities are per box"),
     "decor": ("Decoration and colourways",
               "Frit, marbles, the enamel label and the pressed mark \u2014 both "
               "colourways carry the same work"),
@@ -134,15 +181,16 @@ def use(lang):
     if lang == "zh":
         import specsheet_zh as z
         T = {k: getattr(z, k) for k in
-             ("HAMMER", "JAR", "DECOR", "NOTES", "WAYS", "PAGES", "CLOSEUPS",
-              "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER", "FOOTER", "TITLE",
-              "WAY_NAMES")}
+             ("HAMMER", "JAR", "DECOR", "DECALS", "BOM", "NOTES", "WAYS",
+              "PAGES", "CLOSEUPS", "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER",
+              "FOOTER", "TITLE", "WAY_NAMES")}
         OUT = os.path.join("shots", "JBD_Clearboy_spec_ZH.pdf")
         SITE = os.path.join("docs", "JBD_Clearboy_spec_ZH.pdf")
     else:
         T = {k: here[k] for k in
-             ("HAMMER", "JAR", "DECOR", "NOTES", "WAYS", "PAGES",
-              "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER", "FOOTER", "TITLE")}
+             ("HAMMER", "JAR", "DECOR", "DECALS", "BOM", "NOTES", "WAYS",
+              "PAGES", "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER", "FOOTER",
+              "TITLE")}
         T["CLOSEUPS"] = {k: (t, sub) for k, t, sub in CLOSEUPS}
         OUT = os.path.join("shots", "JBD_Clearboy_spec.pdf")
         SITE = os.path.join("docs", "JBD_Clearboy_spec.pdf")
@@ -216,6 +264,40 @@ def _page_jar(n):
         im = sheet.fit(Image.open(p).convert("RGB"), (380, 640))
         pg.paste(im, (PAGE[0] - im.width - 110, 300))
     _notes(d, y + 46)
+    return pg
+
+
+def _prose(d, rows, y, label_x=300, width=1240):
+    """Grouped prose rows - a label and a paragraph, the group named once. What the
+    decoration and decal pages want; a dimension table would strand the sentences in a
+    column a third of the page wide."""
+    f = sheet.font(False, 21)
+    last = None
+    for who, what, how in rows:
+        if who != last:
+            d.text((96, y), who.upper(), font=sheet.font(True, 19), fill=RED)
+            y += 32
+            last = who
+        d.text((114, y), what, font=sheet.font(True, 22), fill=INK)
+        txt, n = sheet.wrap(d, how, f, width)
+        d.multiline_text((label_x, y), txt, font=f, fill=INK, spacing=9)
+        y += 42 + 30 * (n - 1)
+        d.line([(96, y - 12), (1554, y - 12)], fill=RULE, width=1)
+        y += 8
+    return y
+
+
+def _page_decals(n):
+    pg, d = sheet.blank()
+    _head(d, T["PAGES"]["decals"][0], T["PAGES"]["decals"][1], n)
+    _prose(d, T["DECALS"], 300, label_x=380, width=1160)
+    return pg
+
+
+def _page_bom(n):
+    pg, d = sheet.blank()
+    _head(d, T["PAGES"]["bom"][0], T["PAGES"]["bom"][1], n)
+    _table(d, T["BOM"], 96, 290, 1460, lead=44)
     return pg
 
 
@@ -392,6 +474,9 @@ SOP_FINISH = [
         "face, JBD × Boutiq dropped out in white, kiln-cured to the glass.",
         "Strike the print to read with the head to the left. The box lays the piece "
         "that way; struck the other way round it reads upside down in the tray.",
+        "The jar carries a fired decal as well - the Boutiq mark on the back face, "
+        "19.5-26.5 mm up, opposite the pressed JBD mark. Same process, same run. Both "
+        "are specified on the decal page.",
     ]),
     ("Hold points", [
         "H1  chamber - 68 long, 42 × 37 section, before the bowl is opened.",
@@ -459,7 +544,7 @@ PLAN = ([_page_hammer]
         + [(lambda n, c=c: _page_closeup(n, *c)) for c in CLOSEUPS[:3]]
         + [_page_survey, _page_jar]
         + [(lambda n, c=c: _page_closeup(n, *c)) for c in CLOSEUPS[3:]]
-        + [_page_decor, _page_sop_hammer, _page_sop_jar, _page_sop_finish])
+        + [_page_decor, _page_decals, _page_bom, _page_sop_hammer, _page_sop_jar, _page_sop_finish])
 TOTAL = len(PLAN)
 
 
