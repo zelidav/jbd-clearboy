@@ -58,13 +58,19 @@ JAR = [
 DECOR = [
     ("Hammer", "Frit", "Rolled over the bowl end of the head — the outer 54 mm of the "
                        "68 mm chamber, densest at the rim. Worked in, not a coating."),
-    ("Hammer", "Marbles", "4 clear marbles, ø 6.5–7.5, set into the fritted band. "
-                          "Hand-placed, not evenly spaced."),
+    ("Hammer", "Linework", "About 13 turns at 2.4 pitch over the head, plus rings at the "
+                           "foot. Clear over the fritted body. Laid down before the "
+                           "marbles, so it runs behind them."),
+    ("Hammer", "Marbles", "4 clear marbles, ø 6.5–7.5, set into the fritted band over "
+                          "the linework. Hand-placed, not evenly spaced."),
     ("Hammer", "Label", "Enamel, on the stem, 20–74 mm up from the foot face. JBD × Boutiq "
                         "dropped out in white. The print reads one way along the stem — strike "
                         "it to read with the head to the left."),
     ("Jar", "Frit", "Band around the opening, 66–90.5 mm up from the base."),
-    ("Jar", "Marbles", "7 clear marbles, ø 8, evenly spaced, centres 84.5 mm up."),
+    ("Jar", "Linework", "9 turns at 2.4 pitch over the frit band, laid down before the "
+                        "marbles."),
+    ("Jar", "Marbles", "7 clear marbles, ø 8, evenly spaced, centres 84.5 mm up, set "
+                       "over the linework."),
     ("Jar", "Mark", "JBD pressed into a molten stamp pad, lower middle, centre 28 mm up. "
                     "Die face ≈ 28 × 11 mm; the mark itself runs ≈ 25 mm wide."),
 ]
@@ -259,12 +265,18 @@ SOP_HAMMER = [
         "colour laid under it kills that.",
         "Lay the transparent wash over the fume, even from lobe to rim.",
     ]),
-    ("Frit and marbles", [
+    ("Frit and linework", [
         "Roll the bowl end in frit over the outer 54 mm of the chamber, densest at the "
         "rim, thinning out toward the lobe. Melt it in flush - it is worked into the "
         "wall, not a coating sitting on it.",
-        "Set 4 clear marbles ø 6.5-7.5 into the fritted band by hand. They are not "
-        "evenly spaced and should not look it. Encase them fully; no open seam.",
+        "Spin the linework down next, about 13 turns at 2.4 pitch over the head, plus "
+        "a few rings round the foot. Clear over the fritted body.",
+    ]),
+    ("Marbles", [
+        "Set 4 clear marbles ø 6.5-7.5 into the fritted band by hand, on top of the "
+        "linework - the lines run behind them, not across them.",
+        "They are not evenly spaced and should not look it. Encase them fully; no "
+        "open seam.",
     ]),
     ("Bowl and carb", [
         "Open the bowl at the rim end to ø 25, 19 deep, funnelled down to the ø 3 hole "
@@ -279,10 +291,6 @@ SOP_HAMMER = [
         "Flare the foot to ø 24.5 × 7 thick and break the edges about 1.6. It has to "
         "stand square: 140 overall, no rock.",
     ]),
-    ("Linework", [
-        "Spin the linework on last: about 13 turns at 2.4 pitch down the head, plus a "
-        "few rings round the foot. Clear over the fritted body.",
-    ]),
 ]
 
 SOP_JAR = [
@@ -291,17 +299,20 @@ SOP_JAR = [
         "with a 3 floor - flat enough to stand without rocking.",
         "Fume the inside, then lay the wash over it, same order as the hammer.",
     ]),
-    ("Frit, marbles, mark", [
+    ("Frit and linework", [
         "Frit band 66-90.5 up from the base, melted in flush.",
-        "Set 7 clear marbles ø 8 evenly round the opening, centres 84.5 up. Evenly "
-        "spaced here - the jar reads as a ring, the hammer does not.",
+        "Spin 9 turns at 2.4 pitch over the frit band. Lines go down before any "
+        "marble is set.",
+    ]),
+    ("Marbles and mark", [
+        "Set 7 clear marbles ø 8 evenly round the opening, centres 84.5 up, over the "
+        "linework. Evenly spaced here - the jar reads as a ring, the hammer does not.",
         "Press the JBD mark into a molten stamp pad on the wall, lower middle, centre "
         "28 up. Die face about 28 × 11.",
     ]),
     ("Mouth", [
         "Open and true the mouth to ø 38 ID. Hold the OD at 44 right up to the rim - "
         "straight cylinder, no shoulder, no flare.",
-        "Spin 9 turns at 2.4 pitch over the frit band.",
     ]),
     ("Cork", [
         "Natural cork, 27 long, ø 36.6 at the bottom and ø 41 at the top. One gentle "
@@ -398,13 +409,22 @@ PLAN = ([_page_hammer]
 TOTAL = len(PLAN)
 
 
+def publish(src, dst):
+    """Copy into docs/, but a PDF open in a viewer holds a lock on Windows - say so
+    rather than taking the whole build down with it."""
+    try:
+        shutil.copyfile(src, dst)
+        print("wrote", dst)
+    except PermissionError:
+        print("LOCKED, not updated:", dst, "- close it and re-run")
+
+
 def build():
     os.makedirs("shots", exist_ok=True)
     pages = [fn(i + 1) for i, fn in enumerate(PLAN)]
     sheet.save(pages, OUT, "JBD Clearboy — manufacturing spec")
     if os.path.isdir("docs"):
-        shutil.copyfile(OUT, SITE)
-        print("wrote", SITE)
+        publish(OUT, SITE)
     return OUT
 
 
@@ -450,8 +470,7 @@ def build_pack():
     print("wrote", PACK, "- %.1f MB, %d files"
           % (os.path.getsize(PACK) / 1e6, len(items) - len(missing) + 1))
     if os.path.isdir("docs"):
-        shutil.copyfile(PACK, PACK_SITE)
-        print("wrote", PACK_SITE)
+        publish(PACK, PACK_SITE)
     return PACK
 
 

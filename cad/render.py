@@ -274,9 +274,12 @@ class Renderer:
             min_thick=0.0, max_thick=60.0,
             fume_stops=((1.0, 1.0, 1.0), (0.92, 0.95, 1.02),
                         (0.95, 0.90, 1.05), (1.02, 0.95, 0.86)),
-            fume_pow=1.4, smooth=36.0):
+            fume_pow=1.4, smooth=36.0, role=""):
         """solid=True depth-tests the density pass, so only the surface facing the
-        camera draws contour - the piece stops reading as an X-ray of its own walls."""
+        camera draws contour - the piece stops reading as an X-ray of its own walls.
+
+        role names the part so the passes can treat it as what it is: 'marbles' stand
+        proud of the wall, 'lines' are spun on before them and have to pass behind."""
         v, n, f = load(path, smooth)
         vbo = self.ctx.buffer(np.hstack([v, n]).astype('f4').tobytes())
         ibo = self.ctx.buffer(f.astype('i4').tobytes())
@@ -284,7 +287,7 @@ class Renderer:
                 for k, p in self.progs.items()}
         self.objs.append(dict(vaos=vaos, absorb=absorb, fume=fume, line=line,
                               kAmt=kAmt, kPow=kPow, spec=spec, decal=decal,
-                              solid=solid, lens=lens,
+                              solid=solid, lens=lens, role=role,
                               min_thick=min_thick, max_thick=max_thick,
                               fume_stops=fume_stops, fume_pow=fume_pow))
 
@@ -373,14 +376,67 @@ class Renderer:
 
         # 3b density - every surface for see-through glass, front only for solid colour
         p = self.progs['dens']; setmats(p); ctx.depth_func = '<='
-        for o in self.objs:
-            if o['solid']:
-                ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE); ctx.cull_face = 'back'
+        lines = [o for o in self.objs if o['role'] == 'lines']
+        marbles = [o for o in self.objs if o['role'] == 'marbles']
+
+        def density(objs):
+            for o in objs:
+                if o['solid']:
+                    ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+                    ctx.cull_face = 'back'
+                else:
+                    ctx.disable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+                set_u(p, 'lineCol', o['line']); set_u(p, 'kAmt', o['kAmt'])
+                set_u(p, 'kPow', o['kPow'])
+                o['vaos']['dens'].render(moderngl.TRIANGLES)
+
+        density([o for o in self.objs if o not in lines])
+
+        # 3b1 the linework is spun on before the marbles are set, so it has to pass
+        # behind them. Everything else it may run through - that see-through wrap is
+        # what reads as glass - so it is depth-tested against the marbles alone, on a
+        # depth buffer holding nothing else.
+        if lines:
+            if marbles:
+                ctx.disable(moderngl.BLEND)
+                self.main_fbo.color_mask = (False, False, False, False)
+                self.main_fbo.clear(depth=1.0)
+                ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+                ctx.cull_face = 'back'; ctx.depth_func = '<'
+                setmats(self.progs['dens'])
+                for o in marbles:
+                    o['vaos']['dens'].render(moderngl.TRIANGLES)
+                self.main_fbo.color_mask = (True, True, True, True)
+                ctx.enable(moderngl.BLEND)
+                ctx.blend_func = (moderngl.ZERO, moderngl.SRC_COLOR)
+                ctx.depth_func = '<='
+                # depth-tested so a marble hides it, but unculled and not writing depth:
+                # every crossing of the wrap has to land, and that build-up is what
+                # gives the line its weight through the glass
+                ctx.enable(moderngl.DEPTH_TEST)
+                ctx.disable(moderngl.CULL_FACE)
+                self.main_fbo.depth_mask = False
+                setmats(p)
+                for o in lines:
+                    set_u(p, 'lineCol', o['line']); set_u(p, 'kAmt', o['kAmt'])
+                    set_u(p, 'kPow', o['kPow'])
+                    o['vaos']['dens'].render(moderngl.TRIANGLES)
+                # put the scene's own depth back for the specular pass
+                self.main_fbo.depth_mask = True
+                self.main_fbo.color_mask = (False, False, False, False)
+                self.main_fbo.clear(depth=1.0)
+                ctx.disable(moderngl.BLEND)
+                ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
+                ctx.depth_func = '<'
+                setmats(self.progs['dens'])
+                for o in self.objs:
+                    o['vaos']['dens'].render(moderngl.TRIANGLES)
+                self.main_fbo.color_mask = (True, True, True, True)
+                ctx.enable(moderngl.BLEND)
+                ctx.blend_func = (moderngl.ZERO, moderngl.SRC_COLOR)
+                ctx.depth_func = '<='
             else:
-                ctx.disable(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
-            set_u(p, 'lineCol', o['line']); set_u(p, 'kAmt', o['kAmt'])
-            set_u(p, 'kPow', o['kPow'])
-            o['vaos']['dens'].render(moderngl.TRIANGLES)
+                density(lines)
 
         # 3b2 lens: marbles refract the frit and linework under them
         lenses = [o for o in self.objs if o['lens']]
