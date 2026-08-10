@@ -39,6 +39,11 @@ PIECES = {
      cam_r=204.0, target=(0, 0, 0), fov=17.0, shadow=(0.5, 0.40, 0.06),
      tilt=-90.0, shift=(46.0, 0.0, 0.0), size=(1200, 520), decal=None,
      name="Joint holder", note="90 mm - the bell grips any joint"),
+ "tip": dict(
+     body="out/tip.stl",
+     cam_r=104.0, target=(0, 0, 0), fov=17.0, shadow=(0.5, 0.36, 0.08),
+     tilt=-90.0, shift=(9.5, 0.0, 0.0), size=(1100, 620), decal=None,
+     name="Glass tip", note="19 mm - screen inside, paper slot outside"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
@@ -258,11 +263,12 @@ def build_renderer(piece, key, W, H, decal_turn=0):
     # a clear marble has to catch light to be seen at all, while a tinted one only
     # needs a whisper - too much and the far side rings through the body
     tinted = "marble" in c
-    r.add(p["marbles"], absorb=c.get("marble", MARBLE["absorb"]), fume=0.0,
-          line=(0.52, 0.56, 0.60) if not tinted else MARBLE["line"],
-          kAmt=0.10 if tinted else 0.26, kPow=5.0 if tinted else 3.8,
-          spec=1.30 if tinted else 1.85, smooth=60.0, lens=0.055,
-          solid=tinted, min_thick=0.8 if tinted else 0.0, role="marbles")
+    if p.get("marbles"):
+        r.add(p["marbles"], absorb=c.get("marble", MARBLE["absorb"]), fume=0.0,
+              line=(0.52, 0.56, 0.60) if not tinted else MARBLE["line"],
+              kAmt=0.10 if tinted else 0.26, kPow=5.0 if tinted else 3.8,
+              spec=1.30 if tinted else 1.85, smooth=60.0, lens=0.055,
+              solid=tinted, min_thick=0.8 if tinted else 0.0, role="marbles")
     which = c.get("lines")
     lines = p.get("lines_%s" % which) if which else None
     if lines:
