@@ -9,6 +9,14 @@ adjust, no insert to lose.
 Three marbles sit proud along one side. They are decoration, but they are also why it
 does not roll off a table.
 
+A ring at the mouthpiece takes a chain. It sits on the back face, opposite the marbles,
+so hung round a neck the piece falls bell-down with the stones facing out.
+
+There is no frit on this piece. The body carries spun linework instead - several strands
+of colour wound down the tube together, which is the older trick and reads far better on
+something this slim. Stones come in two materials at once so a course can be opal and
+diamond rather than one or the other.
+
     python holder.py out   -> out/holder.stl/.step, out/holder_frit.stl,
                               out/holder_marbles.stl, out/holder_bling.stl
 """
@@ -37,7 +45,16 @@ P = dict(
     marble_to=0.56,
     bling=0,              # stones set round the bell shoulder
     bling_r=1.7,
-    frit_from=0.68,       # frit band, fractions of the length
+    loop=1,               # bail at the mouthpiece - wears on a chain
+    loop_r=4.0,           # ring, centre to centre of the glass
+    loop_t=1.45,          # thickness of the ring itself
+    loop_z=7.5,           # how far up from the mouthpiece it sits
+    spin=3,               # strands of colour wound down the body
+    spin_turns=6.0,
+    spin_r=0.46,
+    spin_from=0.10,       # the wound run stops at the shoulder - the bell is for stones
+    spin_to=0.60,
+    frit_from=0.68,       # kept for anything that still wants a frit band
     frit_to=1.0,
 )
 
@@ -85,6 +102,17 @@ def build(p=None):
     p = dict(P, **(p or {}))
     body = _revolve(_profile(p))
     body = body.cut(_revolve(_bore(p)))
+
+    if p.get("loop"):
+        # A bail at the mouthpiece, so it wears on a chain. The ring sits on the back
+        # face - opposite the marbles - and its hole runs across the piece, so hung on
+        # a chain it falls bell-down with the marbles and the stones facing out rather
+        # than into the wearer.
+        z = p["loop_z"]
+        R, t = p["loop_r"], p["loop_t"]
+        y = radius_at(z, p) + R - t * 0.75
+        ring = cq.Solid.makeTorus(R, t, cq.Vector(0, y, z), cq.Vector(1, 0, 0))
+        body = body.union(cq.Workplane(obj=ring))
     # break the two edges a mouth actually touches
     try:
         body = body.edges(cq.selectors.NearestToPointSelector((0, 0, 0))).fillet(0.7)
@@ -148,27 +176,59 @@ def build_marbles(p=None):
 
 
 def build_bling(p=None):
-    """Stones set round the bell shoulder, and a second course down the waist once
-    there are enough of them to need somewhere to go."""
+    """Stones set in courses - round the bell shoulder first, then back down the body
+    as the count grows. Returns two meshes, alternating, so a course can be cut in two
+    materials: opal next to diamond rather than a row of one thing."""
     p = dict(P, **(p or {}))
     n = int(p["bling"])
     if n <= 0:
-        return trimesh.Trimesh()
+        return trimesh.Trimesh(), trimesh.Trimesh()
     r = p["bling_r"]
-    zs = [p["length"] - p["bell_len"] + 2.0]
-    if n > 14:
-        zs.append(p["length"] - p["bell_len"] - 7.0)
-    if n > 28:
-        zs.append(p["length"] * 0.24)
-    out, k = [], 0
+    L, bell = p["length"], p["bell_len"]
+    zs = [L - bell + 2.5, L - bell * 0.62]
+    if n > 20:
+        zs.append(L - bell * 0.24)          # right out on the flare
+    if n > 34:
+        zs.append(L - bell - 5.0)           # and a course behind the shoulder
+    if n > 50:
+        zs.append(L - bell - 12.0)
     per = int(math.ceil(n / float(len(zs))))
-    for z in zs:
-        rad = radius_at(z, p) + r * 0.34
+    a_side, b_side, k = [], [], 0
+    for ci, z in enumerate(zs):
+        rad = radius_at(z, p) + r * 0.36
         for i in range(min(per, n - k)):
-            a = 2 * math.pi * i / float(per) + 0.4 * zs.index(z)
-            out.append(_stone(r, (rad * math.sin(a), rad * math.cos(a), z), seed=k))
+            a = 2 * math.pi * i / float(per) + 0.5 * ci
+            st = _stone(r * (0.82 + 0.36 * ((i + ci) % 3) / 2.0),
+                        (rad * math.sin(a), rad * math.cos(a), z), seed=k)
+            (a_side if (i + ci) % 2 == 0 else b_side).append(st)
             k += 1
-    return trimesh.util.concatenate(out) if out else trimesh.Trimesh()
+    cat = trimesh.util.concatenate
+    return (cat(a_side) if a_side else trimesh.Trimesh(),
+            cat(b_side) if b_side else trimesh.Trimesh())
+
+
+def build_spin(p=None):
+    """Colour wound down the body. One mesh per strand, so each takes its own colour -
+    that is what makes it read as a twist rather than a stripe."""
+    p = dict(P, **(p or {}))
+    n = int(p["spin"])
+    if n <= 0:
+        return []
+    turns, r = p["spin_turns"], p["spin_r"]
+    z0, z1 = p["length"] * p["spin_from"], p["length"] * p["spin_to"]
+    steps = max(int(turns * 90), 120)
+    out = []
+    for si in range(n):
+        beads, phase = [], 2 * math.pi * si / float(n)
+        for i in range(steps + 1):
+            t = i / float(steps)
+            z = z0 + (z1 - z0) * t
+            a = phase + 2 * math.pi * turns * t
+            rad = radius_at(z, p) + r * 0.55
+            beads.append(_sphere(r, (rad * math.sin(a), rad * math.cos(a), z),
+                                 subdiv=1))
+        out.append(trimesh.util.concatenate(beads))
+    return out
 
 
 def build_frit(p=None, grains=620, seed=11):
@@ -201,7 +261,9 @@ if __name__ == "__main__":
     cq.exporters.export(m, os.path.join(out, "holder.stl"),
                         tolerance=0.03, angularTolerance=0.12)
     build_marbles().export(os.path.join(out, "holder_marbles.stl"))
-    build_frit().export(os.path.join(out, "holder_frit.stl"))
-    b = build_bling(dict(bling=18))
-    b.export(os.path.join(out, "holder_bling.stl"))
+    for i, m in enumerate(build_spin()):
+        m.export(os.path.join(out, "holder_spin%d.stl" % i))
+    a, b = build_bling(dict(bling=28))
+    a.export(os.path.join(out, "holder_bling.stl"))
+    b.export(os.path.join(out, "holder_bling2.stl"))
     print("exported")

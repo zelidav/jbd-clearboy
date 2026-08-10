@@ -20,7 +20,7 @@ CONTACT = "david@canismajorpartners.com"
 RENDER_URL = "https://jbd-clearboy-render-804083036164.us-east1.run.app/render"
 RENDER_KEY = "NBvIvBZfVeFWVrIYSBqy6Sa-"
 
-PIECES = ["hammer", "jar"]
+PIECES = ["hammer", "jar", "holder"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
 PIECE_META = {
@@ -28,6 +28,8 @@ PIECE_META = {
                    note="140 mm, from the measured original"),
     "jar":    dict(name="Nug jar", code="JBD-NJ-92",
                    note="92 mm straight cylinder, 38 mm opening, cork lid"),
+    "holder": dict(name="Joint holder", code="JBD-JH-90",
+                   note="90 mm, flared bell grips any joint, marbles stop it rolling"),
 }
 # sampled off assets/northstar_rods.jpg - what the shop can actually pull
 STOCK = {
@@ -85,6 +87,26 @@ BASE = {
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
    dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
+ ],
+ "holder": [
+   dict(k="length",     label="Overall length",   v=90,   min=76,  max=112, step=1,   unit="mm"),
+   dict(k="bell_od",    label="Bell outside",     v=23,   min=17,  max=31,  step=0.5, unit="mm"),
+   dict(k="bell_id",    label="Bell opening",     v=15,   min=10,  max=22,  step=0.5, unit="mm"),
+   dict(k="throat_id",  label="Throat",           v=6.4,  min=4,   max=11,  step=0.2, unit="mm"),
+   dict(k="bell_len",   label="Bell length",      v=26,   min=16,  max=40,  step=1,   unit="mm"),
+   dict(k="body_od",    label="Shoulder OD",      v=13.2, min=10,  max=19,  step=0.2, unit="mm"),
+   dict(k="waist_od",   label="Waist OD",         v=10.4, min=8,   max=16,  step=0.2, unit="mm"),
+   dict(k="mouth_od",   label="Mouthpiece OD",    v=9.6,  min=7,   max=15,  step=0.2, unit="mm"),
+   dict(k="mouth_bore", label="Mouthpiece bore",  v=4.2,  min=3,   max=7,   step=0.1, unit="mm"),
+   dict(k="marbles",    label="Marbles",          v=3,    min=0,   max=6,   step=1,   unit=""),
+   dict(k="marble_r",   label="Marble radius",    v=4.2,  min=2.5, max=6.5, step=0.1, unit="mm"),
+   dict(k="bling",      label="Stones",           v=0,    min=0,   max=60,  step=1,   unit=""),
+   dict(k="bling_r",    label="Stone radius",     v=2.2,  min=1.0, max=3.4, step=0.1, unit="mm"),
+   dict(k="spin",       label="Twist strands",    v=3,    min=0,   max=6,   step=1,   unit=""),
+   dict(k="spin_turns", label="Twist turns",      v=6,    min=2,   max=16,  step=1,   unit="turns"),
+   dict(k="loop_r",     label="Chain ring",       v=4.0,  min=2.5, max=7.0, step=0.1, unit="mm"),
+   dict(k="loop_t",     label="Ring section",     v=1.45, min=0.9, max=2.6, step=0.05, unit="mm"),
+   dict(k="frit_from",  label="Frit starts at",   v=68,   min=30,  max=95,  step=1,   unit="%"),
  ],
  "jar": [
    dict(k="height",  label="Glass height",     v=92, min=70, max=130, step=1,   unit="mm"),
@@ -153,6 +175,10 @@ SPECS = {
     "hammer": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
                ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
                ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
+    "holder": [["Overall length", "90", "mm"], ["Bell", "&empty;23", "mm"],
+               ["Grip cone", "&empty;6.4 &ndash; 15", "mm"],
+               ["Mouthpiece", "&empty;9.6", "mm"],
+               ["Glass", "&asymp; 20", "g"], ["Marbles", "3", "one side"]],
     "jar":    [["Glass height", "92", "mm"], ["Body", "&empty;44", "mm straight"],
                ["Mouth", "&empty;38", "mm"], ["Wall", "3", "mm"],
                ["Glass", "&asymp; 90", "g + cork"], ["Marbles", "7", "at the opening"]],

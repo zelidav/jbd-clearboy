@@ -23,6 +23,32 @@ HAMMER_BASE = dict(height=140.0, headlen=68.0, headsec=42.0, stemod=14.0,
                    lines=5, linepitch=6.0, rake=0.0)
 JAR_BASE = dict(height=92.0, mouthid=38.0, wall=3.0, fritz=25.0, corkh=20.0, marbles=7,
                 lines=18, linepitch=1.9)
+HOLDER_BASE = dict(length=90.0, bell_od=23.0, bell_id=15.0, throat_id=6.4,
+                   bell_len=26.0, body_od=13.2, waist_od=10.4, mouth_od=9.6,
+                   mouth_bore=4.2, marbles=3, marble_r=4.2, bling=0, bling_r=2.2,
+                   spin=3, spin_turns=6.0, loop=1, loop_r=4.0, loop_t=1.45,
+                   frit_from=68.0)
+
+
+def build_holder(d, out, vid):
+    """The holder takes its dimensions straight through - the solid is parametric all
+    the way down, so there is nothing to scale by hand."""
+    import holder
+    p = dict(HOLDER_BASE); p.update(d)
+    p["frit_from"] = p["frit_from"] / 100.0 if p["frit_from"] > 1.5 else p["frit_from"]
+    body_path = os.path.join(out, "%s.stl" % vid)
+    cq.exporters.export(holder.build(p), body_path,
+                        tolerance=0.03, angularTolerance=0.12)
+    cq.exporters.export(holder.build(p), os.path.join(out, "%s.step" % vid))
+    holder.build_marbles(p).export(os.path.join(out, "%s_marbles.stl" % vid))
+    holder.build_frit(p).export(os.path.join(out, "%s_frit.stl" % vid))
+    b = holder.build_bling(p)
+    if len(b.faces):
+        b.export(os.path.join(out, "%s_bling.stl" % vid))
+    return dict(body=body_path,
+                frit=os.path.join(out, "%s_frit.stl" % vid),
+                marbles=os.path.join(out, "%s_marbles.stl" % vid),
+                bling=os.path.join(out, "%s_bling.stl" % vid))
 
 
 def slug(text, fallback):
