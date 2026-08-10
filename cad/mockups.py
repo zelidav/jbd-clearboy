@@ -32,6 +32,12 @@ PIECES = {
      cam_r=395.0, target=(0, 0, 10), fov=17.0, shadow=(0.5, 0.46, 0.10),
      decal=(20.0, 74.0, 7.0), tilt=-90.0, shift=(70.0, 0.0, 8.0), size=(1000, 700),
      name="Hammer, laid down", note="how it sits in the case"),
+ "holder": dict(
+     body="out/holder.stl", frit="out/holder_frit.stl",
+     marbles="out/holder_marbles.stl", bling="out/holder_bling.stl",
+     cam_r=204.0, target=(0, 0, 0), fov=17.0, shadow=(0.5, 0.40, 0.06),
+     tilt=-90.0, shift=(46.0, 0.0, 0.0), size=(1200, 520), decal=None,
+     name="Joint holder", note="90 mm - the bell grips any joint"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
@@ -264,6 +270,13 @@ def build_renderer(piece, key, W, H, decal_turn=0):
               spec=1.55 if clear else 1.05,
               solid=not clear, min_thick=0.0 if clear else 5.5,
               max_thick=60.0 if clear else 7.0, smooth=24.0, role="lines")
+    if p.get("bling") and os.path.exists(p["bling"]):
+        # a cut stone is not glass with colour in it - almost no absorption, hard
+        # specular, and left unsmoothed so each facet takes light on its own
+        r.add(p["bling"], absorb=c.get("stone", (0.0022, 0.0020, 0.0026)), fume=0.0,
+              line=c.get("stone_line", (0.72, 0.76, 0.82)),
+              kAmt=0.09, kPow=6.5, spec=2.8, smooth=0.0, lens=0.03,
+              solid=False, min_thick=0.0, role="bling")
     if p.get("cork"):
         r.add(p["cork"], absorb=CORK["absorb"], fume=0.0, line=CORK["line"],
               kAmt=CORK["kAmt"], kPow=CORK["kPow"], spec=CORK["spec"],
