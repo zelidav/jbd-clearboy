@@ -252,23 +252,31 @@ def use_page():
     the real geometry - the tube's run, and the free edge of the rolled sheet."""
     import tip
     W, H = 700, 520
-    cam = dict(cam_r=132.0, target=(0, 0, 0), elev=12.0, shadow=(0.5, 0.34, 0.06))
+    # Side on to put the paper INTO the slot - the slot runs the length, so you have to
+    # see the length. End on to show it wound ON - paper wraps the circumference, and
+    # from the side that reads as a hoop threaded on a rod rather than a wrap.
+    side = dict(cam_r=132.0, target=(0, 0, 0), elev=12.0, shadow=(0.5, 0.34, 0.06))
+    down = dict(cam_r=112.0, target=(0, 0, 9.5), elev=84.0, tilt=0.0, shift=None,
+                shadow=(0.5, 0.0, -9.0))
     R = tip.P["od"] / 2.0
     cells = []
 
     # --- slotted tube ---------------------------------------------------------
     run = tip.P["length"] / 2.0
     for rolled in (False, True):
-        im, px = _shot_of("tip", (W, H), cam, angle=0.0)
+        im, px = _shot_of("tip", (W, H), down if rolled else side, angle=0.0)
         d = ImageDraw.Draw(im)
         if rolled:
-            c = px([(0, 0, tip.P["length"] / 2)])[0]
-            _paper_wrap(d, c[0], c[1], 88, math.radians(-180), math.radians(180), 30)
+            c = px([(0, 0, 9.5)])[0]
+            e = px([(R, 0, 9.5)])[0]
+            rr = abs(e[0] - c[0]) + 6
+            _paper_wrap(d, c[0], c[1], rr, math.radians(-200), math.radians(150),
+                        max(rr * 0.30, 16))
         else:
             ends = px([(0, -R, 0.4), (0, -R, tip.P["length"] - 0.4)])
             _paper_on_slot(d, ends[0], ends[1], 165,
                            away=px([(0, 0, tip.P["length"] / 2)])[0])
-        cells.append((im, "Slotted tube", "paper on" if rolled else "paper in the slot"))
+        cells.append((im, "Slotted tube", "wound on, end on" if rolled else "paper in the slot"))
 
     # --- rolled sheet ---------------------------------------------------------
     sp = tip.S
@@ -277,18 +285,22 @@ def use_page():
     turns = max((r1 - r0) / (t + g), 0.6)
     a_end = 2 * math.pi * turns                       # where the free edge sits
     for rolled in (False, True):
-        im, px = _shot_of("tip_spiral", (W, H), cam, angle=-a_end % (2 * math.pi))
+        im, px = _shot_of("tip_spiral", (W, H), down if rolled else side,
+                          angle=-a_end % (2 * math.pi))
         d = ImageDraw.Draw(im)
         if rolled:
-            c = px([(0, 0, sp["length"] / 2)])[0]
-            _paper_wrap(d, c[0], c[1], 88, math.radians(-180), math.radians(180), 30)
+            c = px([(0, 0, 9.5)])[0]
+            e = px([(sp["od"] / 2, 0, 9.5)])[0]
+            rr = abs(e[0] - c[0]) + 6
+            _paper_wrap(d, c[0], c[1], rr, math.radians(-200), math.radians(150),
+                        max(rr * 0.30, 16))
         else:
             ends = px([(0, -sp["od"] / 2, 0.4),
                        (0, -sp["od"] / 2, sp["length"] - 0.4)])
             _paper_on_slot(d, ends[0], ends[1], 165,
                            away=px([(0, 0, sp["length"] / 2)])[0])
         cells.append((im, "Rolled sheet",
-                      "paper on" if rolled else "paper into the outer ring"))
+                      "wound on, end on" if rolled else "paper into the outer ring"))
 
     pg, d = sheet.blank()
     d.text((96, 62), "JEROME BAKER DESIGNS", font=sheet.font(True, 26), fill=INK)
