@@ -43,6 +43,7 @@ P = dict(
     marble_r=4.2,
     marble_from=0.30,     # first marble, as a fraction of the length
     marble_to=0.56,
+    marble_spread=150.0,  # degrees they wander round the tube between first and last
     bling=0,              # stones set round the bell shoulder
     bling_r=1.7,
     loop=1,               # bail at the mouthpiece - wears on a chain
@@ -158,20 +159,27 @@ def _stone(r, pos, seed=0):
 
 
 def build_marbles(p=None):
-    """A row down one side. Proud enough to stop it rolling, low enough to hold."""
+    """Set down the piece and walked round it as they go.
+
+    A straight row of three along one side made it read like a bugle - the valves of
+    one. Spreading them round an arc breaks that line, and it works better as the
+    anti-roll they are for: marbles at different clock positions stop it whichever way
+    it wants to go, where a single row only stops it once."""
     p = dict(P, **(p or {}))
     n = int(p["marbles"])
     if n <= 0:
         return trimesh.Trimesh()
     r = p["marble_r"]
     z0, z1 = p["length"] * p["marble_from"], p["length"] * p["marble_to"]
+    spread = math.radians(p.get("marble_spread", 150.0))
     out = []
     for i in range(n):
-        z = z0 if n == 1 else z0 + (z1 - z0) * i / (n - 1.0)
-        # on the camera side: they are the anti-roll feature and they are the
-        # decoration, and neither works from behind
-        y = radius_at(z, p) + r * 0.42
-        out.append(_sphere(r, (0.0, -y, z)))
+        t = 0.0 if n == 1 else i / (n - 1.0)
+        z = z0 + (z1 - z0) * t
+        # centred on the camera side so the set still reads from the front
+        a = -math.pi / 2 + spread * (t - 0.5)
+        rad = radius_at(z, p) + r * 0.42
+        out.append(_sphere(r, (rad * math.cos(a), rad * math.sin(a), z)))
     return trimesh.util.concatenate(out)
 
 

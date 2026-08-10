@@ -58,7 +58,7 @@ def dim_view():
     C.dim(d, px([(0, R, 0)])[0], px([(0, -R, 0)])[0], 60, "ø 9", "right")
     C.dim(d, px([(0, 0, 0)])[0], px([(0, 0, P["screen_z"])])[0], 60,
           "6.5  to the screen", "below")
-    C.leader(d, px([(0, -R, P["groove_z"])])[0], (-40, -170), "the slot")
+    C.leader(d, px([(0, -R, P["groove_z"] + 4)])[0], (-30, -170), "the slot")
     return im
 
 
@@ -113,18 +113,19 @@ def steps():
     # 1 - the slot
     im, px = _shot((W, H), cam, angle=0.0)
     d = ImageDraw.Draw(im)
-    C.leader(d, px([(0, -4.5, 9.5)])[0], (110, -150), "the slot")
-    out.append((im, "One", "The slot runs at a long diagonal across the tube."))
+    C.leader(d, px([(0, -4.5, 13.0)])[0], (60, -160), "the slot")
+    out.append((im, "One", "The slot runs the length of the tube, cut in on a lean."))
 
     # 2 - feed the edge in
     im, px = _shot((W, H), cam, angle=0.0)
     d = ImageDraw.Draw(im)
-    import tip, numpy as np
-    th = math.radians(tip.P["groove_deg"])
-    ends = px([(t * math.sin(th), -tip.P["od"] / 2, tip.P["groove_z"] + t * math.cos(th))
-               for t in (-7.0, 7.0)])
-    _paper_on_slot(d, ends[0], ends[1], 330)
-    C.leader(d, px([(0, -4.5, 9.5)])[0], (-30, 150), "edge into the slot")
+    import tip
+    # the slot runs along the axis now, so its two ends are just the ends of the run
+    run = tip.P["length"] * tip.P["groove_run"] / 2.0
+    ends = px([(0, -tip.P["od"] / 2, tip.P["groove_z"] - run),
+               (0, -tip.P["od"] / 2, tip.P["groove_z"] + run)])
+    _paper_on_slot(d, ends[0], ends[1], 300)
+    C.leader(d, px([(0, -4.5, 15.0)])[0], (-30, 150), "edge into the slot")
     out.append((im, "Two", "Slip the leading edge of the paper into it. The slot holds "
                            "the paper on its own."))
 
@@ -149,6 +150,58 @@ def steps():
     return out
 
 
+def compare_page():
+    """The two ways to build it, side by side. Same job, opposite answers."""
+    import mockups
+    pg, d = sheet.blank()
+    d.text((96, 62), "JEROME BAKER DESIGNS", font=sheet.font(True, 26), fill=INK)
+    d.line([(96, 122), (PAGE[0] - 96, 122)], fill=RULE, width=2)
+    d.text((96, 152), "Glass tip — two ways", font=sheet.font(True, 44), fill=INK)
+    d.text((96, 212), "Same job, opposite answers. One is a tube with a slot in it. The "
+           "other is all slot.", font=sheet.font(False, 24), fill=GREY)
+    f = sheet.font(False, 20)
+    tag = "Concept  ·  1 / 2"
+    d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
+
+    cards = [("tip", "Slotted tube",
+              "A slot down the length, cut in on a seventy-degree lean so it undercuts "
+              "and holds the paper. Perforated screen across the bore.",
+              [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Bore", "ø 6.4, 1.3 wall"),
+               ("Screen", "seven ø 1.25 holes"), ("Slot", "0.75 wide, 0.9 deep"),
+               ("Mass", "≈ 1.4 g")]),
+             ("tip_spiral", "Wound coil",
+              "No tube at all - rod wound open end to end. The gap between the turns is "
+              "the slot, and it runs the whole piece, so the paper goes into the outer "
+              "ring anywhere along it.",
+              [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Rod", "ø 1.7"),
+               ("Turns", "six and a half"), ("Slot", "every turn, all the way"),
+               ("Mass", "≈ 3.7 g")])]
+    for i, (key, nm, body, rows) in enumerate(cards):
+        x = 96 + i * 740
+        p_ = os.path.join(OUT, "%s_hero.png" % key)
+        if not os.path.exists(p_):
+            mockups.PIECES[key] = dict(mockups.PIECES[key], size=(1100, 620))
+            im = mockups.frame(mockups.build_renderer(key, WAY, 1100, 620), key,
+                               mockups.SIDE)
+            im.save(p_)
+        art = sheet.fit(Image.open(p_).convert("RGB"), (700, 400))
+        pg.paste(art, (x, 272))
+        d.text((x, 700), nm, font=sheet.font(True, 32), fill=INK)
+        yy = sheet.wrap(d, body, sheet.font(False, 22), 660)
+        d.multiline_text((x, 748), yy[0], font=sheet.font(False, 22), fill=INK,
+                         spacing=8)
+        yy2 = 762 + 30 * yy[1]
+        for k, v in rows:
+            d.text((x, yy2), k, font=sheet.font(False, 20), fill=GREY)
+            d.text((x + 220, yy2), v, font=sheet.font(True, 21), fill=INK)
+            yy2 += 40
+    d.line([(96, PAGE[1] - 74), (PAGE[0] - 96, PAGE[1] - 74)], fill=RULE, width=1)
+    d.text((96, PAGE[1] - 60), "The coil draws freely and cannot clog, but it cannot "
+           "carry a screen · the tube filters · renders, not photographs",
+           font=sheet.font(False, 19), fill=GREY)
+    return pg
+
+
 def build():
     os.makedirs(OUT, exist_ok=True)
     dv = dim_view(); dv.save(os.path.join(OUT, "dims.png"))
@@ -163,7 +216,7 @@ def build():
            "a straight slot cut at a long oblique to start the roll.",
            font=sheet.font(False, 24), fill=GREY)
     f = sheet.font(False, 20)
-    tag = "Concept  ·  1 / 1"
+    tag = "Concept  ·  2 / 2"
     d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
 
     art = sheet.fit(dv, (960, 470))
@@ -206,7 +259,7 @@ def build():
     d.text((96, PAGE[1] - 60), "Clear borosilicate only · no frit, no marbles, no "
            "stones · renders, not photographs",
            font=sheet.font(False, 19), fill=GREY)
-    sheet.save([pg], PDF, "JBD glass tip - concept")
+    sheet.save([compare_page(), pg], PDF, "JBD glass tip - concept")
     return PDF
 
 

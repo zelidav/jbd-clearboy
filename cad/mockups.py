@@ -44,6 +44,11 @@ PIECES = {
      cam_r=104.0, target=(0, 0, 0), fov=17.0, shadow=(0.5, 0.36, 0.08),
      tilt=-90.0, shift=(9.5, 0.0, 0.0), size=(1100, 620), decal=None,
      name="Glass tip", note="19 mm - screen inside, paper slot outside"),
+ "tip_spiral": dict(
+     body="out/tip_spiral.stl",
+     cam_r=104.0, target=(0, 0, 0), fov=17.0, shadow=(0.5, 0.36, 0.08),
+     tilt=-90.0, shift=(9.5, 0.0, 0.0), size=(1100, 620), decal=None,
+     name="Glass tip, coil", note="19 mm - wound open end to end"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",

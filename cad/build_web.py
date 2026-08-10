@@ -20,7 +20,7 @@ CONTACT = "david@canismajorpartners.com"
 RENDER_URL = "https://jbd-clearboy-render-804083036164.us-east1.run.app/render"
 RENDER_KEY = "NBvIvBZfVeFWVrIYSBqy6Sa-"
 
-PIECES = ["hammer", "jar", "holder", "tip"]
+PIECES = ["hammer", "jar", "holder", "tip", "tip_spiral"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
 PIECE_META = {
@@ -32,6 +32,8 @@ PIECE_META = {
                    note="90 mm, flared bell grips any joint, marbles stop it rolling"),
     "tip":    dict(name="Glass tip", code="JBD-GT-19",
                    note="19 mm filter tip, screen across the bore, oblique paper slot"),
+    "tip_spiral": dict(name="Glass tip, coil", code="JBD-GT-19C",
+                       note="19 mm wound open end to end - every turn is the slot"),
 }
 # sampled off assets/northstar_rods.jpg - what the shop can actually pull
 STOCK = {
@@ -89,6 +91,12 @@ BASE = {
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
    dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
+ ],
+ "tip_spiral": [
+   dict(k="length", label="Overall length",  v=19,  min=14, max=32,  step=0.5, unit="mm"),
+   dict(k="od",     label="Outside diameter", v=9,  min=7,  max=15,  step=0.2, unit="mm"),
+   dict(k="rod",    label="Rod section",     v=1.7, min=1.0, max=3.0, step=0.1, unit="mm"),
+   dict(k="turns",  label="Turns",           v=6.5, min=3,  max=14,  step=0.5, unit=""),
  ],
  "tip": [
    dict(k="length",      label="Overall length",  v=19,   min=14,  max=32,  step=0.5, unit="mm"),
@@ -190,6 +198,9 @@ SPECS = {
     "hammer": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
                ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
                ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
+    "tip_spiral": [["Overall length", "19", "mm"], ["Outside", "&empty;9", "mm"],
+               ["Rod", "&empty;1.7", "mm"], ["Turns", "6.5", ""],
+               ["Slot", "every turn", "all the way"], ["Glass", "&asymp; 3.7", "g"]],
     "tip":    [["Overall length", "19", "mm"], ["Outside", "&empty;9", "mm"],
                ["Bore", "&empty;6.4", "mm, 1.3 wall"],
                ["Screen", "seven &empty;1.25", "holes"],
