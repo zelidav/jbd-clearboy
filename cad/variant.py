@@ -30,9 +30,10 @@ HOLDER_BASE = dict(length=90.0, bell_od=23.0, bell_id=15.0, throat_id=6.4,
                    frit_from=68.0)
 
 
-TIP_BASE = dict(length=19.0, od=9.0, bore=6.4, lip=0.5, screen_z=6.5, screen_t=1.5,
+TIP_BASE = dict(length=19.0, od=9.0, bore=5.0, lip=0.5, screen_z=6.5, screen_t=1.5,
                 screen_holes=7, screen_hole_d=1.25, screen_ring=2.05,
-                groove_deg=68.0, groove_w=0.75, groove_depth=0.9, groove_z=9.5)
+                groove_rake=78.0, groove_w=0.75, groove_depth=3.0,
+                groove_run=1.3, groove_z=9.5)
 
 
 def build_tip(d, out, vid):

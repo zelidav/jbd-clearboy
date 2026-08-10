@@ -10,9 +10,14 @@ cut into it is what is oblique: the blade goes in raked seventy degrees off the 
 the slot leans and undercuts, and the paper it takes does not fall straight back out. A
 radial nick of the same depth would.
 
-Shallow, too. Nought point nine into a one point three wall leaves the bore sealed - a
-slot that broke through would pull smoke past the screen, and would be a weak line to
-anneal across.
+It has to be long enough to be worth anything: three millimetres of paper goes into it.
+That is length along the slot, not depth into the wall - raked at seventy-eight degrees
+the radial bite is only six tenths, which is why the tube is drawn thick-walled at two
+millimetres. The bore stays sealed. A slot that broke through would pull smoke past the
+screen and would be a weak line to anneal across.
+
+And it runs the full length and out both ends. The paper is held along its whole edge or
+it is not held.
 
     python tip.py out   -> out/tip.stl/.step, out/tip_screen.stl
 """
@@ -25,7 +30,7 @@ import trimesh
 P = dict(
     length=19.0,          # 0.75 in
     od=9.0,
-    bore=6.4,             # 1.3 wall
+    bore=5.0,             # 2.0 wall - thick, so the slot can be long enough to grip
     lip=0.5,              # the ends are rolled, not cut square
 
     screen_z=6.5,         # how far in the screen sits, from the mouth end
@@ -34,9 +39,11 @@ P = dict(
     screen_hole_d=1.25,
     screen_ring=2.05,     # radius the outer ring of holes sits on
 
-    groove_rake=70.0,     # off the radius. 0 is a plain radial nick, 70 nearly tangent
+    groove_rake=78.0,     # off the radius. 0 is a plain radial nick, 78 well over
     groove_w=0.75,        # slot width - a paper is nothing, the finger is the limit
-    groove_depth=0.9,     # into the 1.3 wall, not through it - the bore stays sealed
+    groove_depth=3.0,     # how far the paper goes IN, measured along the slot. Two to
+                          # four is what actually holds; the radial bite is this times
+                          # cos(rake), so at 78 degrees 3 mm of grip is 0.6 into the wall
     groove_run=1.3,       # >1: the slot breaks out both ends. It has to - the
                           # paper is held along its whole edge or it is not held
     groove_z=9.5,         # centre of the run

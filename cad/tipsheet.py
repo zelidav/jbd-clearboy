@@ -80,14 +80,19 @@ def _paper_flat(d, box, lean=16):
     d.line([pts[0], pts[3]], fill=(150, 40, 60), width=4)      # the edge that goes in
 
 
-def _paper_on_slot(d, a, b, reach):
-    """The paper leaving the slot: its leading edge sits on the slot line, and the
-    sheet runs off square to it."""
+def _paper_on_slot(d, a, b, reach, away=None):
+    """The paper leaving the slot: its leading edge sits on the slot line, and the sheet
+    runs off square to it - away from the piece, so it does not cover the thing it is
+    being shown against."""
     import numpy as np
     a, b = np.array(a, "f8"), np.array(b, "f8")
     u = (b - a) / max(np.hypot(*(b - a)), 1e-9)
     n = np.array([-u[1], u[0]])
-    if n[0] < 0:
+    ref = np.array(away, "f8") if away is not None else None
+    if ref is not None:
+        if np.dot(n, (a + b) / 2 - ref) < 0:
+            n = -n
+    elif n[0] < 0:
         n = -n
     quad = [tuple(a), tuple(b), tuple(b + n * reach), tuple(a + n * reach)]
     d.polygon(quad, fill=PAPERC, outline=PAPERE)
@@ -224,6 +229,90 @@ def section_view(kind, W=760, H=760, k=74.0):
     return im
 
 
+def _shot_of(key, size, cam, angle=0.0):
+    """Same as _shot but for whichever piece is asked for."""
+    import mockups
+    r = mockups.build_renderer(key, WAY, *size)
+    p = mockups.PIECES[key]
+    kw = dict(cam_r=cam.get("cam_r", p["cam_r"]), target=cam.get("target", p["target"]),
+              fov=p["fov"], elev=cam.get("elev", 3.0),
+              shadow=cam.get("shadow", p["shadow"]),
+              tilt=cam.get("tilt", p["tilt"]), shift=cam.get("shift", p["shift"]))
+    im = r.frame(angle, **kw).convert("RGB")
+
+    def px(pts):
+        return r.project(pts, angle, cam_r=kw["cam_r"], elev=kw["elev"],
+                         target=kw["target"], fov=kw["fov"], tilt=kw["tilt"],
+                         shift=kw["shift"])
+    return im, px
+
+
+def use_page():
+    """Both versions, paper out and paper on. The slot line in each is projected off
+    the real geometry - the tube's run, and the free edge of the rolled sheet."""
+    import tip
+    W, H = 700, 520
+    cam = dict(cam_r=132.0, target=(0, 0, 0), elev=12.0, shadow=(0.5, 0.34, 0.06))
+    R = tip.P["od"] / 2.0
+    cells = []
+
+    # --- slotted tube ---------------------------------------------------------
+    run = tip.P["length"] / 2.0
+    for rolled in (False, True):
+        im, px = _shot_of("tip", (W, H), cam, angle=0.0)
+        d = ImageDraw.Draw(im)
+        if rolled:
+            c = px([(0, 0, tip.P["length"] / 2)])[0]
+            _paper_wrap(d, c[0], c[1], 88, math.radians(-180), math.radians(180), 30)
+        else:
+            ends = px([(0, -R, 0.4), (0, -R, tip.P["length"] - 0.4)])
+            _paper_on_slot(d, ends[0], ends[1], 165,
+                           away=px([(0, 0, tip.P["length"] / 2)])[0])
+        cells.append((im, "Slotted tube", "paper on" if rolled else "paper in the slot"))
+
+    # --- rolled sheet ---------------------------------------------------------
+    sp = tip.S
+    t, g = sp["sheet"], sp["gap"]
+    r0, r1 = sp["core"], sp["od"] / 2.0 - t
+    turns = max((r1 - r0) / (t + g), 0.6)
+    a_end = 2 * math.pi * turns                       # where the free edge sits
+    for rolled in (False, True):
+        im, px = _shot_of("tip_spiral", (W, H), cam, angle=-a_end % (2 * math.pi))
+        d = ImageDraw.Draw(im)
+        if rolled:
+            c = px([(0, 0, sp["length"] / 2)])[0]
+            _paper_wrap(d, c[0], c[1], 88, math.radians(-180), math.radians(180), 30)
+        else:
+            ends = px([(0, -sp["od"] / 2, 0.4),
+                       (0, -sp["od"] / 2, sp["length"] - 0.4)])
+            _paper_on_slot(d, ends[0], ends[1], 165,
+                           away=px([(0, 0, sp["length"] / 2)])[0])
+        cells.append((im, "Rolled sheet",
+                      "paper on" if rolled else "paper into the outer ring"))
+
+    pg, d = sheet.blank()
+    d.text((96, 62), "JEROME BAKER DESIGNS", font=sheet.font(True, 26), fill=INK)
+    d.line([(96, 122), (PAGE[0] - 96, 122)], fill=RULE, width=2)
+    d.text((96, 152), "Paper on, both ways", font=sheet.font(True, 44), fill=INK)
+    d.text((96, 212), "Three millimetres of the paper goes into the slot, along its "
+           "whole length. Then it rolls.", font=sheet.font(False, 24), fill=GREY)
+    f = sheet.font(False, 20)
+    tag = "Concept  ·  2 / 3"
+    d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
+    cw = 700
+    for i, (im, nm, cap) in enumerate(cells):
+        x = 96 + (i % 2) * (cw + 60)
+        y = 272 + (i // 2) * 420
+        a = sheet.fit(im, (cw, 330))
+        pg.paste(a, (x, y))
+        d.text((x, y + 342), nm, font=sheet.font(True, 24), fill=INK)
+        d.text((x + 240, y + 344), cap, font=sheet.font(False, 22), fill=C.DIM)
+    d.line([(96, PAGE[1] - 74), (PAGE[0] - 96, PAGE[1] - 74)], fill=RULE, width=1)
+    d.text((96, PAGE[1] - 60), "Paper drawn, tip rendered  ·  the slot line is "
+           "projected off the real geometry", font=sheet.font(False, 19), fill=GREY)
+    return pg
+
+
 def compare_page():
     """The two ways to build it, side by side. Same job, opposite answers."""
     import mockups
@@ -235,14 +324,15 @@ def compare_page():
            "other is a rolled sheet, and the roll is the slot. Sections at right, "
            "with the paper in.", font=sheet.font(False, 24), fill=GREY)
     f = sheet.font(False, 20)
-    tag = "Concept  ·  1 / 2"
+    tag = "Concept  ·  1 / 3"
     d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
 
     cards = [("tip", "Slotted tube",
-              "A slot down the length, cut in on a seventy-degree lean so it undercuts "
-              "and holds the paper. Perforated screen across the bore.",
-              [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Bore", "ø 6.4, 1.3 wall"),
-               ("Screen", "seven ø 1.25 holes"), ("Slot", "0.75 wide, 0.9 deep"),
+              "A slot the whole length, out both ends, raked seventy-eight degrees off "
+              "the radius so it undercuts. Three millimetres of paper goes in. Thick "
+              "wall, and a perforated screen across the bore.",
+              [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Bore", "ø 5.0, 2.0 wall"),
+               ("Screen", "seven ø 1.25 holes"), ("Slot", "0.75 wide, 3 mm of grip"),
                ("Mass", "≈ 1.4 g")]),
              ("tip_spiral", "Rolled sheet",
               "No tube at all - a thin sheet rolled into a 9 mm cylinder, and the stock "
@@ -294,7 +384,7 @@ def build():
            "a straight slot cut at a long oblique to start the roll.",
            font=sheet.font(False, 24), fill=GREY)
     f = sheet.font(False, 20)
-    tag = "Concept  ·  2 / 2"
+    tag = "Concept  ·  3 / 3"
     d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
 
     art = sheet.fit(dv, (960, 470))
@@ -311,7 +401,7 @@ def build():
             ("Bore / wall", "6.4 / 1.3 mm"),
             ("Screen", "1.5 thick, 6.5 in"),
             ("Screen holes", "seven ø 1.25"),
-            ("Slot", "0.75 wide, 0.9 deep"),
+            ("Slot", "0.75 wide, 3 mm of grip"),
             ("Slot rake", "68° off the axis"),
             ("Glass", "clear boro 3.3, ≈ 1.4 g")]
     yy = 292
@@ -337,7 +427,8 @@ def build():
     d.text((96, PAGE[1] - 60), "Clear borosilicate only · no frit, no marbles, no "
            "stones · renders, not photographs",
            font=sheet.font(False, 19), fill=GREY)
-    sheet.save([compare_page(), pg], PDF, "JBD glass tip - concept")
+    sheet.save([compare_page(), use_page(), pg], PDF,
+               "JBD glass tip - concept")
     return PDF
 
 
