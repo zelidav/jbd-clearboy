@@ -30,6 +30,22 @@ HOLDER_BASE = dict(length=90.0, bell_od=23.0, bell_id=15.0, throat_id=6.4,
                    frit_from=68.0)
 
 
+TIP_BASE = dict(length=19.0, od=9.0, bore=6.4, lip=0.5, screen_z=6.5, screen_t=1.5,
+                screen_holes=7, screen_hole_d=1.25, screen_ring=2.05,
+                groove_deg=68.0, groove_w=0.75, groove_depth=0.9, groove_z=9.5)
+
+
+def build_tip(d, out, vid):
+    """Straight through - the tip is parametric all the way down."""
+    import tip
+    p = dict(TIP_BASE); p.update(d)
+    body_path = os.path.join(out, "%s.stl" % vid)
+    solid = tip.build(p)
+    cq.exporters.export(solid, body_path, tolerance=0.02, angularTolerance=0.1)
+    cq.exporters.export(solid, os.path.join(out, "%s.step" % vid))
+    return dict(body=body_path)
+
+
 def build_holder(d, out, vid):
     """The holder takes its dimensions straight through - the solid is parametric all
     the way down, so there is nothing to scale by hand."""

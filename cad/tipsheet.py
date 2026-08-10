@@ -160,7 +160,7 @@ def build():
     d.line([(96, 122), (PAGE[0] - 96, 122)], fill=RULE, width=2)
     d.text((96, 152), "Glass tip", font=sheet.font(True, 44), fill=INK)
     d.text((96, 212), "19 mm of clear 9 mm tube. Perforated screen across the bore, and "
-           "a slot cut at a long oblique to start the roll.",
+           "a straight slot cut at a long oblique to start the roll.",
            font=sheet.font(False, 24), fill=GREY)
     f = sheet.font(False, 20)
     tag = "Concept  ·  1 / 1"
@@ -180,7 +180,7 @@ def build():
             ("Bore / wall", "6.4 / 1.3 mm"),
             ("Screen", "1.5 thick, 6.5 in"),
             ("Screen holes", "seven ø 1.25"),
-            ("Slot", "0.75 wide, 1.9 deep"),
+            ("Slot", "0.75 wide, 0.9 deep"),
             ("Slot rake", "68° off the axis"),
             ("Glass", "clear boro 3.3, ≈ 1.4 g")]
     yy = 292

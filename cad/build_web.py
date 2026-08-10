@@ -20,7 +20,7 @@ CONTACT = "david@canismajorpartners.com"
 RENDER_URL = "https://jbd-clearboy-render-804083036164.us-east1.run.app/render"
 RENDER_KEY = "NBvIvBZfVeFWVrIYSBqy6Sa-"
 
-PIECES = ["hammer", "jar", "holder"]
+PIECES = ["hammer", "jar", "holder", "tip"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
 PIECE_META = {
@@ -30,6 +30,8 @@ PIECE_META = {
                    note="92 mm straight cylinder, 38 mm opening, cork lid"),
     "holder": dict(name="Joint holder", code="JBD-JH-90",
                    note="90 mm, flared bell grips any joint, marbles stop it rolling"),
+    "tip":    dict(name="Glass tip", code="JBD-GT-19",
+                   note="19 mm filter tip, screen across the bore, oblique paper slot"),
 }
 # sampled off assets/northstar_rods.jpg - what the shop can actually pull
 STOCK = {
@@ -87,6 +89,19 @@ BASE = {
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
    dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
+ ],
+ "tip": [
+   dict(k="length",      label="Overall length",  v=19,   min=14,  max=32,  step=0.5, unit="mm"),
+   dict(k="od",          label="Outside diameter", v=9,   min=7,   max=15,  step=0.2, unit="mm"),
+   dict(k="bore",        label="Bore",            v=6.4,  min=4,   max=12,  step=0.2, unit="mm"),
+   dict(k="screen_z",    label="Screen depth in", v=6.5,  min=2,   max=16,  step=0.5, unit="mm"),
+   dict(k="screen_t",    label="Screen thickness", v=1.5, min=0.8, max=3.0, step=0.1, unit="mm"),
+   dict(k="screen_holes", label="Screen holes",   v=7,    min=0,   max=13,  step=1,   unit=""),
+   dict(k="screen_hole_d", label="Hole diameter", v=1.25, min=0.6, max=2.6, step=0.05, unit="mm"),
+   dict(k="groove_deg",  label="Slot rake",       v=68,   min=20,  max=85,  step=1,   unit="deg"),
+   dict(k="groove_w",    label="Slot width",      v=0.75, min=0.4, max=2.2, step=0.05, unit="mm"),
+   dict(k="groove_depth", label="Slot depth",     v=0.9,  min=0.3, max=1.2, step=0.05, unit="mm"),
+   dict(k="groove_z",    label="Slot position",   v=9.5,  min=3,   max=18,  step=0.5, unit="mm"),
  ],
  "holder": [
    dict(k="length",     label="Overall length",   v=90,   min=76,  max=112, step=1,   unit="mm"),
@@ -175,6 +190,11 @@ SPECS = {
     "hammer": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
                ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
                ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
+    "tip":    [["Overall length", "19", "mm"], ["Outside", "&empty;9", "mm"],
+               ["Bore", "&empty;6.4", "mm, 1.3 wall"],
+               ["Screen", "seven &empty;1.25", "holes"],
+               ["Slot", "0.75 &times; 0.9", "at 68&deg;"],
+               ["Glass", "&asymp; 1.4", "g, clear"]],
     "holder": [["Overall length", "90", "mm"], ["Bell", "&empty;23", "mm"],
                ["Grip cone", "&empty;6.4 &ndash; 15", "mm"],
                ["Mouthpiece", "&empty;9.6", "mm"],
@@ -535,7 +555,13 @@ def shell(title, body, script="", nav="index", standalone=False):
     links = [("index.html", "Mockups", "index"), ("survey.html", "Survey", "survey"),
              ("downloads.html", "Downloads", "downloads")]
     # the spec sheet and the whole hand-off pack hang off every page, not just Downloads
-    grabs = ('<a class="dl" href="JBD_Clearboy_spec.pdf" download>Spec sheet'
+    # the two newer pieces have their own sheets rather than a page each, so they hang
+    # off the masthead where they can be found from anywhere
+    grabs = ('<a class="dl" href="JBD_Joint_Holder.pdf" target="_blank">Joint holder'
+             ' <span>PDF</span></a>'
+             '<a class="dl" href="JBD_Glass_Tip.pdf" target="_blank">Glass tip'
+             ' <span>PDF</span></a>'
+             '<a class="dl" href="JBD_Clearboy_spec.pdf" download>Spec sheet'
              ' <span>PDF</span></a>'
              '<a class="dl" href="JBD_Clearboy_pack.zip" download>All specs'
              ' <span>ZIP</span></a>')
@@ -1357,6 +1383,10 @@ def stills():
 SPECFILES = [
     ("JBD_Clearboy_spec.pdf",
      "Manufacturing spec - dimensions, dimensioned closeups, decoration and the survey"),
+    ("JBD_Joint_Holder.pdf",
+     "Joint holder - twelve designs on cut sheets, and how it wears as a pendant"),
+    ("JBD_Glass_Tip.pdf",
+     "Glass tip - dimensions, the screen, and the slot in use"),
     ("JBD_Clearboy_spec_ZH.pdf",
      "Manufacturing spec, Chinese - the same sheet for the glass shop"),
     ("JBD_Clearboy_pack.zip",

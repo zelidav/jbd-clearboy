@@ -11,6 +11,10 @@ and rolling the tip winds the paper on. Because the groove is raked rather than 
 the axis, the first wrap starts slightly off-square, which is exactly the bias a cone
 wants.
 
+The cut is straight and it is shallow. Nought point nine into a one point three wall
+leaves the bore sealed - a slot that broke through would pull smoke past the screen and
+would be a weak line to anneal across.
+
     python tip.py out   -> out/tip.stl/.step, out/tip_screen.stl
 """
 import math, os, sys
@@ -33,7 +37,7 @@ P = dict(
 
     groove_deg=68.0,      # from the tube axis. High is oblique, 90 would be a ring
     groove_w=0.75,        # slot width - a paper is nothing, the finger is the limit
-    groove_depth=1.9,     # past the wall, so the paper tucks through and is held
+    groove_depth=0.9,     # into the 1.3 wall, not through it - the bore stays sealed
     groove_z=9.5,         # where the slot crosses the axis
 )
 
