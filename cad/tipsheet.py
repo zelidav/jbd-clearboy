@@ -150,6 +150,80 @@ def steps():
     return out
 
 
+GLASSF = (206, 224, 232)
+GLASSE = (120, 156, 172)
+
+
+def section_view(kind, W=760, H=760, k=74.0):
+    """A true cross-section, drawn rather than rendered.
+
+    Clear glass photographs badly as a section - it is all highlight and no edge - so
+    this is drawn straight off the same parameters the solid is built from. The paper is
+    in the slot, which is the whole point of the drawing."""
+    import tip
+    im = Image.new("RGB", (W, H), (252, 251, 249))
+    d = ImageDraw.Draw(im)
+    cx, cy = W / 2.0, H / 2.0 + 10
+
+    def P(x, y):
+        return (cx + x * k, cy - y * k)
+
+    if kind == "tube":
+        p = tip.P
+        R, ri = p["od"] / 2.0, p["bore"] / 2.0
+        d.ellipse([P(-R, R)[0], P(-R, R)[1], P(R, -R)[0], P(R, -R)[1]],
+                  fill=GLASSF, outline=GLASSE, width=3)
+        d.ellipse([P(-ri, ri)[0], P(-ri, ri)[1], P(ri, -ri)[0], P(ri, -ri)[1]],
+                  fill=(252, 251, 249), outline=GLASSE, width=3)
+        # the slot, as the cutter actually lays it
+        rake = math.radians(p["groove_rake"])
+        u = (math.sin(rake), math.cos(rake))            # inward, leaned
+        n = (math.cos(rake), -math.sin(rake))           # across the slot
+        e = (0.0, -R)
+        w2, dep = p["groove_w"] / 2.0, p["groove_depth"]
+        far = 0.06        # open it at the surface, do not flap outside the tube
+        quad = [(e[0] + n[0] * w2 - u[0] * far, e[1] + n[1] * w2 - u[1] * far),
+                (e[0] - n[0] * w2 - u[0] * far, e[1] - n[1] * w2 - u[1] * far),
+                (e[0] - n[0] * w2 + u[0] * dep, e[1] - n[1] * w2 + u[1] * dep),
+                (e[0] + n[0] * w2 + u[0] * dep, e[1] + n[1] * w2 + u[1] * dep)]
+        d.polygon([P(*q) for q in quad], fill=(252, 251, 249), outline=GLASSE)
+        # paper: into the slot, then round the outside
+        path = [(e[0] + u[0] * dep * 0.8, e[1] + u[1] * dep * 0.8), e]
+        for i in range(80):
+            a = -math.pi / 2 + 2.15 * i / 79.0
+            path.append(((R + 0.16) * math.cos(a), (R + 0.16) * math.sin(a)))
+        d.line([P(*q) for q in path], fill=(150, 40, 60), width=6, joint="curve")
+        note = "the slot leans in, so the paper cannot pull straight back out"
+    else:
+        p = tip.S
+        t, g = p["sheet"], p["gap"]
+        r0, r1 = p["core"], p["od"] / 2.0 - t
+        pitch = t + g
+        turns = max((r1 - r0) / pitch, 0.6)
+        n_ = 520
+        th = [2 * math.pi * turns * i / float(n_) for i in range(n_ + 1)]
+
+        def at(a, off):
+            r = r0 + pitch * a / (2 * math.pi) + off
+            return (r * math.cos(a), r * math.sin(a))
+        poly = [at(a, 0.0) for a in th] + [at(a, t) for a in reversed(th)]
+        d.polygon([P(*q) for q in poly], fill=GLASSF, outline=GLASSE)
+        # paper into the outer opening, then round
+        a_end = th[-1]
+        start = at(a_end, t * 0.5)
+        path = [start]
+        for i in range(90):
+            a = a_end + 2.0 * i / 89.0
+            rr = p["od"] / 2.0 + 0.16
+            path.append((rr * math.cos(a), rr * math.sin(a)))
+        d.line([P(*q) for q in path], fill=(150, 40, 60), width=6, joint="curve")
+        note = "the free edge of the sheet leaves the slot, and it runs the whole length"
+    txt, _n = sheet.wrap(d, note, sheet.font(False, 20), W - 48)
+    d.multiline_text((24, H - 52), txt, font=sheet.font(False, 20),
+                     fill=GREY, spacing=5)
+    return im
+
+
 def compare_page():
     """The two ways to build it, side by side. Same job, opposite answers."""
     import mockups
@@ -158,7 +232,8 @@ def compare_page():
     d.line([(96, 122), (PAGE[0] - 96, 122)], fill=RULE, width=2)
     d.text((96, 152), "Glass tip — two ways", font=sheet.font(True, 44), fill=INK)
     d.text((96, 212), "Same job, opposite answers. One is a tube with a slot in it. The "
-           "other is all slot.", font=sheet.font(False, 24), fill=GREY)
+           "other is a rolled sheet, and the roll is the slot. Sections at right, "
+           "with the paper in.", font=sheet.font(False, 24), fill=GREY)
     f = sheet.font(False, 20)
     tag = "Concept  ·  1 / 2"
     d.text((PAGE[0] - 96 - d.textlength(tag, font=f), 92), tag, font=f, fill=GREY)
@@ -169,13 +244,13 @@ def compare_page():
               [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Bore", "ø 6.4, 1.3 wall"),
                ("Screen", "seven ø 1.25 holes"), ("Slot", "0.75 wide, 0.9 deep"),
                ("Mass", "≈ 1.4 g")]),
-             ("tip_spiral", "Wound coil",
-              "No tube at all - rod wound open end to end. The gap between the turns is "
-              "the slot, and it runs the whole piece, so the paper goes into the outer "
-              "ring anywhere along it.",
-              [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Rod", "ø 1.7"),
-               ("Turns", "six and a half"), ("Slot", "every turn, all the way"),
-               ("Mass", "≈ 3.7 g")])]
+             ("tip_spiral", "Rolled sheet",
+              "No tube at all - a thin sheet rolled into a 9 mm cylinder, and the stock "
+              "cut into lengths. The gap between the wraps is the slot, it runs the "
+              "whole piece, and the free edge is where the paper goes in.",
+              [("Overall", "19 mm"), ("Outside", "ø 9 mm"), ("Sheet", "0.8 thick"),
+               ("Gap", "0.55 between wraps"), ("Wraps", "about two and a half"),
+               ("Mass", "≈ 1.15 g")])]
     for i, (key, nm, body, rows) in enumerate(cards):
         x = 96 + i * 740
         p_ = os.path.join(OUT, "%s_hero.png" % key)
@@ -184,20 +259,23 @@ def compare_page():
             im = mockups.frame(mockups.build_renderer(key, WAY, 1100, 620), key,
                                mockups.SIDE)
             im.save(p_)
-        art = sheet.fit(Image.open(p_).convert("RGB"), (700, 400))
-        pg.paste(art, (x, 272))
-        d.text((x, 700), nm, font=sheet.font(True, 32), fill=INK)
-        yy = sheet.wrap(d, body, sheet.font(False, 22), 660)
-        d.multiline_text((x, 748), yy[0], font=sheet.font(False, 22), fill=INK,
+        art = sheet.fit(Image.open(p_).convert("RGB"), (400, 300))
+        pg.paste(art, (x, 262))
+        sec = sheet.fit(section_view("tube" if key == "tip" else "spiral"), (300, 300))
+        pg.paste(sec, (x + 412, 262))
+        d.text((x, 596), nm, font=sheet.font(True, 32), fill=INK)
+        yy = sheet.wrap(d, body, sheet.font(False, 22), 680)
+        d.multiline_text((x, 644), yy[0], font=sheet.font(False, 22), fill=INK,
                          spacing=8)
-        yy2 = 762 + 30 * yy[1]
+        yy2 = 660 + 30 * yy[1]
         for k, v in rows:
             d.text((x, yy2), k, font=sheet.font(False, 20), fill=GREY)
             d.text((x + 220, yy2), v, font=sheet.font(True, 21), fill=INK)
             yy2 += 40
     d.line([(96, PAGE[1] - 74), (PAGE[0] - 96, PAGE[1] - 74)], fill=RULE, width=1)
-    d.text((96, PAGE[1] - 60), "The coil draws freely and cannot clog, but it cannot "
-           "carry a screen · the tube filters · renders, not photographs",
+    d.text((96, PAGE[1] - 60), "The rolled sheet draws through the spiral and cannot "
+           "clog, but it cannot carry a screen · the tube filters · renders, "
+           "not photographs",
            font=sheet.font(False, 19), fill=GREY)
     return pg
 

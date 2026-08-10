@@ -32,8 +32,8 @@ PIECE_META = {
                    note="90 mm, flared bell grips any joint, marbles stop it rolling"),
     "tip":    dict(name="Glass tip", code="JBD-GT-19",
                    note="19 mm filter tip, screen across the bore, oblique paper slot"),
-    "tip_spiral": dict(name="Glass tip, coil", code="JBD-GT-19C",
-                       note="19 mm wound open end to end - every turn is the slot"),
+    "tip_spiral": dict(name="Glass tip, rolled", code="JBD-GT-19R",
+                       note="19 mm of rolled sheet - the gap between wraps is the slot"),
 }
 # sampled off assets/northstar_rods.jpg - what the shop can actually pull
 STOCK = {
@@ -95,8 +95,9 @@ BASE = {
  "tip_spiral": [
    dict(k="length", label="Overall length",  v=19,  min=14, max=32,  step=0.5, unit="mm"),
    dict(k="od",     label="Outside diameter", v=9,  min=7,  max=15,  step=0.2, unit="mm"),
-   dict(k="rod",    label="Rod section",     v=1.7, min=1.0, max=3.0, step=0.1, unit="mm"),
-   dict(k="turns",  label="Turns",           v=6.5, min=3,  max=14,  step=0.5, unit=""),
+   dict(k="sheet",  label="Sheet thickness", v=0.8, min=0.4, max=1.6, step=0.05, unit="mm"),
+   dict(k="gap",    label="Gap between wraps", v=0.55, min=0.2, max=1.6, step=0.05, unit="mm"),
+   dict(k="core",   label="Centre hole",      v=1.1, min=0.4, max=3.0, step=0.1, unit="mm"),
  ],
  "tip": [
    dict(k="length",      label="Overall length",  v=19,   min=14,  max=32,  step=0.5, unit="mm"),
@@ -199,8 +200,8 @@ SPECS = {
                ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"],
                ["Glass", "&asymp; 83", "g"], ["Marbles", "4", "clear"]],
     "tip_spiral": [["Overall length", "19", "mm"], ["Outside", "&empty;9", "mm"],
-               ["Rod", "&empty;1.7", "mm"], ["Turns", "6.5", ""],
-               ["Slot", "every turn", "all the way"], ["Glass", "&asymp; 3.7", "g"]],
+               ["Sheet", "0.8", "mm thick"], ["Gap", "0.55", "between wraps"],
+               ["Wraps", "&asymp; 2.5", ""], ["Glass", "&asymp; 1.15", "g"]],
     "tip":    [["Overall length", "19", "mm"], ["Outside", "&empty;9", "mm"],
                ["Bore", "&empty;6.4", "mm, 1.3 wall"],
                ["Screen", "seven &empty;1.25", "holes"],
