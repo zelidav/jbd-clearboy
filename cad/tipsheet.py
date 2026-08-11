@@ -269,7 +269,7 @@ def use_page():
         if rolled:
             c = px([(0, 0, 9.5)])[0]
             e = px([(R, 0, 9.5)])[0]
-            rr = abs(e[0] - c[0]) + 6
+            rr = math.hypot(e[0] - c[0], e[1] - c[1]) + 6
             _paper_wrap(d, c[0], c[1], rr, math.radians(-200), math.radians(150),
                         max(rr * 0.30, 16))
         else:
@@ -284,14 +284,17 @@ def use_page():
     r0, r1 = sp["core"], sp["od"] / 2.0 - t
     turns = max((r1 - r0) / (t + g), 0.6)
     a_end = 2 * math.pi * turns                       # where the free edge sits
+    # bring that edge round to the camera side, which is where the paper is drawn.
+    # -a_end alone only brings it to +X, which is round the back of the piece
+    yaw = -math.pi / 2 - a_end
     for rolled in (False, True):
         im, px = _shot_of("tip_spiral", (W, H), down if rolled else side,
-                          angle=-a_end % (2 * math.pi))
+                          angle=yaw)
         d = ImageDraw.Draw(im)
         if rolled:
             c = px([(0, 0, 9.5)])[0]
             e = px([(sp["od"] / 2, 0, 9.5)])[0]
-            rr = abs(e[0] - c[0]) + 6
+            rr = math.hypot(e[0] - c[0], e[1] - c[1]) + 6
             _paper_wrap(d, c[0], c[1], rr, math.radians(-200), math.radians(150),
                         max(rr * 0.30, 16))
         else:
