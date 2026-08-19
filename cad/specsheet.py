@@ -266,6 +266,14 @@ def _table(d, rows, x, y, w, lead=42, notes=True):
     return y
 
 
+def _still(piece, way):
+    """The revision's own render, falling back to the shared one. A fritted thumbnail
+    on a no-frit sheet is the sheet contradicting itself, and it is the shop that pays
+    for it."""
+    p = os.path.join("shots", "%s_%s%s.png" % (piece, way, REVS[_REV]["still"]))
+    return p if os.path.exists(p) else os.path.join("shots", "%s_%s.png" % (piece, way))
+
+
 def _page_hammer(n):
     pg, d = sheet.blank()
     _head(d, T["PAGES"]["hammer"][0], T["PAGES"]["hammer"][1], n)
@@ -280,6 +288,15 @@ def _page_survey(n):
     if os.path.exists(p):
         im = sheet.fit(Image.open(p).convert("RGB"), (PAGE[0] - 192, PAGE[1] - 400))
         pg.paste(im, ((PAGE[0] - im.width) // 2, 285))
+        if not REVS[_REV]["frit"]:
+            # the photographed piece is the frit-rolled original - the only image on a
+            # no-frit sheet that is meant to show frit, so it is labelled rather than
+            # left for the shop to reconcile
+            d.text((96, 285 + im.height + 26),
+                   "The piece photographed here is the frit-rolled original the "
+                   "dimensions were taken from. Its surface is not this revision - "
+                   "the figures are, and they do not move.",
+                   font=sheet.font(False, 24), fill=RED)
     else:
         d.text((96, 300), "JBD_Clearboy_dimensions.png not found",
                font=sheet.font(False, 26), fill=RED)
@@ -290,7 +307,7 @@ def _page_jar(n):
     pg, d = sheet.blank()
     _head(d, T["PAGES"]["jar"][0], T["PAGES"]["jar"][1], n)
     y = _table(d, T["JAR"], 96, 290, 1000)
-    p = os.path.join("shots", "jar_teal_silver.png")
+    p = _still("jar", "teal_silver")
     if os.path.exists(p):
         im = sheet.fit(Image.open(p).convert("RGB"), (380, 640))
         pg.paste(im, (PAGE[0] - im.width - 110, 300))
@@ -363,11 +380,7 @@ def _page_decor(n):
 
     x = 114
     for piece, way in (("hammer", "magenta_gold"), ("jar", "teal_silver")):
-        # the thumbnails have to be the revision's own renders - a fritted still under
-        # a "neither carries frit" heading is the sheet arguing with itself
-        p = os.path.join("shots", "%s_%s%s.png" % (piece, way, REVS[_REV]["still"]))
-        if not os.path.exists(p):
-            p = os.path.join("shots", "%s_%s.png" % (piece, way))
+        p = _still(piece, way)
         if os.path.exists(p):
             im = sheet.fit(Image.open(p).convert("RGB"), (300, PAGE[1] - y - 130))
             pg.paste(im, (x, y + 20))
@@ -376,13 +389,24 @@ def _page_decor(n):
 
 
 def _notes(d, y):
-    f = sheet.font(False, 21)
+    """Set the notes at the largest size that still clears the footer.
+
+    The block used to assume a fixed count at a fixed leading. Rev B carries one note
+    more than Rev A, which ran the last one straight through the footer rule - so the
+    size is chosen against the space actually left on the page rather than hoped for."""
+    limit = PAGE[1] - 98
+    for size in (21, 20, 19, 18, 17):
+        f = sheet.font(False, size)
+        lead = size + 9
+        total = sum(lead * sheet.wrap(d, n, f, 1400)[1] + 12 for n in T["NOTES"])
+        if y + total <= limit or size == 17:
+            break
     d.text((96, y - 40), T["NOTES_TITLE"], font=sheet.font(True, 19), fill=RED)
     for i, n in enumerate(T["NOTES"]):
         txt, lines = sheet.wrap(d, n, f, 1400)
-        d.text((96, y), "%d" % (i + 1), font=sheet.font(True, 21), fill=RED)
+        d.text((96, y), "%d" % (i + 1), font=sheet.font(True, size), fill=RED)
         d.multiline_text((126, y), txt, font=f, fill=INK, spacing=8)
-        y += 30 * lines + 12
+        y += lead * lines + 12
 
 
 
@@ -617,11 +641,18 @@ def build(lang="en", rev="A"):
 PACK_NOTE = """JBD x Boutiq - Clearboy programme
 Manufacturing hand-off pack
 
-  spec/JBD_Clearboy_spec.pdf   the spec sheet - read this first. Dimensions,
+  spec/JBD_Clearboy_spec.pdf   Rev A, frit-rolled - read this first. Dimensions,
                                dimensioned closeups, the survey, decoration, and the
                                bench process with its QC hold points.
-  spec/dimensions.png          the dimensional survey of the original piece
-  spec/detail/*.png            dimensioned closeups, full resolution
+  spec/JBD_Clearboy_spec_RevB.pdf
+                               Rev B, no frit. Same geometry, same dimensions, same
+                               decals and QC - the frit is left off and the linework
+                               and marbles go straight onto the fumed body. Build to
+                               ONE of these two sheets, not a mixture.
+  spec/dimensions.png          the dimensional survey of the original piece. The piece
+                               photographed is the frit-rolled original either way.
+  spec/detail/*.png            dimensioned closeups, Rev A
+  spec/detail_RevB/*.png       the same closeups, Rev B
   cad/*.step                   solid B-rep - the reference geometry
   cad/*.stl                    meshes - 3D print, mould master, wax pattern
   box/*.png                    the collaboration box with the pieces seated
@@ -635,11 +666,15 @@ before any tooling. Figures are in millimetres.
 
 def build_pack():
     """One zip with everything the shop needs, laid out so it explains itself."""
-    items = [(OUT, "spec/JBD_Clearboy_spec.pdf"),
+    items = [(os.path.join("shots", "JBD_Clearboy_spec.pdf"), "spec/JBD_Clearboy_spec.pdf"),
+             (os.path.join("shots", "JBD_Clearboy_spec_RevB.pdf"),
+              "spec/JBD_Clearboy_spec_RevB.pdf"),
              ("JBD_Clearboy_dimensions.png", "spec/dimensions.png"),
              (os.path.join("shots", "JBD_x_Boutiq.pdf"), "JBD_x_Boutiq.pdf")]
-    items += [(p, "spec/detail/" + os.path.basename(p))
-              for p in sorted(glob.glob(os.path.join("shots", "spec", "*.png")))]
+    # both revisions' closeups, kept apart - they differ, and the difference is the point
+    for folder, into in (("spec", "spec/detail"), ("spec_revb", "spec/detail_RevB")):
+        items += [(p, into + "/" + os.path.basename(p))
+                  for p in sorted(glob.glob(os.path.join("shots", folder, "*.png")))]
     items += [(p, "cad/" + os.path.basename(p))
               for p in sorted(glob.glob(os.path.join("out", "*.ste[pl]")))]
     items += [(p, "box/" + os.path.basename(p))

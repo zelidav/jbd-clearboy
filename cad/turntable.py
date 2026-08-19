@@ -14,30 +14,33 @@ from mockups import PIECES, WAYS, SIDE
 FRAMES = "frames"
 
 
-def spin(piece, key, n=72, W=None, H=None, out=None):
-    out = out or os.path.join(FRAMES, "%s_%s" % (piece, key))
+def spin(piece, key, n=72, W=None, H=None, out=None, frit=True, tag=""):
+    """tag names a second set of frames for the same piece and colourway - the no-frit
+    revision spins the same geometry with one layer left off."""
+    out = out or os.path.join(FRAMES, "%s_%s%s" % (piece, key, tag))
     os.makedirs(out, exist_ok=True)
     W, H = mockups.size_of(piece, W, H)
-    r = mockups.build_renderer(piece, key, W, H)
+    r = mockups.build_renderer(piece, key, W, H, frit=frit)
     t0 = time.time()
     for i in range(n):
         im = mockups.frame(r, piece, SIDE + 2 * math.pi * i / n)
         im.save(os.path.join(out, "%03d.png" % i))
-    print("  %s / %s: %d frames in %.1fs" % (piece, key, n, time.time() - t0), flush=True)
+    print("  %s / %s%s: %d frames in %.1fs"
+          % (piece, key, tag, n, time.time() - t0), flush=True)
     return out
 
 
 TILTS = [0.0, -23.0, -45.0, -68.0, -90.0]      # standing -> laid down
 
 
-def grid(piece, key, n=24, tilts=None, W=None, H=None, out=None):
+def grid(piece, key, n=24, tilts=None, W=None, H=None, out=None, frit=True):
     """A roll x tilt sheet: dragging left/right rolls the piece on its own axis,
     dragging up/down tips it between laid down and standing."""
     tilts = TILTS if tilts is None else tilts
     out = out or os.path.join(FRAMES, "%s_%s" % (piece, key))
     os.makedirs(out, exist_ok=True)
     W, H = mockups.size_of(piece, W, H)
-    r = mockups.build_renderer(piece, key, W, H)
+    r = mockups.build_renderer(piece, key, W, H, frit=frit)
     t0 = time.time()
     for j, tl in enumerate(tilts):
         for i in range(n):

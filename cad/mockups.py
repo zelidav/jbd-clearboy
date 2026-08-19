@@ -110,7 +110,8 @@ WAYS = {
      fume_stops=((1.00, 1.00, 1.00), (0.88, 0.94, 1.06),
                  (0.92, 0.86, 1.10), (1.08, 0.98, 0.84)),
      line=(0.09, 0.11, 0.14), fline=(0.01, 0.11, 0.12),
-     marble=(0.105, 0.047819999999999994, 0.05448), wrap=(0.175, 0.0797, 0.0908), lines="body",
+     marble=(0.105, 0.047819999999999994, 0.05448), wrap=(0.175, 0.0797, 0.0908),
+     lines="body", lines_nofrit="frit", wrapped=True,
      label=(14, 122, 106), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy silver fume",
      sub="teal frit, marbles \u00b7 wrapped linework"),
@@ -121,7 +122,8 @@ WAYS = {
      fume_stops=((1.00, 0.99, 0.95), (1.08, 1.00, 0.82),
                  (1.08, 0.86, 0.82), (0.92, 0.86, 1.08)),
      line=(0.14, 0.10, 0.06), fline=(0.13, 0.01, 0.09),
-     marble=(0.047819999999999994, 0.12732, 0.08676), wrap=(0.0797, 0.2122, 0.1446), lines="body",
+     marble=(0.047819999999999994, 0.12732, 0.08676), wrap=(0.0797, 0.2122, 0.1446),
+     lines="body", lines_nofrit="frit", wrapped=True,
      label=(150, 32, 108), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy gold fume",
      sub="magenta frit, marbles \u00b7 wrapped linework"),
@@ -294,10 +296,18 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
               kAmt=0.10 if tinted else 0.26, kPow=5.0 if tinted else 3.8,
               spec=1.30 if tinted else 1.85, smooth=60.0, lens=0.055,
               solid=tinted, min_thick=0.8 if tinted else 0.0, role="marbles")
+    # two separate decisions that used to be one switch: which mesh the lines are spun
+    # on, and what the lines are made of. The clear builds wrap coloured linework and
+    # the fumed builds lay clear lines - that does not change when the frit comes off,
+    # but the coverage does. Without a frit band to sit against, the jar's full-height
+    # spiral is the only thing on the glass and reads as far too much work, so the
+    # no-frit builds spin the same short band the fumed ones wear.
     which = c.get("lines")
+    if not frit and c.get("lines_nofrit"):
+        which = c["lines_nofrit"]
     lines = p.get("lines_%s" % which) if which else None
     if lines:
-        clear = which == "frit"          # clear lines laid over a coloured, fritted body
+        clear = not c.get("wrapped", False)
         r.add(lines, absorb=c.get("wrap", (0.30, 0.085, 0.12)), fume=0.0,
               line=(0.10, 0.12, 0.14) if clear else c["fline"],
               kAmt=0.62 if clear else 0.30, kPow=2.6 if clear else 2.0,

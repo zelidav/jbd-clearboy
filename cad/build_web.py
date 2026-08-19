@@ -62,6 +62,9 @@ PIECE_META = {
                    note="19 mm thick-walled filter tip, screen inside, raked paper slot end to end"),
     "tip_spiral": dict(name="Glass tip, rolled", code="JBD-GT-19R",
                        note="19 mm of rolled sheet - the gap between wraps is the slot"),
+    # posed off the hammer, so a remodel request routes to the hammer builder
+    "pose135": dict(name="Clearboy hammer, raked", code="JBD-CB-140-R", variant_of="hammer",
+                    note="the same hammer posed as a sidecar - Angle 1 135, Angle 3 30"),
 }
 # sampled off assets/northstar_rods.jpg - what the shop can actually pull
 STOCK = {
@@ -106,6 +109,9 @@ BASE = {
    dict(k="footod",  label="Foot diameter",    v=24.5, min=18,  max=34,  step=0.5, unit="mm"),
    dict(k="marbles", label="Marbles",          v=4,    min=0,   max=8,   step=1,   unit=""),
    dict(k="scatter", label="Marble scatter",   v=0,    min=0,   max=40,  step=1,   unit=""),
+   dict(k="angle1",  label="Angle 1, joint",    v=90,  min=60,  max=170, step=5,   unit="°"),
+   dict(k="angle3",  label="Angle 3, head",     v=90,  min=10,  max=150, step=5,   unit="°"),
+
    dict(k="lines",   label="Spiral turns",     v=13,   min=0,   max=30,  step=1,   unit="turns"),
    dict(k="linepitch", label="Drop per turn",  v=2.4,  min=1.0, max=8.0, step=0.2, unit="mm"),
  ],
@@ -235,6 +241,10 @@ SPECS = {
                ["Screen", "seven &empty;1.25", "holes"],
                ["Slot", "0.75 wide", "3 mm grip"],
                ["Glass", "&asymp; 1.4", "g, clear"]],
+    "pose135": [["Overall height", "140", "mm"], ["Head", "68 &times; 42", "mm"],
+               ["Angle 1", "135", "&deg; at the joint"],
+               ["Angle 3", "30", "&deg; off vertical"],
+               ["Stem OD", "14", "mm"], ["Bowl", "&empty;25", "mm"]],
     "holder": [["Overall length", "90", "mm"], ["Bell", "&empty;23", "mm"],
                ["Grip cone", "&empty;6.4 &ndash; 15", "mm"],
                ["Mouthpiece", "&empty;9.6", "mm"],
@@ -272,6 +282,13 @@ def data_uri(path):
         return "data:%s;base64,%s" % (mime, base64.b64encode(f.read()).decode())
 
 
+# the raked tab is the hammer at a different pose, so it starts from the hammer's own
+# sliders with the two angles moved - the ghost outline stays the piece on screen
+BASE["pose135"] = [dict(r, v=(135 if r["k"] == "angle1" else
+                             30 if r["k"] == "angle3" else r["v"]))
+                   for r in BASE["hammer"]]
+
+
 def all_pieces():
     out = list(PIECES)
     for v in variants():
@@ -280,14 +297,17 @@ def all_pieces():
     return out
 
 
-def assets(inline):
+def assets(inline, pieces=None, suffix=""):
     ref = data_uri if inline else (
         lambda p: os.path.relpath(p, SITE).replace("\\", "/") + "?v=" + BUILD)
     out = {}
-    for pc in all_pieces():
+    for pc in (pieces or all_pieces()):
         out[pc] = {}
         for w in WAYS:
-            d = os.path.join(SITE, "spin", "%s_%s" % (pc, w))
+            d = os.path.join(SITE, "spin", "%s_%s%s" % (pc, w, suffix))
+            if suffix and not os.path.isdir(d):
+                # the piece carries no frit either way, so it spins the shared frames
+                d = os.path.join(SITE, "spin", "%s_%s" % (pc, w))
             if not os.path.isdir(d):
                 continue                      # a variant is usually rendered in one colourway
             names = [f for f in sorted(os.listdir(d)) if f.endswith(".webp")]
@@ -617,7 +637,8 @@ footer .r{margin-left:auto}
 
 def shell(title, body, script="", nav="index", standalone=False):
     links = [("revisions.html", "Revisions", "revisions"),
-             ("index.html", "Mockups", "index"), ("survey.html", "Survey", "survey"),
+             ("index.html", "Rev A", "index"), ("revb.html", "Rev B", "revb"),
+             ("raked.html", "Raked", "raked"), ("survey.html", "Survey", "survey"),
              ("downloads.html", "Downloads", "downloads")]
     # the spec sheet and the whole hand-off pack hang off every page, not just Downloads
     # the two newer pieces have their own sheets rather than a page each, so they hang
@@ -659,11 +680,10 @@ def shell(title, body, script="", nav="index", standalone=False):
 
 INDEX_BODY = r"""
   <div class="hero">
-    <div class="eyebrow">Rev A &middot; fumed glass &middot; frit-rolled &middot; clear marbles</div>
-    <h1 class="title">Mock<em>ups</em></h1>
-    <p class="deck">Two pieces, two colourways, spun on their own axis from a broadside start.
-      Both are built off the measured survey of the original hand-blown hammer. The glass is
-      rendered dense on purpose &mdash; these read as colour, not as an X-ray of the wall.</p>
+    <div class="eyebrow">__EYEBROW__</div>
+    <h1 class="title">__TITLE__</h1>
+    <p class="deck">__DECK__</p>
+    <div class="go" style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">__LINKS__</div>
   </div>
 
   <div class="pieces" id="pieces" role="group" aria-label="Piece"></div>
@@ -878,64 +898,18 @@ def build_revisions():
       matches the build you want.</p>
   </div>
   <div class="revs">""" + rev_cards() + """</div>
-  <p class="fine">Renders are proposals. The original hand-blown piece stays the reference,
+  <div class="sechead" style="margin-top:38px"><span class="n">&mdash;</span>
+    <h2>The raked pipe</h2><span class="note">a pose, not a revision</span></div>
+  <p class="deck">The same hammer swung into a sidecar &mdash; head up, stem raked back,
+    mouthpiece at bowl level. It has its own spinning tab because it is a different piece
+    to hold, not a different surface, and it reads badly next to the upright builds.</p>
+  <div class="go" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn" href="raked.html">Spin the raked pipe</a></div>
+  <p class="fine" style="margin-top:34px">Renders are proposals. The original hand-blown piece stays the reference,
     and wall thickness on the hammer is inferred rather than measured &mdash; confirm with
     calipers before any tooling.</p>
 """)
     return shell("Revisions | Jerome Baker Designs", body, "", "revisions")
-
-
-def rev_gallery(r):
-    """Every piece in the set for one revision. Pieces that carry no frit are the same
-    glass in every revision, so they fall back to the shared render rather than being
-    re-rendered into an identical file."""
-    cards = []
-    posed = "pose135_magenta_gold%s.png" % r["still"]
-    if os.path.exists(os.path.join(SITE, "still", posed)):
-        cards.append('<div class="shotcard wide"><img loading="lazy" src="still/%s" '
-                     'alt="Hammer, posed"><div class="cap"><b>Clearboy hammer, posed</b>'
-                     'Angle 1 135 / Angle 3 30 &mdash; head up, stem raked to fifteen '
-                     'degrees above horizontal, mouthpiece at bowl level</div></div>' % posed)
-    for pc in PIECES:
-        for w in WAYS:
-            name = "%s_%s%s.png" % (pc, w, r["still"] if pc in REV_PIECES else "")
-            if not os.path.exists(os.path.join(SITE, "still", name)):
-                continue
-            shared = pc not in REV_PIECES
-            cards.append(
-                '<div class="shotcard"><img loading="lazy" src="still/%s" alt="%s">'
-                '<div class="cap"><b>%s</b>%s %s%s</div></div>'
-                % (name, PIECE_META[pc]["name"], PIECE_META[pc]["name"],
-                   WAY_META[w]["name"], WAY_META[w]["sub"],
-                   " &middot; no frit either way" if shared else ""))
-    return "".join(cards)
-
-
-REVB_BODY = r"""
-  <div class="hero">
-    <div class="eyebrow">Fumed glass &middot; no frit &middot; clear marbles</div>
-    <h1 class="title">Rev B <em>No frit</em></h1>
-    <p class="deck">__BLURB__ Dimensions, decals, box contents, anneal and QC are unchanged
-      from Rev A &mdash; the spec sheet restates only the pages that named frit, so a figure
-      corrected on one sheet is corrected on both.</p>
-    <div class="go" style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn" href="__SPEC__" download>Spec &amp; SOP PDF</a>
-      <a class="btn" href="revisions.html">All revisions</a>
-      <a class="btn" href="index.html">Rev A spinners</a>
-    </div>
-  </div>
-  <div class="gallery">__CARDS__</div>
-  <p class="fine">Stills only on this tab &mdash; the drag-to-spin turntables and the
-    remodeller still run off the Rev A frames.</p>
-"""
-
-
-def build_revb():
-    r = REV_BY_KEY["b"]
-    body = (REVB_BODY.replace("__BLURB__", r["blurb"])
-                     .replace("__SPEC__", r["spec"])
-                     .replace("__CARDS__", rev_gallery(r)))
-    return shell("Rev B, no frit | Jerome Baker Designs", body, "", "revisions")
 
 
 DOWNLOADS_BODY = r"""
@@ -1502,10 +1476,59 @@ document.getElementById("videorows").innerHTML = VIDEOS.map(function(v){
 """
 
 
-def build_index(inline):
+# Each spinning tab is the same viewer pointed at a different set of frames. Keeping
+# them one code path is the point: the raked pipe and the no-frit build get the drag,
+# the colourway switch and the spec table for free, and a fix to the viewer lands on
+# every tab at once.
+VIEWS = {
+ "index": dict(
+    # the posed hammer has its own tab, so it is not offered here as well
+    nav="index", file="index.html", suffix="",
+    pieces=[p for p in all_pieces() if p != "pose135"],
+    title="Mock<em>ups</em>", eyebrow="Rev A &middot; fumed glass &middot; frit-rolled",
+    deck="Two pieces, two colourways, spun on their own axis from a broadside start. "
+         "Both are built off the measured survey of the original hand-blown hammer. The "
+         "glass is rendered dense on purpose &mdash; these read as colour, not as an "
+         "X-ray of the wall.",
+    links=[("revb.html", "Rev B, no frit"), ("raked.html", "The raked pipe"),
+           ("revisions.html", "All revisions")],
+    head="Mockups, Rev A"),
+ "revb": dict(
+    nav="revb", file="revb.html", suffix="_revb",
+    pieces=["hammer", "jar", "holder", "tip", "tip_spiral"],
+    title="Rev B <em>No frit</em>", eyebrow="Rev B &middot; fumed glass &middot; no frit",
+    deck="The same geometry with the frit left off. Fume and transparent wash are the "
+         "entire surface, so the linework and the marbles are the only texture on the "
+         "piece &mdash; and an uneven wash has nothing to hide behind. The joint holder "
+         "and the tips carry no frit in any revision, so they spin the shared frames.",
+    links=[("JBD_Clearboy_spec_RevB.pdf", "Rev B spec &amp; SOP"),
+           ("raked.html", "The raked pipe"), ("revisions.html", "All revisions")],
+    head="Rev B, no frit"),
+ "raked": dict(
+    nav="raked", file="raked.html", suffix="_revb", pieces=["pose135"],
+    title="The <em>raked</em> pipe", eyebrow="Sidecar &middot; Angle 1 135 &middot; Angle 3 30",
+    deck="The head swung up and the stem raked back, so the mouthpiece comes to bowl "
+         "level and you look down into the bowl rather than across it. Head and stem are "
+         "posed about the joint independently, which is what makes it a sidecar rather "
+         "than a hammer with a bent handle &mdash; the frit-rolled build simply swung "
+         "the stem, and at any real angle it stopped reading as a hammer at all.",
+    links=[("revb.html", "Rev B, no frit"), ("index.html", "Rev A spinners"),
+           ("revisions.html", "All revisions")],
+    head="The raked pipe"),
+}
+
+
+def build_index(inline, view="index"):
+    v = VIEWS[view]
+    meta = piece_meta()
+    if v["pieces"]:
+        meta = {k: meta[k] for k in v["pieces"] if k in meta}
+    links = "".join('<a class="btn" href="%s"%s>%s</a>'
+                    % (h, ' download' if h.endswith(".pdf") else "", t)
+                    for h, t in v["links"])
     js = (INDEX_JS
-          .replace("__ASSETS__", json.dumps(assets(inline)))
-          .replace("__META__", json.dumps({"pieces": piece_meta(), "ways": WAY_META}))
+          .replace("__ASSETS__", json.dumps(assets(inline, v["pieces"], v["suffix"])))
+          .replace("__META__", json.dumps({"pieces": meta, "ways": WAY_META}))
           .replace("__BASE__", json.dumps(base_dims()))
           .replace("__SPECS__", json.dumps(piece_specs()))
           .replace("__REPO__", REPO)
@@ -1513,8 +1536,12 @@ def build_index(inline):
           .replace("__RENDER_URL__", "" if inline else RENDER_URL)
           .replace("__RENDER_KEY__", RENDER_KEY)
           .replace("__STOCK__", json.dumps(STOCK)))
-    return shell("Mockups &middot; Clearboy programme | Jerome Baker Designs",
-                 INDEX_BODY, js, "index", standalone=inline)
+    body = (INDEX_BODY.replace("__EYEBROW__", v["eyebrow"])
+                      .replace("__TITLE__", v["title"])
+                      .replace("__DECK__", v["deck"])
+                      .replace("__LINKS__", links))
+    return shell("%s &middot; Clearboy programme | Jerome Baker Designs" % v["head"],
+                 body, js, v["nav"], standalone=inline)
 
 
 def stills():
@@ -1610,10 +1637,10 @@ if __name__ == "__main__":
         w = 1500
         im.resize((w, round(im.height * w / im.width)), Image.LANCZOS).save(
             dims, quality=86, optimize=True)
-    stills()                      # populates docs/still - the gallery pages read it
+    stills()
     write("revisions.html", build_revisions())
-    write("index.html", build_index(False))
-    write("revb.html", build_revb())
+    for key, v in VIEWS.items():
+        write(v["file"], build_index(False, key))
     write("survey.html", shell("Survey | Jerome Baker Designs", SURVEY_BODY, "", "survey"))
     write("downloads.html", build_downloads())
     write("mockups_selfcontained.html", build_index(True))
