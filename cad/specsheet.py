@@ -21,6 +21,17 @@ LANG = "en"
 PACK = os.path.join("shots", "JBD_Clearboy_pack.zip")
 PACK_SITE = os.path.join("docs", "JBD_Clearboy_pack.zip")
 REV = "Rev A"
+# The glass build revisions. Rev A is the frit-rolled piece the survey was drawn from;
+# Rev B is the same geometry with no frit, so the fume and the linework are the whole
+# surface. Only the blocks that mention frit differ - see specsheet_revb.py.
+REVS = {
+    "A": dict(rev="Rev A", label="frit-rolled", suffix="", spec_dir="spec", still="",
+              frit=True),
+    "B": dict(rev="Rev B", label="no frit", suffix="_RevB", spec_dir="spec_revb",
+              still="_revb", frit=False),
+}
+SPEC_DIR = "spec"
+_REV = "A"
 
 # (group, dimension, value, note) - note "" prints nothing, and carries the places where
 # the build departs from the measured original
@@ -173,9 +184,14 @@ TITLE = "JBD Clearboy \u2014 manufacturing spec"
 T = {}
 
 
-def use(lang):
-    """Point every string at one language, and the sheet at a face that can set it."""
-    global T, LANG, OUT, SITE
+def use(lang, rev="A"):
+    """Point every string at one language and one build revision, and the sheet at a
+    face that can set it.
+
+    Revision is an overlay, not a fork: Rev B restates only the blocks that name frit
+    and inherits everything else, so a dimension corrected once is corrected on both
+    sheets."""
+    global T, LANG, OUT, SITE, REV, SPEC_DIR, _REV
     LANG = lang
     here = globals()
     if lang == "zh":
@@ -183,18 +199,33 @@ def use(lang):
         T = {k: getattr(z, k) for k in
              ("HAMMER", "JAR", "DECOR", "DECALS", "BOM", "NOTES", "WAYS",
               "PAGES", "CLOSEUPS", "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER",
-              "FOOTER", "TITLE", "WAY_NAMES")}
+              "FOOTER", "TITLE", "WAY_NAMES",
+              "SOP_HAMMER", "SOP_JAR", "SOP_FINISH")}
         OUT = os.path.join("shots", "JBD_Clearboy_spec_ZH.pdf")
         SITE = os.path.join("docs", "JBD_Clearboy_spec_ZH.pdf")
     else:
         T = {k: here[k] for k in
              ("HAMMER", "JAR", "DECOR", "DECALS", "BOM", "NOTES", "WAYS",
               "PAGES", "NOTES_TITLE", "COLOURWAYS_TITLE", "HEADER", "FOOTER",
-              "TITLE")}
+              "TITLE", "SOP_HAMMER", "SOP_JAR", "SOP_FINISH")}
         T["CLOSEUPS"] = {k: (t, sub) for k, t, sub in CLOSEUPS}
         OUT = os.path.join("shots", "JBD_Clearboy_spec.pdf")
         SITE = os.path.join("docs", "JBD_Clearboy_spec.pdf")
     sheet.use_cjk(lang == "zh")
+
+    r = REVS[rev]
+    REV, SPEC_DIR, _REV = r["rev"], r["spec_dir"], rev
+    if rev != "A":
+        if lang != "en":
+            raise SystemExit("revision %s is English only" % rev)
+        import specsheet_revb as b
+        for k in ("DECOR", "NOTES", "WAYS", "SOP_HAMMER", "SOP_JAR"):
+            T[k] = getattr(b, k)
+        # PAGES and CLOSEUPS restate only their frit-touching entries
+        T["PAGES"] = dict(T["PAGES"]); T["PAGES"].update(b.PAGES)
+        T["CLOSEUPS"] = dict(T["CLOSEUPS"]); T["CLOSEUPS"].update(b.CLOSEUPS)
+        OUT = OUT.replace(".pdf", r["suffix"] + ".pdf")
+        SITE = SITE.replace(".pdf", r["suffix"] + ".pdf")
 
 
 def _head(d, title, sub, page_no, pages=None):
@@ -332,7 +363,11 @@ def _page_decor(n):
 
     x = 114
     for piece, way in (("hammer", "magenta_gold"), ("jar", "teal_silver")):
-        p = os.path.join("shots", "%s_%s.png" % (piece, way))
+        # the thumbnails have to be the revision's own renders - a fritted still under
+        # a "neither carries frit" heading is the sheet arguing with itself
+        p = os.path.join("shots", "%s_%s%s.png" % (piece, way, REVS[_REV]["still"]))
+        if not os.path.exists(p):
+            p = os.path.join("shots", "%s_%s.png" % (piece, way))
         if os.path.exists(p):
             im = sheet.fit(Image.open(p).convert("RGB"), (300, PAGE[1] - y - 130))
             pg.paste(im, (x, y + 20))
@@ -369,7 +404,7 @@ def _page_closeup(n, key, title, sub):
     pg, d = sheet.blank()
     title, sub = T["CLOSEUPS"].get(key, (title, sub))
     _head(d, title, sub, n)
-    folder = "spec_zh" if LANG == "zh" else "spec"
+    folder = "spec_zh" if LANG == "zh" else SPEC_DIR
     p = os.path.join("shots", folder, key + ".png")
     if not os.path.exists(p):
         p = os.path.join("shots", "spec", key + ".png")
@@ -559,17 +594,21 @@ def publish(src, dst):
 
 
 def _sop(name):
+    """Language and revision both reach the process pages through T - reading the
+    module globals here would quietly serve Rev A steps under a Rev B header."""
+    if name in T:
+        return T[name]
     if LANG == "zh":
         import specsheet_zh as z
         return getattr(z, name)
     return globals()[name]
 
 
-def build(lang="en"):
-    use(lang)
+def build(lang="en", rev="A"):
+    use(lang, rev)
     os.makedirs("shots", exist_ok=True)
     pages = [fn(i + 1) for i, fn in enumerate(PLAN)]
-    sheet.save(pages, OUT, "JBD Clearboy — manufacturing spec")
+    sheet.save(pages, OUT, "JBD Clearboy — manufacturing spec, %s" % REV)
     if os.path.isdir("docs"):
         publish(OUT, SITE)
     return OUT
@@ -622,8 +661,15 @@ def build_pack():
 
 
 if __name__ == "__main__":
-    langs = [a for a in sys.argv[1:] if a in ("en", "zh")] or ["en", "zh"]
+    args = sys.argv[1:]
+    revs = [a.upper().replace("REV", "") for a in args if a.lower() in ("reva", "revb")]
+    langs = [a for a in args if a in ("en", "zh")] or ["en", "zh"]
+    if revs:                                  # an explicit revision is English only
+        for rv in revs:
+            build("en", rv)
+        raise SystemExit(0)
     for lg in langs:
         build(lg)
-    build("en")
+    build("en", "B")
+    build("en")                               # leave Rev A as the resting state
     build_pack()

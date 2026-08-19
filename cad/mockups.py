@@ -11,7 +11,7 @@ Colourways (both fumed, both frit-rolled with clear marbles)
 Glass is rendered denser than a clear piece would be - the point of these is the
 colour, not an X-ray of the wall.
 """
-import os, sys
+import math, os, sys
 from PIL import Image, ImageDraw, ImageFont
 import render
 
@@ -62,8 +62,9 @@ PIECES = {
  "pose135": dict(
      body="out/v-pose135.stl", frit="out/v-pose135_frit.stl",
      marbles="out/v-pose135_marbles.stl",
-     cam_r=620.0, target=(42, 0, 120), fov=17.0, shadow=(0.5, 0.30, 0.055),
-     decal=None, size=(1200, 820),
+     lines_body="out/v-pose135_lines.stl", lines_frit="out/v-pose135_lines.stl",
+     # posed, the piece hangs between Z 79 and 160 and off to +X, so it frames itself
+     fit=True, fov=17.0, decal=None, size=(1200, 820),
      name="Hammer, posed", note="Angle 1 135 / Angle 3 30"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
@@ -266,9 +267,12 @@ def make_jar_sticker(path):
     return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
-def build_renderer(piece, key, W, H, decal_turn=0):
+def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
     """decal_turn=180 prints the stem label the other way along the stem, for a piece
-    laid in a case with its head at the other end."""
+    laid in a case with its head at the other end.
+
+    frit=False leaves the rolled grain off - a smooth fumed body, marbles and linework
+    only. The frit mesh is the only layer dropped; nothing else moves."""
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
@@ -277,7 +281,7 @@ def build_renderer(piece, key, W, H, decal_turn=0):
           decal=(p["decal"] is not None) or (p.get("stamp") is not None),
           solid=True, min_thick=2.2, role="body")
     # the holder wears spun linework instead, so frit is optional now
-    if p.get("frit"):
+    if p.get("frit") and frit:
         r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],
               kAmt=0.22, kPow=2.0, spec=1.25, solid=True, min_thick=3.4, smooth=0.0,
               role="frit")
@@ -338,12 +342,62 @@ def build_renderer(piece, key, W, H, decal_turn=0):
     return r
 
 
+def fit(r, angle=SIDE, fov=17.0, tilt=0.0, shift=None, pad=0.14, elev=5.0):
+    """Frame the camera on whatever was actually added, and put the contact shadow
+    under it.
+
+    A hand-set cam_r/target/shadow is only right for the geometry it was measured on.
+    Pose the piece - swing the head up, rake the stem - and the solid moves off Z 0,
+    so the piece drifts in frame and the shadow stays behind on the floor, which is
+    what made the raked hammer read as floating. This measures instead.
+
+    Measured broadside, whatever angle is being drawn: these pieces are long in X and
+    spin about Z, so SIDE is where they are widest, and one frame for the whole
+    turntable is what keeps a spinner from breathing as it turns."""
+    import numpy as np
+    if r.bbox is None:
+        raise RuntimeError("nothing added to the renderer - nothing to frame")
+    lo, hi = r.bbox
+    corners = np.array([[x, y, z] for x in (lo[0], hi[0])
+                        for y in (lo[1], hi[1]) for z in (lo[2], hi[2])], "f8")
+    m = render.roty(math.radians(tilt)) @ render.rotz(angle)
+    world = (m[:3, :3] @ corners.T).T + m[:3, 3] + np.asarray(shift or (0, 0, 0), "f8")
+    cx, cz = world[:, 0].mean(), (world[:, 2].min() + world[:, 2].max()) / 2
+    target = (float(cx), 0.0, float(cz))
+
+    W, H = r.W / render.SS, r.H / render.SS
+    def spread(cam_r):
+        px = r.project(corners, angle=angle, cam_r=cam_r, elev=elev, target=target,
+                       fov=fov, tilt=tilt, shift=shift)
+        return px, max(np.ptp(px[:, 0]) / W, np.ptp(px[:, 1]) / H)
+    # the projected size falls off as 1/cam_r, so one measurement sets the scale and
+    # a couple of passes settle the perspective term
+    cam_r = max(float(np.linalg.norm(hi - lo)) * 3.0, 60.0)
+    for _ in range(6):
+        px, got = spread(cam_r)
+        cam_r *= got / (1.0 - pad)
+    px, _ = spread(cam_r)
+
+    # the pool goes under the part that is actually lowest, not under the centroid -
+    # a posed piece rests on one end and the shadow belongs there
+    low = int(px[:, 1].argmax())
+    bottom = 1.0 - px[low, 1] / H              # uv runs up from the frame floor
+    wide = np.ptp(px[:, 0]) / W
+    shadow = (float((px[low, 0] * 0.65 + px[:, 0].mean() * 0.35) / W),
+              float(min(max(wide * 0.62, 0.12), 0.45)), float(max(bottom, 0.02)))
+    return dict(cam_r=float(cam_r), target=target, fov=fov, shadow=shadow,
+                tilt=tilt, shift=shift)
+
+
 def frame(r, piece, angle, tilt=None):
     """tilt=None uses the piece's own orientation. Pass a tilt in degrees to sweep
     between standing (0) and laid down (-90): the camera pulls back and the piece
     slides across so it stays framed the whole way."""
     p = PIECES[piece]
     if tilt is None:
+        if p.get("fit"):                  # posed geometry frames itself - see fit()
+            return r.frame(angle, **fit(r, SIDE, p["fov"], p.get("tilt", 0.0),
+                                        p.get("shift"), p.get("pad", 0.14)))
         return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
                        shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
     t = abs(tilt) / 90.0                      # 0 standing, 1 flat on its side
@@ -362,10 +416,10 @@ def size_of(piece, W=None, H=None):
     return PIECES[piece].get("size", (760, 1000))
 
 
-def shot(piece, key, angle=SIDE, W=None, H=None, tag=""):
+def shot(piece, key, angle=SIDE, W=None, H=None, tag="", frit=True):
     os.makedirs(OUT, exist_ok=True)
     W, H = size_of(piece, W, H)
-    im = frame(build_renderer(piece, key, W, H), piece, angle)
+    im = frame(build_renderer(piece, key, W, H, frit=frit), piece, angle)
     im.save(f"{OUT}/{piece}_{key}{tag}.png")
     print("wrote", piece, key + tag, im.size)
     return im
@@ -373,8 +427,9 @@ def shot(piece, key, angle=SIDE, W=None, H=None, tag=""):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
+    frit = "nofrit" not in args                  # nofrit -> smooth body, marbles only
     pieces = [a for a in args if a in PIECES] or list(PIECES)
     ways = [a for a in args if a in WAYS] or list(WAYS)
     for pc in pieces:
         for k in ways:
-            shot(pc, k)
+            shot(pc, k, frit=frit)

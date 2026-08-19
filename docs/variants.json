@@ -1,15 +1,5 @@
 [
  {
-  "id": "v-raked-stem",
-  "way": "magenta_gold",
-  "piece": "hammer",
-  "label": "raked stem",
-  "notes": "",
-  "dims": {
-   "rake": 80.0
-  }
- },
- {
   "id": "v-tighter-spiral",
   "way": "clear_silver",
   "piece": "hammer",

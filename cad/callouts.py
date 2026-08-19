@@ -18,6 +18,7 @@ import model as M
 import jar as J
 
 OUT = os.path.join("shots", "spec")
+FRIT = True             # Rev A rolls frit; Rev B leaves the body smooth
 # the fumed builds carry the linework the shop actually lays down - 9 turns over the
 # frit, not the 42-turn body spiral the clear builds wear - so they read cleanest here
 WAY = "teal_silver"
@@ -27,7 +28,7 @@ PAPER = (252, 251, 249)
 
 
 def _renderer(piece, W, H):
-    return mockups.build_renderer(piece, WAY, W, H)
+    return mockups.build_renderer(piece, WAY, W, H, frit=FRIT)
 
 
 def _shot(piece, W, H, cam):
@@ -180,15 +181,18 @@ def jar_body():
                                      elev=0.0, angle=math.pi))
     d = ImageDraw.Draw(im)
     caption(d, (W, H), "Nug jar", "Straight cylinder, flat closed bottom. The frit band "
-            "and its marbles sit under the rim.")
+            "and its marbles sit under the rim." if FRIT else
+            "Straight cylinder, flat closed bottom. No frit - the linework and its "
+            "marbles sit under the rim.")
     dim(d, px([(-J.OD / 2, 0, 0)])[0], px([(J.OD / 2, 0, 0)])[0], 90,
         "ø 44 OD", "below")
     dim(d, px([(0, 0, J.HEIGHT)])[0], px([(0, 0, 0)])[0], 240,
         "92  glass height", "left")
     dim(d, px([(-J.MOUTH_ID / 2, 0, J.HEIGHT)])[0],
         px([(J.MOUTH_ID / 2, 0, J.HEIGHT)])[0], 190, "ø 38 mouth", "above")
+    # same band either way - on Rev B the linework occupies the height the frit had
     dim(d, px([(0, 0, J.FRIT_Z[1])])[0], px([(0, 0, J.FRIT_Z[0])])[0],
-        240, "frit  66–90.5", "right")
+        240, "frit  66–90.5" if FRIT else "linework  66–90.5", "right")
     leader(d, px([(0, -J.OD / 2, J.MARBLE_Z)])[0], (-190, -120), "7 × ø 8 marbles")
     leader(d, px([(0, -J.OD / 2, J.STAMP_Z)])[0], (0, 150), "JBD pressed mark")
     return im, "jar_body"
@@ -219,7 +223,9 @@ def jar_cork():
 VIEWS = [head, bowl, stem, jar_body, jar_cork]
 
 
-def build():
+def build(out=None, frit=True):
+    global OUT, FRIT
+    OUT, FRIT = out or OUT, frit
     os.makedirs(OUT, exist_ok=True)
     made = []
     for fn in VIEWS:

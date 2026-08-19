@@ -20,6 +20,34 @@ CONTACT = "david@canismajorpartners.com"
 RENDER_URL = "https://jbd-clearboy-render-804083036164.us-east1.run.app/render"
 RENDER_KEY = "NBvIvBZfVeFWVrIYSBqy6Sa-"
 
+# The glass build revisions. This is the counter the spec sheet uses, and the only
+# thing "Rev" means anywhere on the site - the mockups page used to carry a second,
+# unrelated Rev of its own, which is why the heading no longer says one.
+REVISIONS = [
+    dict(key="a", rev="Rev A", label="Frit-rolled", still="", page="index.html",
+         spec="JBD_Clearboy_spec.pdf", current=False,
+         blurb="The build the survey was drawn from. The bowl end of the hammer and "
+               "the band under the jar rim are rolled in matched frit, worked into "
+               "the wall, with the clear linework and the marbles set over it.",
+         detail=["Frit over the outer 54 mm of the chamber, densest at the rim",
+                 "Jar frit band 66-90.5 mm up from the base",
+                 "Spinners, remodeller and the full hand-off pack",
+                 "Chinese spec sheet available"]),
+    dict(key="b", rev="Rev B", label="No frit", still="_revb", page="revb.html",
+         spec="JBD_Clearboy_spec_RevB.pdf", current=True,
+         blurb="The same geometry with the frit left off. Fume and transparent wash "
+               "are the entire surface, so the linework and the marbles are the only "
+               "texture on the piece - and an uneven wash has nothing to hide behind.",
+         detail=["No frit on either piece - nothing else moves",
+                 "Linework spun straight onto the fumed body",
+                 "Marbles set on the bowl end, over the linework",
+                 "Same dimensions, decals, BOM, anneal and QC as Rev A"]),
+]
+REV_BY_KEY = {r["key"]: r for r in REVISIONS}
+# what Rev B actually re-renders - the other pieces carry no frit, so they are shared
+REV_PIECES = ["hammer", "jar"]
+CURRENT = next(r for r in REVISIONS if r["current"])
+
 PIECES = ["hammer", "jar", "holder", "tip", "tip_spiral"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
@@ -390,6 +418,30 @@ nav a.dl span{color:var(--ink-3);margin-left:5px}
 @media (max-width:640px){nav a.dl span{display:none}}
 
 .hero{padding:40px 0 6px}
+.revs{display:grid;gap:22px;margin:34px 0 10px;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.rev{border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px;
+  display:flex;flex-direction:column;background:var(--paper-2,transparent)}
+.rev.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.rev .tag{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);display:flex;gap:10px;align-items:center}
+.rev .tag b{color:var(--accent);font-weight:500}
+.rev h2{font-family:var(--font-display);font-stretch:87.5%;font-size:34px;
+  text-transform:uppercase;margin:12px 0 0;letter-spacing:-.005em}
+.rev p{color:var(--ink-2);font-size:15.5px;margin:12px 0 0}
+.rev ul{margin:16px 0 0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.rev li{padding:5px 0 5px 16px;position:relative}
+.rev li:before{content:"";position:absolute;left:0;top:12px;width:6px;height:1px;
+  background:var(--ink-3)}
+.rev .go{margin-top:auto;padding-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+.gallery{display:grid;gap:18px;margin:30px 0;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.shotcard{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.shotcard img{display:block;width:100%;height:auto;background:#eef0f2}
+.shotcard .cap{padding:11px 14px 13px;font-size:13.5px;color:var(--ink-2);
+  border-top:1px solid var(--line)}
+.shotcard .cap b{display:block;color:var(--ink);font-size:14.5px;font-weight:600}
+.wide{grid-column:1/-1}
 .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.19em;
   text-transform:uppercase;color:var(--ink-3)}
 .title{font-family:var(--font-display);font-stretch:87.5%;font-weight:700;
@@ -564,7 +616,8 @@ footer .r{margin-left:auto}
 
 
 def shell(title, body, script="", nav="index", standalone=False):
-    links = [("index.html", "Mockups", "index"), ("survey.html", "Survey", "survey"),
+    links = [("revisions.html", "Revisions", "revisions"),
+             ("index.html", "Mockups", "index"), ("survey.html", "Survey", "survey"),
              ("downloads.html", "Downloads", "downloads")]
     # the spec sheet and the whole hand-off pack hang off every page, not just Downloads
     # the two newer pieces have their own sheets rather than a page each, so they hang
@@ -573,10 +626,10 @@ def shell(title, body, script="", nav="index", standalone=False):
              ' <span>PDF</span></a>'
              '<a class="dl" href="JBD_Glass_Tip.pdf" target="_blank">Glass tip'
              ' <span>PDF</span></a>'
-             '<a class="dl" href="JBD_Clearboy_spec.pdf" download>Spec sheet'
+             '<a class="dl" href="%s" download>Spec sheet %s'
              ' <span>PDF</span></a>'
              '<a class="dl" href="JBD_Clearboy_pack.zip" download>All specs'
-             ' <span>ZIP</span></a>')
+             ' <span>ZIP</span></a>') % (CURRENT["spec"], CURRENT["rev"])
     navhtml = "" if standalone else "<nav>" + "".join(
         '<a href="%s"%s>%s</a>' % (h, ' aria-current="page"' if k == nav else "", t)
         for (h, t, k) in links) + grabs + "</nav>"
@@ -606,8 +659,8 @@ def shell(title, body, script="", nav="index", standalone=False):
 
 INDEX_BODY = r"""
   <div class="hero">
-    <div class="eyebrow">Fumed glass &middot; frit-rolled &middot; clear marbles</div>
-    <h1 class="title">Mockups <em>Rev B</em></h1>
+    <div class="eyebrow">Rev A &middot; fumed glass &middot; frit-rolled &middot; clear marbles</div>
+    <h1 class="title">Mock<em>ups</em></h1>
     <p class="deck">Two pieces, two colourways, spun on their own axis from a broadside start.
       Both are built off the measured survey of the original hand-blown hammer. The glass is
       rendered dense on purpose &mdash; these read as colour, not as an X-ray of the wall.</p>
@@ -797,6 +850,93 @@ SURVEY_BODY = r"""
     </figure>
   </section>
 """
+
+def rev_cards():
+    out = []
+    for r in REVISIONS:
+        li = "".join("<li>%s</li>" % x for x in r["detail"])
+        out.append(
+            '<div class="rev%s">'
+            '<div class="tag"><b>%s</b><span>%s</span>%s</div>'
+            '<h2>%s</h2><p>%s</p><ul>%s</ul>'
+            '<div class="go"><a class="btn" href="%s">Mockups</a>'
+            '<a class="btn" href="%s" download>Spec &amp; SOP PDF</a></div></div>'
+            % (" on" if r["current"] else "", r["rev"], r["label"],
+               "<span>&middot; current</span>" if r["current"] else "",
+               r["label"], r["blurb"], li, r["page"], r["spec"]))
+    return "".join(out)
+
+
+def build_revisions():
+    body = ("""
+  <div class="hero">
+    <div class="eyebrow">Clearboy programme &middot; pick a build</div>
+    <h1 class="title">Revi<em>sions</em></h1>
+    <p class="deck">Same geometry, same dimensions, same decals and the same QC. What changes
+      between revisions is the surface. Each one carries its own mockups and its own
+      manufacturing spec with the bench process in it &mdash; send the shop the sheet that
+      matches the build you want.</p>
+  </div>
+  <div class="revs">""" + rev_cards() + """</div>
+  <p class="fine">Renders are proposals. The original hand-blown piece stays the reference,
+    and wall thickness on the hammer is inferred rather than measured &mdash; confirm with
+    calipers before any tooling.</p>
+""")
+    return shell("Revisions | Jerome Baker Designs", body, "", "revisions")
+
+
+def rev_gallery(r):
+    """Every piece in the set for one revision. Pieces that carry no frit are the same
+    glass in every revision, so they fall back to the shared render rather than being
+    re-rendered into an identical file."""
+    cards = []
+    posed = "pose135_magenta_gold%s.png" % r["still"]
+    if os.path.exists(os.path.join(SITE, "still", posed)):
+        cards.append('<div class="shotcard wide"><img loading="lazy" src="still/%s" '
+                     'alt="Hammer, posed"><div class="cap"><b>Clearboy hammer, posed</b>'
+                     'Angle 1 135 / Angle 3 30 &mdash; head up, stem raked to fifteen '
+                     'degrees above horizontal, mouthpiece at bowl level</div></div>' % posed)
+    for pc in PIECES:
+        for w in WAYS:
+            name = "%s_%s%s.png" % (pc, w, r["still"] if pc in REV_PIECES else "")
+            if not os.path.exists(os.path.join(SITE, "still", name)):
+                continue
+            shared = pc not in REV_PIECES
+            cards.append(
+                '<div class="shotcard"><img loading="lazy" src="still/%s" alt="%s">'
+                '<div class="cap"><b>%s</b>%s %s%s</div></div>'
+                % (name, PIECE_META[pc]["name"], PIECE_META[pc]["name"],
+                   WAY_META[w]["name"], WAY_META[w]["sub"],
+                   " &middot; no frit either way" if shared else ""))
+    return "".join(cards)
+
+
+REVB_BODY = r"""
+  <div class="hero">
+    <div class="eyebrow">Fumed glass &middot; no frit &middot; clear marbles</div>
+    <h1 class="title">Rev B <em>No frit</em></h1>
+    <p class="deck">__BLURB__ Dimensions, decals, box contents, anneal and QC are unchanged
+      from Rev A &mdash; the spec sheet restates only the pages that named frit, so a figure
+      corrected on one sheet is corrected on both.</p>
+    <div class="go" style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn" href="__SPEC__" download>Spec &amp; SOP PDF</a>
+      <a class="btn" href="revisions.html">All revisions</a>
+      <a class="btn" href="index.html">Rev A spinners</a>
+    </div>
+  </div>
+  <div class="gallery">__CARDS__</div>
+  <p class="fine">Stills only on this tab &mdash; the drag-to-spin turntables and the
+    remodeller still run off the Rev A frames.</p>
+"""
+
+
+def build_revb():
+    r = REV_BY_KEY["b"]
+    body = (REVB_BODY.replace("__BLURB__", r["blurb"])
+                     .replace("__SPEC__", r["spec"])
+                     .replace("__CARDS__", rev_gallery(r)))
+    return shell("Rev B, no frit | Jerome Baker Designs", body, "", "revisions")
+
 
 DOWNLOADS_BODY = r"""
   <div class="hero">
@@ -1378,23 +1518,50 @@ def build_index(inline):
 
 
 def stills():
-    """Copy the hero stills into the site and list them."""
+    """Copy the hero stills into the site and list them, every revision.
+
+    Only the pieces that carry frit are re-rendered per revision; the rest are the same
+    glass whichever sheet you build to, so they are copied once and shared."""
+    global _STILLS
+    if _STILLS is not None:
+        return _STILLS
     src, dst = "shots", os.path.join(SITE, "still")
     os.makedirs(dst, exist_ok=True)
-    rows = []
-    for pc in PIECES:
-        for w in WAYS:
-            name = "%s_%s.png" % (pc, w)
-            if os.path.exists(os.path.join(src, name)):
+    rows, seen = [], set()
+    for r in REVISIONS:
+        for pc in PIECES:
+            for w in WAYS:
+                tag = r["still"] if pc in REV_PIECES else ""
+                name = "%s_%s%s.png" % (pc, w, tag)
+                if name in seen or not os.path.exists(os.path.join(src, name)):
+                    continue
+                seen.add(name)
                 shutil.copyfile(os.path.join(src, name), os.path.join(dst, name))
-                rows.append((name, "%s / %s %s" % (PIECE_META[pc]["name"],
-                                                   WAY_META[w]["name"], WAY_META[w]["sub"])))
+                rows.append((name, "%s / %s %s%s"
+                             % (PIECE_META[pc]["name"], WAY_META[w]["name"],
+                                WAY_META[w]["sub"],
+                                "" if not tag else " · " + r["rev"])))
+        for w in ("magenta_gold", "teal_silver"):
+            name = "pose135_%s%s.png" % (w, r["still"])
+            if name in seen or not os.path.exists(os.path.join(src, name)):
+                continue
+            seen.add(name)
+            shutil.copyfile(os.path.join(src, name), os.path.join(dst, name))
+            rows.append((name, "Clearboy hammer, posed / %s %s · %s"
+                         % (WAY_META[w]["name"], WAY_META[w]["sub"], r["rev"])))
+    _STILLS = rows
     return rows
 
 
+_STILLS = None
+
 SPECFILES = [
     ("JBD_Clearboy_spec.pdf",
-     "Manufacturing spec - dimensions, dimensioned closeups, decoration and the survey"),
+     "Rev A, frit-rolled - manufacturing spec and bench process, dimensions, "
+     "dimensioned closeups, decoration and the survey"),
+    ("JBD_Clearboy_spec_RevB.pdf",
+     "Rev B, no frit - the same sheet for the build with the frit left off. English "
+     "only; the Chinese sheet is Rev A"),
     ("JBD_Joint_Holder.pdf",
      "Joint holder - twelve designs on cut sheets, and how it wears as a pendant"),
     ("JBD_Glass_Tip.pdf",
@@ -1443,7 +1610,10 @@ if __name__ == "__main__":
         w = 1500
         im.resize((w, round(im.height * w / im.width)), Image.LANCZOS).save(
             dims, quality=86, optimize=True)
+    stills()                      # populates docs/still - the gallery pages read it
+    write("revisions.html", build_revisions())
     write("index.html", build_index(False))
+    write("revb.html", build_revb())
     write("survey.html", shell("Survey | Jerome Baker Designs", SURVEY_BODY, "", "survey"))
     write("downloads.html", build_downloads())
     write("mockups_selfcontained.html", build_index(True))

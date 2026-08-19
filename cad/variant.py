@@ -18,9 +18,11 @@ import cadquery as cq
 
 VARIANTS = os.path.join("docs", "variants.json")
 
+# angle1 is the joint, taken on the upper side; angle3 is the head off vertical.
+# 90/90 is the original flat-headed hammer. See model.angles().
 HAMMER_BASE = dict(height=140.0, headlen=68.0, headsec=42.0, stemod=14.0,
                    bowlid=25.0, footod=24.5, stemlen=88.0, marbles=4, scatter=0,
-                   lines=5, linepitch=6.0, rake=0.0)
+                   lines=5, linepitch=6.0, rake=0.0, angle1=90.0, angle3=90.0)
 JAR_BASE = dict(height=92.0, mouthid=38.0, wall=3.0, fritz=25.0, corkh=20.0, marbles=7,
                 lines=18, linepitch=1.9)
 HOLDER_BASE = dict(length=90.0, bell_od=23.0, bell_id=15.0, throat_id=6.4,
@@ -94,6 +96,8 @@ def build_hammer(d, out, vid):
     model.FOOT_OD = p["footod"]
     model.COLLAR_OD = p["stemod"] + 3.5
     model.STEM_ANGLE = p["rake"]
+    model.HEAD_FROM_VERT = p["angle3"]
+    model.STEM_TO_HEAD = p["angle1"]
     model.BOWL_DEPTH = min(model.BOWL_DEPTH * k_len, model.HEAD_X1 * 0.55 + 12)
 
     body = model.build()
@@ -108,37 +112,41 @@ def build_hammer(d, out, vid):
     n = int(p["marbles"])
     frit.MARBLES = [(x * k_len, th, r) for (x, th, r) in frit.MARBLES]
 
+    import linework, math, numpy as np, trimesh
+    # model.build() poses head and stem about the joint. Frit, marbles and linework are
+    # separate meshes built in the unposed frame, so each has to take the turn of the
+    # part it sits on or the decoration slides off the glass.
+    head_turn = -(90.0 - p["angle3"])
+    stem_turn = p["rake"] or (head_turn + (90.0 - p["angle1"]))
+    zj = model._interp(0, 0)[2]
+
+    def posed(mesh, deg):
+        if deg:
+            mesh.apply_transform(trimesh.transformations.rotation_matrix(
+                math.radians(deg), [0, 1, 0], [0, 0, zj]))
+        return mesh
+
     frit_path = os.path.join(out, "%s_frit.stl" % vid)
     marb_path = os.path.join(out, "%s_marbles.stl" % vid)
-    frit.build_frit().export(frit_path)
-    frit.build_marbles(n=n, seed=int(p["scatter"])).export(marb_path)
+    posed(frit.build_frit(), head_turn).export(frit_path)
+    posed(frit.build_marbles(n=n, seed=int(p["scatter"])), head_turn).export(marb_path)
 
-    import linework, math, numpy as np, trimesh
     lines_path = os.path.join(out, "%s_lines.stl" % vid)
-    if p["rake"]:
-        # the foot has moved, so its rings have to travel with it
-        head = linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"], foot=False)
-        foot = linework.hammer_spiral(turns=max(p["lines"], 1), pitch=p["linepitch"],
-                                      foot=True, head=False)
-        zj = model._interp(0, 0)[2]
-        T = trimesh.transformations.rotation_matrix(
-            math.radians(p["rake"]), [0, 1, 0], [0, 0, zj])
-        foot.apply_transform(T)
-        trimesh.util.concatenate([head, foot]).export(lines_path)
-    else:
-        linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"]).export(lines_path)
-    if p["rake"]:                       # a raked piece lies wide, so frame it wide
-        return dict(body=body_path, frit=frit_path, marbles=marb_path,
-                    lines_body=lines_path, lines_frit=lines_path,
-                    cam_r=590.0, target=(0, 0, 116 + dz), fov=17.0,
-                    shift=(42.0, 0.0, 0.0), size=(1000, 700),
-                    shadow=(0.5, 0.40, 0.085), decal=None)
-    return dict(body=body_path, frit=frit_path, marbles=marb_path,
-                lines_body=lines_path, lines_frit=lines_path,
-                cam_r=700.0 + max(dz, 0) * 2.2, target=(0, 0, 74 + dz * 0.55),
-                fov=17.0, shadow=(0.5, 0.30, 0.075),
-                # the sticker projector assumes a vertical stem, so a raked one goes bare
-                decal=None if p["rake"] else (20.0, 74.0, p["stemod"] / 2))
+    head = posed(linework.hammer_spiral(turns=p["lines"], pitch=p["linepitch"],
+                                        foot=False), head_turn)
+    foot = posed(linework.hammer_spiral(turns=max(p["lines"], 1), pitch=p["linepitch"],
+                                        foot=True, head=False), stem_turn)
+    trimesh.util.concatenate([head, foot]).export(lines_path)
+
+    spec = dict(body=body_path, frit=frit_path, marbles=marb_path,
+                lines_body=lines_path, lines_frit=lines_path, fov=17.0)
+    if head_turn or stem_turn:
+        # a posed piece sits nowhere predictable, so let the frame measure it
+        spec.update(fit=True, size=(1200, 820), decal=None)
+        return spec
+    spec.update(cam_r=700.0 + max(dz, 0) * 2.2, target=(0, 0, 74 + dz * 0.55),
+                shadow=(0.5, 0.30, 0.075), decal=(20.0, 74.0, p["stemod"] / 2))
+    return spec
 
 
 # ---------------------------------------------------------------- jar

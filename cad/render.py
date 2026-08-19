@@ -268,6 +268,7 @@ class Renderer:
                                         ctx.depth_renderbuffer((self.W, self.H)))
         self.objs = []
         self.decals = []
+        self.bbox = None                 # model-space extent of everything added
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
             kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, lens=0.0,
@@ -281,6 +282,9 @@ class Renderer:
         role names the part so the passes can treat it as what it is: 'marbles' stand
         proud of the wall, 'lines' are spun on before them and have to pass behind."""
         v, n, f = load(path, smooth)
+        lo, hi = v.min(axis=0), v.max(axis=0)
+        self.bbox = ((lo, hi) if self.bbox is None
+                     else (np.minimum(self.bbox[0], lo), np.maximum(self.bbox[1], hi)))
         vbo = self.ctx.buffer(np.hstack([v, n]).astype('f4').tobytes())
         ibo = self.ctx.buffer(f.astype('i4').tobytes())
         vaos = {k: self.ctx.vertex_array(p, [(vbo, '3f 3f', 'in_pos', 'in_norm')], ibo)
