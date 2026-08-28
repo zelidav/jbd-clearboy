@@ -173,7 +173,11 @@ p{margin:0}
 .frameBox{position:relative;background:#EDEFF2;touch-action:pan-y;cursor:grab;
   user-select:none;-webkit-user-select:none}
 .frameBox.dragging{cursor:grabbing}
-.frameBox img{width:100%;pointer-events:none}
+/* the tube renders portrait at 640x1040; letting it fill the column pushes the
+   bottom of the piece off the screen, so the frame is capped to the viewport and
+   the image is centred in it rather than stretched */
+.frameBox{display:flex;align-items:center;justify-content:center;min-height:340px}
+.frameBox img{width:auto;max-width:100%;max-height:64vh;pointer-events:none}
 .hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
   background:rgba(11,13,16,.72);color:#fff;font-size:12px;font-weight:600;
   letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;border-radius:999px;
