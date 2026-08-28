@@ -163,6 +163,23 @@ WAYS = {
      label=(150, 32, 108), label_text=(255, 255, 255),
      name="Clear \u00b7 heavy gold fume",
      sub="magenta frit, marbles \u00b7 wrapped linework"),
+
+ # The collab way. One piece, one finish - a colourway drawn for Puff rather than one
+ # of ours borrowed for them: their blue in the body, silver fumed so it flashes rather
+ # than sits flat, their gold in the drips off the rim, and the wig wag at the base
+ # pulled in the gold and the pink of their drip mark. Three colours, all theirs.
+ "puff_blue": dict(
+     sticker=None,
+     body=(0.0620, 0.0260, 0.0060), frit=(0.020, 0.160, 0.060),
+     fume=1.15, fume_pow=1.00,
+     fume_stops=((1.00, 1.00, 1.00), (0.90, 0.95, 1.06),
+                 (0.92, 0.88, 1.10), (1.06, 0.98, 0.86)),
+     line=(0.02, 0.10, 0.16), fline=(0.01, 0.09, 0.15),
+     wrap=(0.020, 0.060, 0.160),
+     label=(47, 180, 245), label_text=(255, 255, 255),
+     lines="frit",
+     name="Puff blue \u00b7 silver fume",
+     sub="gold drips \u00b7 pink and gold wig wag"),
 }
 
 MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.62, 0.66, 0.70))
@@ -444,7 +461,7 @@ def make_puff_label(w=2600, h=915):
                   tiny, PUFF["gold"] + (255,), u * 0.060 * scale)
 
     # the plain facts, in one pill under the lockup
-    fact = "1 GRAM  \u00b7  HAND BLOWN  \u00b7  NEW YORK"
+    fact = "1 GRAM  \u00b7  HAND BLOWN GLASS"
     fs = max(int(u * 0.095), 7)
     fpad, ftrack = u * 0.062, u * 0.030
     ff = brand_font("bold", fs)

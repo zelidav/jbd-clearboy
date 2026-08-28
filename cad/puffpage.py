@@ -19,17 +19,12 @@ SITE = "docs"
 OUT = os.path.join(SITE, "puff.html")
 CONTACT = "david@canismajorpartners.com"
 
-WAYS = [
-    ("teal_silver", "Mint, silver fume", "rod 13 &middot; silver nitrate",
-     "linear-gradient(145deg,#E4F5EF,#C9E8E1 60%,#8FC8BC)"),
-    ("magenta_gold", "Pink, gold fume", "rod 3 &middot; gold chloride",
-     "linear-gradient(145deg,#F0A0C8,#C0348A 62%,#7E1E5C)"),
-    ("clear_silver", "Clear, heavy silver", "teal accents &middot; wrapped",
-     "linear-gradient(145deg,#EDF2F6,#9FB6E0 55%,#6E8CC4)"),
-    ("clear_gold", "Clear, heavy gold", "magenta accents &middot; wrapped",
-     "linear-gradient(145deg,#FBF3E4,#E0BE7A 55%,#C08A3E)"),
-]
+# One finish. The piece is not a range with a Puff option in it - it is a Puff piece,
+# so there is nothing to switch between and no switch on the page.
+WAY = "puff_blue"
 
+# One piece and the box it ships in. The rest of the programme has its own site; a
+# partner deck that wanders into it is a deck about us rather than about the collab.
 PIECES = [
     dict(id="tube_loaded", name="The tube, loaded", tag="JBD-JT-124",
          note="A one-gram cone, sealed under cork.",
@@ -47,11 +42,6 @@ PIECES = [
                 ("Clasp", "2 x 9 mm disc magnets"), ("Insert", "die-cut foam, one well"),
                 ("Relief", "front-cut, lifts straight out"),
                 ("Lining", "colour - the glass is seen against it")]),
-    dict(id="lighter_loaded", name="Lighter sleeve", tag="JBD-LS-58",
-         note="A glass jacket for the lighter everyone already owns.",
-         specs=[("Overall height", "58 mm"), ("Section", "30 x 19 mm obround"),
-                ("Socket", "24.5 x 13.3 mm"), ("Glass", "approx. 29 g"),
-                ("Proud", "26 mm of lighter"), ("Notch", "through the front wall")]),
 ]
 
 MARKS = [
@@ -68,23 +58,27 @@ MARKS = [
 ]
 
 ROUTES = [
-    ("A", "Glass inside a CR outer", "#2FB4F5",
-     "The loaded tube ships inside a child-resistant carton or pouch. The customer "
-     "opens the pack and keeps the glass.",
-     "Highest cost per unit, cleanest story. Route to test first."),
-    ("B", "Glass sold empty, alongside", "#E85090",
-     "The pre-roll ships in the existing compliant pack; the tube sells as an empty "
-     "vessel at the same counter, in the same artwork.",
-     "Fastest to market. No packaging approval. Loses the unboxing."),
-    ("C", "CR closure on the glass", "#E8B21F",
-     "A certified push-and-turn closure replacing the cork. Real, and used on glass "
-     "tubes today - but it is a tooled part and it has to be tested.",
-     "Longest lead time. The endgame, not the launch."),
+    ("A", "The box is the package", "#2FB4F5",
+     "The opaque rigid box carries the opacity rule and the label; a certified CR band "
+     "or closure carries the other. The glass keeps its cork and its look.",
+     "Recommended. Nothing about the piece changes."),
+    ("B", "CR closure on the glass", "#E8B21F",
+     "An off-the-shelf certified CR cap replaces the cork on the loaded SKU. Stock "
+     "part, not tooling. Still needs an opaque outer or an exit bag.",
+     "Cork stays on the empty SKU."),
+    ("C", "CR shrink band over the cork", "#127BB0",
+     "The cheapest mechanism, and single-use - which both states allow for a package "
+     "holding one pre-roll. Gives tamper evidence for free.",
+     "Cheapest. Still needs the opaque outer."),
+    ("D", "Sold empty, alongside", "#E85090",
+     "An empty glass vessel is not a cannabis product: no CR, no opacity, no approval. "
+     "The pre-roll ships in the existing compliant pack.",
+     "Ships to states Puff is not in yet."),
 ]
 
-TIERS = [("Pilot", "500", "one colourway, one state"),
-         ("Drop", "2,500", "two colourways, both states"),
-         ("Programme", "10,000+", "rolling, four ways")]
+TIERS = [("The test", "10,000 / state", "20,000 units, one way each"),
+         ("Programme", "25,000 / state", "rolling, two ways each"),
+         ("Standard pack", "100,000+ / yr", "the glass tube is the pack")]
 
 
 def frames():
@@ -93,13 +87,11 @@ def frames():
     out = {}
     for p in PIECES:
         out[p["id"]] = {}
-        for key, _, _, _ in WAYS:
-            d = os.path.join(SITE, "spin", "%s_%s" % (p["id"], key))
-            if not os.path.isdir(d):
-                continue
+        d = os.path.join(SITE, "spin", "%s_%s" % (p["id"], WAY))
+        if os.path.isdir(d):
             names = sorted(f for f in os.listdir(d) if f.endswith(".webp"))
             if names:
-                out[p["id"]][key] = ["spin/%s_%s/%s" % (p["id"], key, n) for n in names]
+                out[p["id"]][WAY] = ["spin/%s_%s/%s" % (p["id"], WAY, n) for n in names]
     missing = [p["id"] for p in PIECES if not out[p["id"]]]
     if missing:
         raise SystemExit("no rendered frames for: %s - run spin_all/encode first"
@@ -185,10 +177,11 @@ p{margin:0}
 .hint.gone{opacity:0}
 .vbar{display:flex;align-items:center;gap:10px;padding:12px 14px;
   border-top:1px solid var(--rule);flex-wrap:wrap}
-.ways{display:flex;gap:8px}
-.way{width:30px;height:30px;border-radius:50%;border:2px solid var(--rule);
-  cursor:pointer;padding:0}
-.way[aria-pressed="true"]{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,180,245,.24)}
+.finish{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
+  color:var(--ink-2)}
+.finish i{width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(145deg,#8FD6FA,#2FB4F5 58%,#127BB0);
+  box-shadow:0 0 0 2px var(--rule)}
 .spinbtn{margin-left:auto;border:1px solid var(--rule);background:transparent;
   color:var(--ink-2);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;
   font-weight:600;cursor:pointer}
@@ -272,7 +265,7 @@ footer a{color:#fff}
 JS = r"""
 (function(){
   var FR = window.__FRAMES__, PIECES = window.__PIECES__;
-  var piece = PIECES[0].id, way = "teal_silver", idx = 0, spinning = true;
+  var piece = PIECES[0].id, way = window.__WAY__, idx = 0, spinning = true;
   var box = document.getElementById('frameBox');
   var img = document.getElementById('frameImg');
   var hint = document.getElementById('hint');
@@ -304,22 +297,10 @@ JS = r"""
       return '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('');
     [].forEach.call(document.querySelectorAll('.tab[data-piece]'), function(b){
       b.setAttribute('aria-selected', b.dataset.piece === p ? 'true' : 'false'); });
-    // a colourway with nothing rendered for this piece should not look available
-    [].forEach.call(document.querySelectorAll('.way'), function(b){
-      var ok = !!ways()[b.dataset.way];
-      b.style.display = ok ? '' : 'none';
-    });
-  }
-  function pickWay(w){
-    way = w; set(list()); draw();
-    [].forEach.call(document.querySelectorAll('.way'), function(b){
-      b.setAttribute('aria-pressed', b.dataset.way === w ? 'true' : 'false'); });
   }
 
   [].forEach.call(document.querySelectorAll('.tab[data-piece]'), function(b){
     b.addEventListener('click', function(){ pick(b.dataset.piece); }); });
-  [].forEach.call(document.querySelectorAll('.way'), function(b){
-    b.addEventListener('click', function(){ pickWay(b.dataset.way); }); });
 
   // drag to spin. One frame per 7 px of travel reads as 1:1 on a phone and a mouse.
   var down = false, lastX = 0, moved = 0;
@@ -363,7 +344,7 @@ JS = r"""
     });
   });
 
-  pick(piece); pickWay(way); go();
+  pick(piece); go();
   // only autoplay while it is on screen - a spinner running in a background tab is
   // thirty image decodes a second for nobody
   if('IntersectionObserver' in window){
@@ -398,11 +379,6 @@ def build():
         '<button class="tab" data-piece="%s" aria-selected="%s">%s</button>'
         % (p["id"], "true" if i == 0 else "false", p["name"])
         for i, p in enumerate(PIECES))
-    dots = "".join(
-        '<button class="way" data-way="%s" title="%s" aria-pressed="%s" '
-        'style="background:%s"></button>'
-        % (k, n, "true" if k == "teal_silver" else "false", g)
-        for k, n, s, g in WAYS)
     marks = "".join('<div class="mark"><h3>%s</h3><p>%s</p></div>' % (t, b)
                     for t, b in MARKS)
     rtabs = "".join(
@@ -464,7 +440,7 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
           <div class="hint" id="hint">Drag to turn</div>
         </div>
         <div class="vbar">
-          <div class="ways">%(dots)s</div>
+          <span class="finish"><i></i>Puff Blue &middot; silver fumed</span>
           <button class="spinbtn" id="spinBtn" aria-pressed="true">Auto-turn</button>
         </div>
       </div>
@@ -536,32 +512,39 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
 <section class="alt" id="routes">
   <div class="wrap">
     <div class="eyebrow" style="color:#B8860B">The constraint</div>
-    <h2 class="big">A cork-stopped tube<br>is not child-resistant</h2>
-    <p class="lede">California and New York both require cannabis pre-rolls to reach the
-    customer in child-resistant packaging. A glass tube with a cork in it is not that, and
-    no amount of design makes it that. It decides the shape of the programme, so it is
-    here rather than in a footnote.</p>
+    <h2 class="big">Two rules, not one</h2>
+    <p class="lede">Both states ask for two things of a retail pre-roll pack, and the
+    box answers the harder one.</p>
+    <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card"><h3>Child-resistant</h3><p>Every route below is a stock
+      component &mdash; a certified closure, a shrink band, a pouch. None of it is
+      tooling.</p></div>
+      <div class="card"><h3>Opaque</h3><p>The retail package may not show the product
+      through it. A clear tube with a joint in it cannot be the retail package, and a
+      clear pouch does not fix that. Something opaque has to be outside it &mdash;
+      which is what the box already is.</p></div>
+    </div>
     <div class="tabs" style="margin-top:26px">%(rtabs)s</div>
     %(rbodies)s
-    <p class="note"><b>Recommendation:</b> launch on Route B in both states while Route A
-    is packed and tested, and keep Route C on the roadmap. Not legal advice &mdash;
-    Puff&rsquo;s own compliance team signs the final pack.</p>
+    <p class="note"><b>Recommended:</b> Route A with a Route C band inside it &mdash;
+    the box makes it opaque, the band makes it child-resistant, and the piece is
+    untouched. Route D runs alongside from day one, because it needs nothing at all.</p>
   </div>
 </section>
 
 <section id="drop">
   <div class="wrap">
-    <div class="eyebrow">The drop</div>
-    <h2 class="big">One release, two states, numbered</h2>
-    <p class="lede">Numbering is the mechanic: a piece with a number on it is a thing to
-    come back for, and a drop that sells out is a drop the second one is pre-ordered
-    against. Allocation splits by door count, not evenly, and doors that already carry
-    Puff go first.</p>
+    <div class="eyebrow">The test</div>
+    <h2 class="big">Ten thousand a state.<br>Then decide.</h2>
+    <p class="lede">One piece, one finish, both states - allocated by door count
+    rather than evenly, into doors that already carry Puff. The read is
+    sell-through per door over sixty days against the same SKU in plastic. Twenty
+    thousand is the floor, not the ambition &mdash; and if it works, the glass tube
+    stops being a drop and becomes what the one-gram ships in.</p>
     <div class="tiers">%(tiers)s</div>
-    <p class="note">Tier volumes are the bands to quote against, not a commitment. There
-    is no price on this page on purpose: a quote before the final spec is a number that
-    gets renegotiated. What moves it is glass weight, how many decoration passes stay in,
-    anneal yield, the print, the closure and whether there is an outer.</p>
+    <p class="note">Capacity is in place for all three bands. The body and the
+    decoration run as two jobs and the line is in place. Samples in hand inside three
+    weeks of sign-off.</p>
   </div>
 </section>
 
@@ -570,10 +553,10 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
     <h2 class="big">Say yes to the shape of it,<br>and we spec it</h2>
     <p class="lede">Four decisions and this becomes a quote and a sample.</p>
     <div class="steps">
-      <div class="step"><b>1 &nbsp;Pick a route</b><span>B to launch, A packed behind it</span></div>
-      <div class="step"><b>2 &nbsp;Pick a way</b><span>one colourway per state, or per strain</span></div>
-      <div class="step"><b>3 &nbsp;Sign the lockup</b><span>Puff&rsquo;s own artwork replaces the stand-in</span></div>
-      <div class="step"><b>4 &nbsp;Quote</b><span>against a tier, five working days</span></div>
+      <div class="step"><b>1 &nbsp;Pick a route</b><span>A with a band in it, D alongside</span></div>
+      <div class="step"><b>2 &nbsp;Confirm the finish</b><span>Puff Blue, silver fumed</span></div>
+      <div class="step"><b>3 &nbsp;Sign the lockup</b><span>your artwork replaces the stand-in</span></div>
+      <div class="step"><b>4 &nbsp;Samples</b><span>in hand inside three weeks</span></div>
     </div>
     <div class="btns">
       <a class="btn" href="mailto:%(contact)s?subject=PUFF%%20x%%20Jerome%%20Baker">Start the spec</a>
@@ -585,9 +568,7 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
 <footer>
   <div class="wrap">
     %(flock)s
-    <p>Concept pack &mdash; not an offer. Renders are proposals; the hand-blown original
-    stays the reference. Puff marks are set as stand-ins and shown for approval; no Puff
-    artwork is reproduced here.</p>
+    <p>Puff marks are set as stand-ins, for your own artwork to replace.</p>
     <p style="margin-top:10px">Jerome Baker Designs &middot;
       <a href="mailto:%(contact)s">%(contact)s</a> &middot;
       <a href="./">the rest of the programme</a></p>
@@ -597,13 +578,14 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
 <script>
 window.__FRAMES__ = %(frames)s;
 window.__PIECES__ = %(pieces)s;
+window.__WAY__ = "%(way)s";
 </script>
 <script>%(js)s</script>
 </html>
-""" % dict(css=CSS, js=JS, tabs=tabs, dots=dots, marks=marks, rtabs=rtabs,
+""" % dict(css=CSS, js=JS, tabs=tabs, marks=marks, rtabs=rtabs,
            rbodies=rbodies, tiers=tiers, contact=CONTACT,
            lock=lockup("26px"), flock=lockup("22px"), favicon=FAVICON,
-           frames=json.dumps(fr, separators=(",", ":")),
+           way=WAY, frames=json.dumps(fr, separators=(",", ":")),
            pieces=json.dumps(PIECES, separators=(",", ":")))
 
     os.makedirs(SITE, exist_ok=True)

@@ -21,8 +21,8 @@ up in two fumed colourways.
 
 Alongside them: a **joint tube** (124 mm, one gram, 4.5 mm wall so it survives a floor,
 cork-stopped, drips and a wig wag, the JB mark pressed in, two marbles so it will not
-roll) and its **presentation box** (rigid board, hinged lid, magnetic clasp), a **lighter sleeve** (58 mm obround socket for a
-standard full-size lighter), and the earlier **glass tip** and **joint holder**. The tube
+roll) and its **presentation box** (rigid board, hinged lid, magnetic clasp), a **lighter sleeve** (58 mm obround socket cut to BIC's published
+J26 Maxi envelope, 81 x 25 x 14), and the earlier **glass tip** and **joint holder**. The tube
 and the sleeve are each rendered empty and loaded - the tube with a one-gram cone in it,
 the sleeve with a lighter.
 
@@ -53,8 +53,8 @@ scaling) moves if they come back different.
 | `cad/tube.py` | Joint tube - flat-bottomed 124 mm tube for a one-gram cone, cork, two anti-roll marbles, drips off the rim, wig wag at the base, and the cone itself for the loaded shot. |
 | `cad/lighter.py` | Lighter sleeve - obround socket for a standard full-size lighter, finger notch through the front wall, wig wag at the base, and the lighter (shell / hood / wheel) for the loaded shot. |
 | `cad/box.py` | Presentation box - shell, hinged lid shown open, disc magnets, die-cut foam insert. Modelled around the tube where the tube already sits, so the glass meshes and the label projector are reused unchanged. |
-| `cad/puffdeck.py` | PUFF x Jerome Baker collab concept pack - page furniture, Puff's palette and type. |
-| `cad/puffdeck_slides.py` | The eleven pages of that pack. |
+| `cad/puffdeck.py` | PUFF x Jerome Baker pitch - page furniture, Puff's palette and type. One piece, one finish: the joint tube in the `puff_blue` colourway. |
+| `cad/puffdeck_slides.py` | The nine pages of that pack. |
 | `cad/puffpage.py` | The interactive version of it - `docs/puff.html`, drag-to-spin, published on Pages. |
 | `cad/render.py` | Studio glass compositor (moderngl): sweep → Beer-Lambert tint with fume shift → density pass → specular → enamel decal. Not a path tracer. |
 | `cad/mockups.py` | Pieces, colourways, hero stills. |

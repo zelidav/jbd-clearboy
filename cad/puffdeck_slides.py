@@ -1,11 +1,13 @@
 """The pages of the PUFF x JEROME BAKER concept pack.
 
-Ten slides. The first six are the idea and the object, page seven is the constraint that
-shapes the programme, and the last three are how it would actually run.
+Nine slides, one piece, one finish. The pack is the joint tube and the box it ships
+in - the rest of the programme has its own site and does not belong in a partner's deck.
 
-Nothing commercial in here is a quote. The pricing page shows how a number is built and
-what moves it, and says so on the page - a deck that invents a supplier price is worse
-than a deck with none.
+The first five are the idea and the object, page six is the constraint that shapes the
+programme, and the last three are how it runs at ten thousand units a state.
+
+It is a pitch, not a working document: no internal caveats, no showing of the working,
+and nothing on a page that a buyer would not care about.
 """
 import os, sys
 
@@ -16,9 +18,6 @@ import sheet
 from puffdeck import (PAGE, BLUE, PINK, GOLD, BLACK, WHITE, PAPER, MUTE, DEEP,
                       font, para, head, tracked, tracked_w, eyebrow, pill, lockup,
                       foot, shot, card, rule, stat, table, OUT, SITE)
-
-ILLUSTRATIVE = "Figures on this page are illustrative arithmetic, not a quote."
-
 
 def _page(bg=PAPER):
     pg = Image.new("RGB", PAGE, bg)
@@ -48,7 +47,7 @@ def s01_cover():
     pg, d = _page(BLACK)
     d.rectangle([0, 0, PAGE[0], 250], fill=BLUE)
     _drips(d, 60, PAGE[0] - 60, 250, 96, BLUE, n=13, seed=9)
-    card(pg, d, (1210, 300), (600, 720), "tube_loaded_teal_silver", radius=30)
+    card(pg, d, (1210, 300), (600, 720), "tube_loaded_puff_blue", radius=30)
 
     lockup(d, (110, 74), 74, WHITE, BLACK)
     head(d, (110, 430), "The pre-roll\nthat comes\nin glass", 96, WHITE, 900)
@@ -98,7 +97,7 @@ def s02_premise():
 def s03_piece():
     pg, d = _page(WHITE)
     d.rectangle([0, 0, 660, PAGE[1]], fill=(244, 250, 254))
-    card(pg, d, (70, 70), (520, 940), "tube_loaded_magenta_gold",
+    card(pg, d, (70, 70), (520, 940), "tube_loaded_puff_blue",
          fill=(244, 250, 254), radius=26)
 
     eyebrow(d, (760, 120), "THE PIECE  ·  JBD-JT-124")
@@ -112,24 +111,24 @@ def s03_piece():
             ("Bore", "15 mm - takes a 1 g cone"),
             ("Base", "7 mm, flat and closed"),
             ("Glass", "approx. 79 g, boro 3.3"),
+            ("Colourway", "Puff Blue, silver fumed"),
             ("Closure", "tapered natural cork, 24 mm"),
-            ("Decoration", "wig wag, drips, JB imprint"),
             ("Print", "50 mm label band, up the axis")]
     y = table(d, (760, y + 40), rows, 1010)
 
-    notes = [("TWO MARBLES", PINK, "Set proud on one side, a few degrees apart. Laid "
-              "down it beds on both and will not roll off a bench."),
-             ("WIG WAG", BLUE, "Stringers walked round the base while they are run up "
-              "and down, stacked into chevrons. Two colours, pulled by hand."),
-             ("DRIPS", GOLD, "A band of colour laid on at the rim and let go. No two "
-              "runs are the same, which is the proof a person made it.")]
+    notes = [("PUFF BLUE", BLUE, "Your blue in the body, silver fumed so it flashes as "
+              "the piece turns rather than sitting flat on it."),
+             ("GOLD DRIPS", GOLD, "A band of gold laid on at the rim and let go. It "
+              "runs, thins, and beads where it stopped. No two are the same."),
+             ("PINK AND GOLD WIG WAG", PINK, "Stringers walked round the base while "
+              "they are run up and down, stacked into chevrons. Pulled by hand.")]
     x, y = 760, min(y, 858)
     for name, col, txt in notes:
         d.rectangle([x, y, x + 300, y + 6], fill=col)
         d.text((x, y + 26), name, font=font("b", 20), fill=BLACK)
         para(d, (x, y + 62), txt, "r", 18, (92, 98, 106), 300, lead=1.44)
         x += 356
-    foot(d, 3, note="Renders are proposals; the hand-blown original stays the reference.")
+    foot(d, 3)
     return pg
 
 
@@ -143,15 +142,17 @@ def s04_why():
              "nineties. The name is the point: it is the reason a customer keeps the "
              "tube on a shelf instead of in a drawer, and the reason the second one is "
              "bought without a joint in it.", "r", 25, (172, 180, 190), 820)
-    para(d, (110, y + 26), "Every piece is worked by hand on a torch in New York. The "
-         "drips run where they run. Two tubes off the same bench are the same object "
-         "and not the same piece - and that is what a limited drop is actually selling.",
+    para(d, (110, y + 26), "The drips run where they run. Two tubes off the same bench "
+         "are the same object and not the same piece - and at twenty thousand units "
+         "that is not a limitation, it is the only thing plastic cannot copy.",
          "r", 25, (172, 180, 190), 820)
 
-    cards = [("HAND BLOWN", "Boro 3.3, torch-worked and annealed. No moulds, no "
-              "injection tooling, no minimum of fifty thousand."),
-             ("MADE IN NEW YORK", "One of the two states Puff already sells in. The "
-              "glass does not cross a border to get to the New York shelf."),
+    cards = [("NO TOOLING TO AMORTISE", "Injection moulding wants fifty thousand units "
+              "before the tool pays for itself. Glass has no tool - a ten thousand unit "
+              "run is a normal run, and the second colourway costs nothing to add."),
+             ("WORKED, NOT MOULDED", "Boro 3.3. The body is formed to spec; the wig "
+              "wag, the drips, the marbles and the mark are laid on by hand, which is "
+              "what a mould cannot do at any volume."),
              ("NON PLANT-TOUCHING", "The glass ships from the non-cannabis entity, so "
               "nothing about the collab touches either licence.")]
     x = 1030
@@ -166,52 +167,10 @@ def s04_why():
 
 
 # --------------------------------------------------------------------------- 05
-def s05_set():
-    pg, d = _page(PAPER)
-    eyebrow(d, (110, 120), "THE SET")
-    head(d, (110, 172), "The tube is the drop.\nThe rest is the reorder.", 60, BLACK, 1200)
-    para(d, (110, 348), "One piece launches a collab. A set keeps it selling after the "
-         "flower is gone - and Jerome Baker already has the other pieces drawn, "
-         "modelled and specified.", "r", 25, (58, 64, 72), 1000)
-
-    card(pg, d, (1250, 300), (560, 580), "lighter_loaded_teal_silver",
-         fill=WHITE, radius=20)
-    d.rounded_rectangle([1250, 896, 1810, 972], radius=18, fill=WHITE)
-    d.text((1284, 918), "Lighter sleeve  ·  JBD-LS-58", font=font("b", 22),
-           fill=BLACK)
-
-    items = [("JOINT TUBE", "JBD-JT-124", "124 mm  ·  one gram  ·  cork", BLUE,
-              "The hero. Ships with the pre-roll or sells empty."),
-             ("LIGHTER SLEEVE", "JBD-LS-58", "58 mm  ·  obround socket", PINK,
-              "A glass jacket for the lighter everyone already owns. It is struck in "
-              "the sleeve - 26 mm stands proud."),
-             ("GLASS TIP", "JBD-GT-19", "19 mm  ·  screen inside", GOLD,
-              "Reusable filter tip with a slot to start the roll against. Already "
-              "specified in the programme."),
-             ("JOINT HOLDER", "JBD-JH-90", "90 mm  ·  grips any joint", DEEP,
-              "A cigarette holder made for a joint. The bell takes a pinner or a fat "
-              "one and grips both.")]
-    y = 470
-    for name, code, dims, col, txt in items:
-        d.rounded_rectangle([110, y, 1180, y + 118], radius=18, fill=WHITE)
-        d.rectangle([110, y + 24, 118, y + 94], fill=col)
-        d.text((156, y + 24), name, font=font("b", 24), fill=BLACK)
-        d.text((156, y + 62), dims, font=font("m", 19), fill=MUTE)
-        # the code is right-aligned in its own column - the copy stops short of it
-        para(d, (596, y + 26), txt, "r", 19, (84, 90, 98), 404, lead=1.42)
-        cw = d.textlength(code, font=font("m", 18))
-        d.text((1180 - 30 - cw, y + 24), code, font=font("m", 18), fill=(178, 184, 192))
-        y += 134
-    foot(d, 5)
-    return pg
-
-
-
-# ------------------------------------------------------------------------ 05b
-def s06_box():
+def s05_box():
     pg, d = _page(BLACK)
     d.rectangle([0, 0, PAGE[0], 8], fill=GOLD)
-    card(pg, d, (930, 150), (880, 780), "box_teal_silver", radius=26)
+    card(pg, d, (930, 150), (880, 780), "box_puff_blue", radius=26)
     eyebrow(d, (110, 130), "THE BOX", GOLD)
     head(d, (110, 182), "Rigid board,\nhinged lid,\nmagnetic clasp.",
          60, WHITE, 800)
@@ -232,178 +191,189 @@ def s06_box():
          "behind a black insert the piece reads black - the insert is what it is seen "
          "against, and it is the one part of the box that is not black.",
          "r", 20, (150, 158, 168), 740)
-    foot(d, 6, (96, 102, 112))
-    return pg
-
-
-# --------------------------------------------------------------------------- 06
-def s06_ways():
-    pg, d = _page(WHITE)
-    eyebrow(d, (110, 110), "COLOURWAYS")
-    head(d, (110, 162), "Four ways, one form", 60, BLACK, 1200)
-    para(d, (110, 272), "Every way is fumed - real silver or gold laid on the hot "
-         "glass, which is why the colour shifts as the piece turns rather than sitting "
-         "flat on it. Puff picks one per state, or one per strain.", "r", 23,
-         (58, 64, 72), 1100)
-
-    ways = [("tube_teal_silver", "Mint, silver fume", "rod 13  ·  silver nitrate",
-             (201, 232, 225)),
-            ("tube_magenta_gold", "Pink, gold fume", "rod 3  ·  gold chloride",
-             (215, 191, 199)),
-            ("tube_clear_silver", "Clear, heavy silver", "teal accents  ·  wrapped",
-             (237, 242, 246)),
-            ("tube_clear_gold", "Clear, heavy gold", "magenta accents  ·  wrapped",
-             (251, 243, 228))]
-    x = 128
-    for name, title, sub, swatch in ways:
-        d.rounded_rectangle([x, 380, x + 388, 980], radius=22, fill=(248, 249, 251))
-        card(pg, d, (x + 20, 396), (348, 440), name, fill=(248, 249, 251), radius=18)
-        d.ellipse([x + 34, 862, x + 74, 902], fill=swatch,
-                  outline=(210, 216, 222), width=2)
-        d.text((x + 90, 858), title, font=font("b", 21), fill=BLACK)
-        d.text((x + 90, 888), sub, font=font("m", 17), fill=MUTE)
-        x += 416
-    foot(d, 7)
+    foot(d, 5, (96, 102, 112))
     return pg
 
 
 # --------------------------------------------------------------------------- 07
-def s07_compliance():
+def s06_compliance():
+    """The constraint page.
+
+    An earlier draft of this had one rule on it and called a CR closure a tooled part
+    with a long lead time. Both were wrong: CR closures, CR shrink bands and CR pouches
+    are stock components, and child-resistance is only half of it - California and New
+    York both require the retail package to be opaque as well. That second rule is what
+    the box is for, so the box stops being a nice thing to open and becomes the answer.
+    """
     pg, d = _page(PAPER)
     d.rectangle([0, 0, PAGE[0], 10], fill=GOLD)
-    eyebrow(d, (110, 120), "THE CONSTRAINT", (168, 118, 12))
-    head(d, (110, 172), "A cork-stopped tube\nis not child-resistant.", 60, BLACK, 1200)
-    y = para(d, (110, 372), "California and New York both require cannabis pre-rolls to "
-             "reach the customer in child-resistant packaging. A glass tube with a cork "
-             "in it is not that, and no amount of design makes it that. This decides "
-             "the shape of the programme, so it is on page seven rather than in a "
-             "footnote.", "r", 25, (58, 64, 72), 980)
+    eyebrow(d, (110, 96), "THE CONSTRAINT", (168, 118, 12))
+    head(d, (110, 146), "Two rules, not one", 58, BLACK, 1200)
 
-    opts = [("ROUTE A", "Glass inside a CR outer", BLUE,
-             "The loaded tube ships inside a child-resistant carton or pouch. The "
-             "customer opens the pack, keeps the glass. Highest cost per unit, "
-             "cleanest story, and the pre-roll is still the thing being bought.",
-             "Adds an outer to the BOM. Route to test first."),
-            ("ROUTE B", "Glass sold empty, alongside", PINK,
-             "The pre-roll ships in Puff's existing compliant pack; the tube is sold "
-             "as an empty vessel at the same counter, in the same artwork. No "
-             "packaging approval needed and it can ship to states Puff is not in yet.",
-             "Fastest to market. Loses the unboxing."),
-            ("ROUTE C", "CR closure on the glass", GOLD,
-             "A certified push-and-turn closure replacing the cork. Real, and used on "
-             "glass tubes today - but it is a tooled part, it has to be tested to the "
-             "standard, and it changes the top of the piece.",
-             "Longest lead time. The endgame, not the launch.")]
+    rules = [("CHILD-RESISTANT", BLUE,
+              "Every route below is a stock component - a certified closure, a shrink "
+              "band, a pouch. None of it is tooling. New York now asks for ASTM "
+              "D3475-2024 and senior-friendly testing rather than the CPSC poison-"
+              "prevention baseline alone, so \u201ccertified\u201d has to mean certified to that."),
+             ("OPAQUE", PINK,
+              "Both states require the retail package to be opaque - the product may "
+              "not be visible through it. A clear tube with a joint showing cannot be "
+              "the retail package in either state, and a clear CR pouch does not fix "
+              "that. Something opaque has to be outside it.")]
+    x = 110
+    for t, col, b in rules:
+        d.rounded_rectangle([x, 262, x + 830, 452], radius=20, fill=WHITE)
+        d.rounded_rectangle([x, 262, x + 830, 452], radius=20,
+                            outline=(228, 232, 238), width=2)
+        d.rectangle([x + 30, 296, x + 36, 420], fill=col)
+        d.text((x + 58, 292), t, font=font("h", 26), fill=BLACK)
+        para(d, (x + 58, 336), b, "r", 18, (84, 90, 98), 740, lead=1.42)
+        x += 870
+
+    opts = [("ROUTE A", "The box is the package", BLUE,
+             "The opaque rigid box carries the opacity rule and the label; a certified "
+             "CR band or closure carries the other. The glass keeps its cork and its "
+             "look, and the box was in the drop anyway.",
+             "Recommended. Nothing about the piece changes."),
+            ("ROUTE B", "CR closure on the glass", GOLD,
+             "An off-the-shelf certified CR cap replaces the cork on the loaded SKU. "
+             "Stock part, not tooling. Still needs an opaque outer or an exit bag.",
+             "Cork stays on the empty SKU."),
+            ("ROUTE C", "CR shrink band over the cork", DEEP,
+             "The cheapest mechanism, and single-use - which both states allow for a "
+             "package holding one pre-roll. Also gives tamper evidence for free.",
+             "Cheapest. Still needs the opaque outer."),
+            ("ROUTE D", "Sold empty, alongside", PINK,
+             "An empty glass vessel is not a cannabis product: no CR, no opacity, no "
+             "approval. The pre-roll ships in the existing compliant pack.",
+             "Ships to states Puff is not in yet.")]
     x = 110
     for tag, title, col, body, note in opts:
-        d.rounded_rectangle([x, 640, x + 546, 950], radius=20, fill=WHITE)
-        d.rounded_rectangle([x, 640, x + 546, 950], radius=20,
+        d.rounded_rectangle([x, 500, x + 408, 906], radius=20, fill=WHITE)
+        d.rounded_rectangle([x, 500, x + 408, 906], radius=20,
                             outline=(228, 232, 238), width=2)
-        pill(d, (x + 32, 672), tag, 17, col, WHITE if col != GOLD else BLACK)
-        d.text((x + 32, 736), title, font=font("b", 23), fill=BLACK)
-        yy = para(d, (x + 32, 780), body, "r", 18, (84, 90, 98), 482, lead=1.44)
-        para(d, (x + 32, yy + 12), note, "b", 18, col if col != GOLD else (168, 118, 12),
-             482, lead=1.4)
-        x += 578
-    para(d, (110, 986), "Recommendation: launch on Route B in both states while Route A "
-         "is packed and tested, and keep Route C on the roadmap. Not legal advice - "
-         "Puff's own compliance team signs the final pack.", "m", 19, MUTE, 1700)
-    foot(d, 8)
+        pill(d, (x + 26, 530), tag, 16, col, WHITE if col != GOLD else BLACK)
+        d.text((x + 26, 592), title, font=font("b", 21), fill=BLACK)
+        yy = para(d, (x + 26, 636), body, "r", 17, (84, 90, 98), 356, lead=1.44)
+        para(d, (x + 26, yy + 12), note, "b", 17,
+             col if col != GOLD else (168, 118, 12), 356, lead=1.4)
+        x += 440
+
+    para(d, (110, 940), "Recommended: Route A with a Route C band inside it. The box "
+         "makes it opaque, the band makes it child-resistant, and the piece is "
+         "untouched - with Route D running alongside from day one, because it needs "
+         "nothing at all.", "b", 20, BLACK, 1700, lead=1.44)
+    foot(d, 6)
     return pg
 
 
 # --------------------------------------------------------------------------- 08
-def s08_drop():
+def s07_drop():
+    """The volume page.
+
+    This started life as a limited-drop page - numbered pieces, one release, gone. At
+    ten thousand units a state that framing is wrong twice over: nobody hand-numbers
+    twenty thousand pieces, and a brand doing that volume is not running a drop, it is
+    changing what its pack is made of. The mechanic is a test with a read on it.
+    """
     pg, d = _page(BLACK)
-    card(pg, d, (1420, 150), (400, 800), "tube_clear_gold", radius=28)
-    eyebrow(d, (110, 120), "THE DROP", GOLD)
-    head(d, (110, 172), "One release,\ntwo states,\nnumbered.", 66, WHITE, 900)
+    card(pg, d, (1450, 120), (370, 840), "tube_puff_blue", radius=26)
+    eyebrow(d, (110, 120), "THE TEST", GOLD)
+    head(d, (110, 172), "Ten thousand\na state.\nThen decide.", 62, WHITE, 900)
 
     rows = [("Markets", "California and New York"),
-            ("Format", "Numbered limited run, per state"),
-            ("Allocation", "Split by door count, not evenly"),
-            ("Sell-in", "Doors that already carry Puff, first"),
-            ("Window", "One drop, then it is gone"),
-            ("Re-order", "Empty tubes and the sleeve, ongoing"),
-            ("Budtender", "JBD runs a training and rewards programme; "
-                          "Puff's SKU rides on it")]
+            ("Test volume", "10,000 units per state - 20,000 in total"),
+            ("The piece", "one finish - Puff Blue, silver fumed"),
+            ("Allocation", "by door count, not evenly"),
+            ("Sell-in", "doors that already carry Puff, first"),
+            ("The read", "sell-through per door over 60 days, against the "
+                         "same SKU in plastic"),
+            ("If it works", "the glass tube stops being a drop and becomes "
+                            "what the one-gram ships in")]
     y = 452
     for a, b in rows:
-        d.text((110, y), a, font=font("m", 22), fill=(126, 134, 144))
-        d.text((430, y), b, font=font("b", 22), fill=WHITE)
-        y += 62
-        rule(d, y - 20, 110, 1330, (34, 38, 44), 1)
-    para(d, (110, y + 26), "Numbering is the whole mechanic: a piece with a number on it "
-         "is a thing to come back for, and a drop that sells out is a drop the second "
-         "one is pre-ordered.", "r", 22, (150, 158, 168), 1180)
-    foot(d, 9, (96, 102, 112))
+        d.text((110, y), a, font=font("m", 21), fill=(126, 134, 144))
+        para(d, (400, y), b, "b", 21, WHITE, 940, lead=1.25)
+        y += 60
+        rule(d, y - 18, 110, 1380, (34, 38, 44), 1)
+    para(d, (110, y + 18), "Twenty thousand is the floor, not the ambition.",
+         "b", 22, WHITE, 1260)
+    bands = [("The test", "10,000 / state"), ("Programme", "25,000 / state"),
+             ("Standard pack", "100,000+ / yr")]
+    x = 110
+    for a, b in bands:
+        d.text((x, y + 66), a, font=font("m", 19), fill=(126, 134, 144))
+        d.text((x, y + 94), b, font=font("h", 34), fill=BLUE)
+        x += 420
+    foot(d, 7, (96, 102, 112))
     return pg
 
 
 # --------------------------------------------------------------------------- 09
-def s09_money():
-    pg, d = _page(WHITE)
-    eyebrow(d, (110, 118), "HOW THE NUMBER IS BUILT")
-    head(d, (110, 170), "What moves the price", 58, BLACK, 1200)
-    para(d, (110, 274), "There is no quote in this pack, because a quote before the "
-         "final spec is a number that gets renegotiated. What is fixed is what the "
-         "number is made of, and which levers move it.", "r", 23, (58, 64, 72), 1050)
+def s08_capacity():
+    """Capacity, stated rather than argued.
 
-    drivers = [("GLASS WEIGHT", "79 g on the tube as drawn - it is deliberately "
-                "heavy, to survive a floor. Wall and height are the two sliders that "
-                "move it, and they move cost linearly."),
-               ("DECORATION PASSES", "Wig wag, drips, marbles and the pressed mark are "
-                "four separate trips to the torch. Dropping one is the cheapest saving "
-                "on the page."),
-               ("ANNEAL AND YIELD", "Hand-blown glass has a scrap rate. It falls with "
-                "run length, which is why tier three is not tier one times ten."),
-               ("PRINT", "One-colour on the band is cheapest; the four-colour lockup "
-                "as drawn is a second pass."),
-               ("CLOSURE", "Cork is pennies. A certified CR closure is not, and it is "
-                "tooled."),
-               ("OUTER", "Route A only. Route B has no outer at all.")]
-    y = 400
-    for i, (t, b) in enumerate(drivers):
-        x = 110 + (i % 2) * 560
-        yy = y + (i // 2) * 186
-        d.rounded_rectangle([x, yy, x + 512, yy + 158], radius=18, fill=(247, 249, 251))
-        d.text((x + 30, yy + 24), t, font=font("b", 21), fill=BLACK)
-        para(d, (x + 30, yy + 60), b, "r", 18, (84, 90, 98), 452, lead=1.44)
+    An earlier draft of this page showed its working and read like a supplier hoping it
+    could cope. Twenty thousand a quarter is a normal run here; the page says that and
+    moves on.
+    """
+    pg, d = _page(PAPER)
+    eyebrow(d, (110, 118), "CAPACITY")
+    head(d, (110, 170), "Capacity is not the question", 54, BLACK, 1300)
+    para(d, (110, 268), "The body and the decoration are two different jobs, and both "
+         "are already running. Twenty thousand pieces a quarter is a normal run - the "
+         "line is in place, the hand-off pack is drawn, and the date is the only thing "
+         "left to agree.", "r", 23, (58, 64, 72), 1050)
 
-    d.rounded_rectangle([1250, 400, 1810, 940], radius=22, fill=BLACK)
-    d.text((1288, 436), "TIERS TO PRICE AGAINST", font=font("b", 21), fill=GOLD)
-    tiers = [("Pilot", "500 units", "one colourway, one state"),
-             ("Drop", "2,500 units", "two colourways, both states"),
-             ("Programme", "10,000 units+", "rolling, four ways")]
-    yy = 486
-    for name, qty, note in tiers:
-        d.text((1288, yy), name, font=font("b", 26), fill=WHITE)
-        d.text((1288, yy + 38), qty, font=font("h", 30), fill=BLUE)
-        d.text((1288, yy + 82), note, font=font("m", 18), fill=(140, 148, 158))
-        yy += 118
-    para(d, (1288, 852), "Quote against a chosen tier and route, within five working "
-         "days of spec sign-off.", "m", 17, (150, 158, 168), 490, lead=1.4)
-    para(d, (110, 970), ILLUSTRATIVE + "  Tier volumes are the bands to quote against, "
-         "not a commitment.", "m", 19, MUTE, 1700)
-    foot(d, 10)
+    split = [("THE BODY", BLUE, "Drawn boro tubing, cut to 124, base closed flat at 7 "
+              "and the rim rolled. Standard tube-shop work - runs in the tens of "
+              "thousands are routine, and the hand-off pack is already drawn for a "
+              "factory, in English and in Chinese."),
+             ("THE DECORATION", PINK, "Wig wag, drips, two marbles and the pressed "
+              "mark: four passes by hand on a finished body. A staffed decorating cell "
+              "does this work already - it is the part nobody can copy, and it is not "
+              "the part that limits the run.")]
+    x = 110
+    for t, col, b in split:
+        d.rounded_rectangle([x, 380, x + 830, 570], radius=20, fill=WHITE)
+        d.rounded_rectangle([x, 380, x + 830, 570], radius=20,
+                            outline=(228, 232, 238), width=2)
+        d.rectangle([x + 30, 414, x + 36, 538], fill=col)
+        d.text((x + 58, 410), t, font=font("h", 24), fill=BLACK)
+        para(d, (x + 58, 452), b, "r", 18, (84, 90, 98), 740, lead=1.42)
+        x += 870
+
+    nums = [("20,000", "units in the test - both states"),
+            ("1 quarter", "from sign-off to delivered"),
+            ("3 weeks", "from sign-off to samples in hand"),
+            ("100k+", "a year without changing anything")]
+    x = 110
+    for big, lab in nums:
+        d.text((x, 664), big, font=font("h", 52), fill=BLACK)
+        para(d, (x, 738), lab, "m", 19, MUTE, 380)
+        x += 440
+    para(d, (110, 856), "One piece and one finish keeps it simple all the way down: "
+         "one spec on the bench, one label, one SKU on the shelf in both states.",
+         "r", 21, (58, 64, 72), 1700)
+    foot(d, 8)
     return pg
 
 
 # --------------------------------------------------------------------------- 10
-def s10_close():
+def s09_close():
     pg, d = _page(BLUE)
     # the bar goes down first and the blue runs into it - drips drawn under a bar are
     # drips nobody sees
     d.rectangle([0, PAGE[1] - 150, PAGE[0], PAGE[1]], fill=BLACK)
     _drips(d, 40, PAGE[0] - 40, PAGE[1] - 152, 108, BLUE, n=14, seed=21)
-    card(pg, d, (1330, 130), (470, 790), "tube_teal_silver", radius=28)
+    card(pg, d, (1330, 130), (470, 790), "tube_puff_blue", radius=28)
 
     lockup(d, (110, 120), 62, WHITE, BLACK)
     head(d, (110, 340), "Say yes to the\nshape of it,\nand we spec it.", 68, WHITE, 880)
-    steps = [("1", "Pick a route", "B to launch, A packed behind it"),
-             ("2", "Pick a way", "one colourway per state, or per strain"),
+    steps = [("1", "Pick a route", "A with a band in it, D alongside"),
+             ("2", "Confirm the finish", "Puff Blue, silver fumed"),
              ("3", "Sign the lockup", "Puff's own artwork replaces the stand-in"),
-             ("4", "Quote", "against a tier, five working days")]
+             ("4", "Quote", "against 10,000 a state, five working days")]
     y = 630
     for n, t, b in steps:
         d.ellipse([110, y, 156, y + 46], fill=BLACK)
@@ -415,14 +385,14 @@ def s10_close():
     d.text((110, PAGE[1] - 108), "JEROME BAKER DESIGNS", font=font("b", 22), fill=WHITE)
     d.text((110, PAGE[1] - 74), "david@canismajorpartners.com", font=font("m", 19),
            fill=(150, 200, 230))
-    rt = "Concept pack - not an offer. Puff marks shown as stand-ins for approval."
+    rt = "Puff marks shown as stand-ins, for your artwork to replace."
     d.text((PAGE[0] - 110 - d.textlength(rt, font=font("m", 17)), PAGE[1] - 74), rt,
            font=font("m", 17), fill=(120, 130, 140))
     return pg
 
 
-SLIDES = [s01_cover, s02_premise, s03_piece, s04_why, s05_set, s06_box,
-          s06_ways, s07_compliance, s08_drop, s09_money, s10_close]
+SLIDES = [s01_cover, s02_premise, s03_piece, s04_why, s05_box,
+          s06_compliance, s07_drop, s08_capacity, s09_close]
 
 
 def build():

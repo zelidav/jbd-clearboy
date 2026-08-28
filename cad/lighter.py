@@ -32,15 +32,20 @@ import numpy as np
 import trimesh
 
 # ------------------------------------------------------------- the lighter itself
-# A full-size disposable, measured off the one on the bench: 81 mm overall, an obround
-# section 23.4 across the faces by 12.2 deep at the base, drafted in a little towards
-# the shoulder, then a pressed metal hood over the wheel and the jet.
+# The full-size disposable everyone owns, sized off BIC's own published envelope for
+# the J26 Maxi: 81 x 25 x 14 mm. Those three numbers are the spec the socket is cut
+# to - not a lighter someone eyeballed - because a sleeve that is two millimetres shy
+# is a sleeve that does not take the lighter it was made for.
+#
+# The section is drafted in slightly towards the shoulder, then a pressed metal hood
+# carries the wheel and the jet. A J25 Mini is a different envelope (66 x 21 x 11); it
+# would be the same sleeve off a different L, which is why this is a dict.
 L = dict(
-    body_h=67.5,          # plastic, base to shoulder
-    base_w=23.4, base_d=12.2,
-    top_w=21.6, top_d=11.4,
-    hood_h=9.5,           # the pressed shroud
-    hood_w=17.0, hood_d=10.4,
+    body_h=69.0,          # plastic, base to shoulder
+    base_w=25.0, base_d=14.0,     # BIC's published width and depth
+    top_w=23.2, top_d=13.0,
+    hood_h=12.0,          # the pressed shroud - the rest of the 81
+    hood_w=18.0, hood_d=12.0,
     wheel_r=4.6,          # the flint wheel, across the hood
     wheel_t=3.4,
     total=81.0,
