@@ -577,6 +577,117 @@ def _persp_coeffs(dst, src):
     return tuple(np.linalg.solve(np.array(A, "f8"), np.array(B, "f8")))
 
 
+def make_box_wrap(w=2400, h=740):
+    """The print on the outside of the box, in the sticker's own system.
+
+    Same furniture as the label on the glass - gold keyline, the lockup, the plain
+    facts in a pink pill - with the blue field left off, because the board is already
+    the blue field. Anything else would be a blue sticker on a blue box."""
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    m = int(h * 0.10)
+    frame = [int(w * 0.020), m, int(w * 0.980), h - m]
+    fw, fh = frame[2] - frame[0], frame[3] - frame[1]
+    cx, cy = (frame[0] + frame[2]) / 2.0, (frame[1] + frame[3]) / 2.0
+    d.rounded_rectangle(frame, radius=int(min(fh, fw) * 0.26),
+                        outline=PUFF["gold"] + (255,), width=max(int(h * 0.016), 3))
+
+    u = min(fh, fw * 0.34)
+    room = fw * 0.80
+    scale = 1.0
+    for _ in range(9):
+        big = brand_font("heavy", max(int(u * 0.34 * scale), 8))
+        sub = brand_font("round", max(int(u * 0.125 * scale), 6))
+        ours = brand_font("bold", max(int(u * 0.215 * scale), 7))
+        tiny = brand_font("med", max(int(u * 0.105 * scale), 6))
+        cross = brand_font("heavy", max(int(u * 0.27 * scale), 7))
+        puff_w = d.textlength("PUFF", font=big)
+        pre_w = _tracked_width(d, "pre-rolls", sub, u * 0.024 * scale)
+        jb_w = d.textlength("JEROME BAKER", font=ours)
+        des_w = _tracked_width(d, "DESIGNS", tiny, u * 0.060 * scale)
+        left_w, right_w = max(puff_w, pre_w), max(jb_w, des_w)
+        x_w = d.textlength("\u00d7", font=cross)
+        gap = u * 0.26 * scale
+        total = left_w + gap + x_w + gap + right_w
+        if total <= room:
+            break
+        scale *= room / total
+
+    top = cy - u * 0.16
+    x = cx - total / 2
+    d.text((x + (left_w - puff_w) / 2, top - u * 0.30 * scale), "PUFF", font=big,
+           fill=PUFF["paper"] + (255,))
+    _tracked_text(d, (x + (left_w - pre_w) / 2, top + u * 0.09 * scale), "pre-rolls",
+                  sub, PUFF["paper"] + (255,), u * 0.024 * scale)
+    x += left_w + gap
+    d.text((x, top - u * 0.18 * scale), "\u00d7", font=cross,
+           fill=PUFF["gold"] + (255,))
+    x += x_w + gap
+    d.text((x + (right_w - jb_w) / 2, top - u * 0.22 * scale), "JEROME BAKER",
+           font=ours, fill=PUFF["paper"] + (255,))
+    _tracked_text(d, (x + (right_w - des_w) / 2, top + u * 0.09 * scale), "DESIGNS",
+                  tiny, PUFF["gold"] + (255,), u * 0.060 * scale)
+
+    fact = "HOLIDAY COLLAB  \u00b7  1 GRAM  \u00b7  HAND BLOWN GLASS"
+    fs = max(int(u * 0.095), 7)
+    fpad, ftrack = u * 0.062, u * 0.030
+    ff = brand_font("bold", fs)
+    fwid = _tracked_width(d, fact, ff, ftrack) + 2 * fpad * 1.6
+    _pill(d, (cx - fwid / 2, cy + u * 0.335), fact, ff, PUFF["pink"], PUFF["paper"],
+          fpad, ftrack)
+    return img
+
+
+def _warp_onto(im, art, px):
+    """Warp artwork onto four projected corners, un-mirroring it if the face is being
+    seen the other way round.
+
+    A quad given top-left first reads correctly only when its projected winding comes
+    out positive in image coordinates; when it does not, the panel is being viewed from
+    the side that flips it, and swapping the two pairs of corners is the fix. Doing it
+    from the winding rather than by eye means the print stays right if the camera moves.
+    """
+    import numpy as np
+    q = [tuple(v) for v in px]
+    x = np.array([v[0] for v in q]); y = np.array([v[1] for v in q])
+    area = 0.5 * float(np.sum(x * np.roll(y, -1) - np.roll(x, -1) * y))
+    if area < 0:
+        q = [q[1], q[0], q[3], q[2]]
+    src = [(0, 0), (art.width, 0), (art.width, art.height), (0, art.height)]
+    warped = art.transform(im.size, Image.PERSPECTIVE, _persp_coeffs(q, src),
+                           Image.BICUBIC)
+    im = im.convert("RGB")
+    im.paste(warped, (0, 0), warped)
+    return im
+
+
+def place_box_wrap(im, r, angle, kw, art=None):
+    """Print the outside of the box on whichever panel the shot is actually showing."""
+    import numpy as np
+    import box as boxmod
+    art = make_box_wrap() if art is None else art
+    eye, model, _, _ = r._mats(angle, kw["cam_r"], kw.get("elev", 5.0), kw["target"],
+                               kw["fov"], kw.get("tilt", 0.0), kw.get("shift"))
+    faces = boxmod.outer_faces()
+    best, best_area, best_px = None, 0.0, None
+    for name, corners in faces.items():
+        n = np.asarray(boxmod.face_normal(name), "f8")
+        c = np.asarray(corners, "f8").mean(axis=0)
+        wn = model[:3, :3] @ n
+        wc = model[:3, :3] @ c + model[:3, 3]
+        if float(np.dot(wn, np.asarray(eye, "f8") - wc)) <= 0:
+            continue                      # facing away - nothing to print on
+        px = r.project(np.asarray(corners, "f8"), angle=angle,
+                       **{k: v for k, v in kw.items() if k != "shadow"})
+        x, y = px[:, 0], px[:, 1]
+        a = abs(0.5 * float(np.sum(x * np.roll(y, -1) - np.roll(x, -1) * y)))
+        if a > best_area:
+            best, best_area, best_px = name, a, px
+    if best is None:
+        return im
+    return _warp_onto(im, art, best_px)
+
+
 def place_lid_label(im, r, angle, kw, art=None):
     """Warp the collab lockup onto the inside of the lid, where the lid actually is."""
     import numpy as np
@@ -585,14 +696,7 @@ def place_lid_label(im, r, angle, kw, art=None):
     quad = np.asarray(boxmod.lid_label_quad(), "f8")
     px = r.project(quad, angle=angle, **{k: v for k, v in kw.items()
                                          if k != "shadow"})
-    W, H = im.size
-    src = [(0, 0), (art.width, 0), (art.width, art.height), (0, art.height)]
-    warped = art.transform((W, H), Image.PERSPECTIVE,
-                           _persp_coeffs([tuple(q) for q in px], src),
-                           Image.BICUBIC)
-    im = im.convert("RGB")
-    im.paste(warped, (0, 0), warped)
-    return im
+    return _warp_onto(im, art, px)
 
 
 def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
@@ -616,7 +720,8 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
         r.add(path,
               absorb=(c.get("plastic") if mat == "plastic" else None) or m["absorb"],
               fume=0.0, line=m["line"], kAmt=m["kAmt"], kPow=m["kPow"], spec=m["spec"],
-              solid=True, min_thick=m["min_thick"], max_thick=m["max_thick"],
+              solid=True, opaque=True,
+              min_thick=m["min_thick"], max_thick=m["max_thick"],
               smooth=36.0, role="opaque")
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
           fume_stops=c["fume_stops"], fume_pow=c.get("fume_pow", 1.4),
@@ -666,15 +771,14 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
     # the rim and one at the base, so the piece reads as one decision rather than two.
     # Both take the linework role: they stand on the surface and have to pass behind
     # anything set proud of it.
-    pairs = [(p.get("drips"), 1.4, 9.0), (p.get("wig"), 1.2, 7.0)]
-    for meshes, lo, hi in pairs:
+    for meshes in (p.get("drips"), p.get("wig")):
         for i, m in enumerate(meshes or ()):
             if not os.path.exists(m):
                 continue
             r.add(m, absorb=(c["frit"] if i == 0 else c.get("wrap", c["frit"])),
                   fume=0.0, line=c["fline"] if i == 0 else c["line"],
-                  kAmt=0.36, kPow=2.05, spec=1.32,
-                  solid=True, min_thick=lo, max_thick=hi, smooth=24.0, role="lines")
+                  kAmt=0.36, kPow=2.05, spec=1.32, solid=True,
+                  min_thick=1.4, max_thick=9.0, smooth=24.0, role="lines")
     for tag, mat in (("bling", "stone"), ("bling2", "stone2")):
         q = p.get(tag)
         if q and os.path.exists(q):
@@ -808,6 +912,7 @@ def shot(piece, key, angle=None, W=None, H=None, tag="", frit=True):
     if PIECES[piece].get("lid_label"):
         im, kw = frame(r, piece, angle, want_kw=True)
         im = place_lid_label(im, r, angle, kw)
+        im = place_box_wrap(im, r, angle, kw)
     else:
         im = frame(r, piece, angle)
     im.save(f"{OUT}/{piece}_{key}{tag}.png")

@@ -157,6 +157,44 @@ def lid_label_quad(p=None, frac_x=0.74, half_z=62.0):
             pt(xh, zc - half_z), pt(xh, zc + half_z)]
 
 
+def outer_faces(p=None, inset=0.86):
+    """The closed outer faces of the base, as four model-space corners each.
+
+    The mouth is not in here - it is a hole, and printing across a hole is not a thing.
+    Corners run so the artwork's long axis follows the long axis of the face; which of
+    these is actually facing the camera is decided at render time rather than guessed,
+    so the print lands on whichever panel the shot is showing.
+
+    Returned as a dict so the caller can say which one it used."""
+    p = dict(P, **(p or {}))
+    hx, y0, y1, b, ox, oy0, oy1 = _dims(p)
+    zl, zh = p["z0"] - b, p["z1"] + b
+    zc, zr = (zl + zh) / 2.0, (zh - zl) / 2.0 * inset
+    yc, yr = (oy0 + oy1) / 2.0, (oy1 - oy0) / 2.0 * inset
+    xr = ox * inset
+    return {
+        # the two long sides: artwork runs along Z, across Y
+        "side_-x": [(-ox, yc - yr, zc + zr), (-ox, yc - yr, zc - zr),
+                    (-ox, yc + yr, zc - zr), (-ox, yc + yr, zc + zr)],
+        "side_+x": [(ox, yc - yr, zc + zr), (ox, yc - yr, zc - zr),
+                    (ox, yc + yr, zc - zr), (ox, yc + yr, zc + zr)],
+        # the back, opposite the mouth: artwork runs along Z, across X
+        "back":    [(-xr, oy1, zc + zr), (-xr, oy1, zc - zr),
+                    (xr, oy1, zc - zr), (xr, oy1, zc + zr)],
+        # the two ends: artwork runs along X, across Y
+        "end_low": [(-xr, yc - yr, zl), (xr, yc - yr, zl),
+                    (xr, yc + yr, zl), (-xr, yc + yr, zl)],
+        "end_high": [(-xr, yc - yr, zh), (xr, yc - yr, zh),
+                     (xr, yc + yr, zh), (-xr, yc + yr, zh)],
+    }
+
+
+def face_normal(name, p=None):
+    """Outward normal of one of those faces."""
+    return {"side_-x": (-1, 0, 0), "side_+x": (1, 0, 0), "back": (0, 1, 0),
+            "end_low": (0, 0, -1), "end_high": (0, 0, 1)}[name]
+
+
 def foam(p=None):
     """Die-cut foam: a block filling the cavity with one trough cut into it.
 

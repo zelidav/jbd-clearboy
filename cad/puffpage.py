@@ -13,7 +13,7 @@ sign-off.
 
     python cad/puffpage.py     -> docs/puff.html
 """
-import json, os, sys
+import hashlib, json, os, sys
 
 SITE = "docs"
 OUT = os.path.join(SITE, "puff.html")
@@ -64,6 +64,33 @@ TIERS = [("Holiday drop", "10,000 / state", "20,000 units, one finish"),
          ("A year of it", "3 - 4 drops", "one occasion, then a cadence")]
 
 
+def build_id():
+    """A short stamp over everything the page serves.
+
+    The spinner frames live at fixed paths, so a browser that has been on this page
+    before will happily show yesterday's renders on today's page - which looks exactly
+    like the page not having updated. Every asset URL carries this, and it moves
+    whenever any of the frames or any of the build scripts do.
+    """
+    h = hashlib.md5()
+    for root in (os.path.join(SITE, "spin"), os.path.join(SITE, "video")):
+        for dirpath, _, names in os.walk(root):
+            for n in sorted(names):
+                f = os.path.join(dirpath, n)
+                h.update(n.encode())
+                h.update(str(os.path.getsize(f)).encode())
+    for f in sorted(os.listdir("cad")):
+        if f.endswith(".py"):
+            h.update(open(os.path.join("cad", f), "rb").read())
+    pdf = os.path.join(SITE, "PUFF_x_JBD.pdf")
+    if os.path.exists(pdf):
+        h.update(str(os.path.getsize(pdf)).encode())
+    return h.hexdigest()[:8]
+
+
+BUILD = None
+
+
 def frames():
     """Every spinner the page needs, as relative URLs. A piece and colourway with no
     frames rendered is left out rather than linked and broken."""
@@ -74,7 +101,8 @@ def frames():
         if os.path.isdir(d):
             names = sorted(f for f in os.listdir(d) if f.endswith(".webp"))
             if names:
-                out[p["id"]][WAY] = ["spin/%s_%s/%s" % (p["id"], WAY, n) for n in names]
+                out[p["id"]][WAY] = ["spin/%s_%s/%s?v=%s" % (p["id"], WAY, n, BUILD)
+                                     for n in names]
     missing = [p["id"] for p in PIECES if not out[p["id"]]]
     if missing:
         raise SystemExit("no rendered frames for: %s - run spin_all/encode first"
@@ -342,6 +370,8 @@ FAVICON = ('<link rel="icon" href="data:image/svg+xml,'
 
 
 def build():
+    global BUILD
+    BUILD = build_id()
     fr = frames()
     tabs = "".join(
         '<button class="tab" data-piece="%s" aria-selected="%s">%s</button>'
@@ -360,6 +390,7 @@ def build():
 <meta name="description" content="A holiday collab drop: the Puff one-gram in a \
 hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <meta name="robots" content="noindex">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 %(favicon)s
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -373,7 +404,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
       <a href="#piece">The piece</a>
       <a href="#box">The box</a>
       <a href="#drop">The drop</a>
-      <a href="PUFF_x_JBD.pdf">PDF</a>
+      <a href="PUFF_x_JBD.pdf?v=%(build)s">PDF</a>
     </nav>
   </div>
 </header>
@@ -498,7 +529,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     </div>
     <div class="btns">
       <a class="btn" href="mailto:%(contact)s?subject=PUFF%%20x%%20Jerome%%20Baker">Start the spec</a>
-      <a class="btn k" href="PUFF_x_JBD.pdf">Download the pack (PDF)</a>
+      <a class="btn k" href="PUFF_x_JBD.pdf?v=%(build)s">Download the pack (PDF)</a>
     </div>
   </div>
 </section>
@@ -523,13 +554,14 @@ window.__WAY__ = "%(way)s";
 """ % dict(css=CSS, js=JS, tabs=tabs, marks=marks,
            tiers=tiers, contact=CONTACT,
            lock=lockup("26px"), flock=lockup("22px"), favicon=FAVICON,
-           way=WAY, frames=json.dumps(fr, separators=(",", ":")),
+           way=WAY, build=BUILD,
+           frames=json.dumps(fr, separators=(",", ":")),
            pieces=json.dumps(PIECES, separators=(",", ":")))
 
     os.makedirs(SITE, exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(html)
-    print("wrote", OUT, "-", round(len(html) / 1024.0, 1), "KB")
+    print("wrote", OUT, "-", round(len(html) / 1024.0, 1), "KB", "build", BUILD)
     return OUT
 
 

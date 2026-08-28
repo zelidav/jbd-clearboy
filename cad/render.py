@@ -272,7 +272,7 @@ class Renderer:
 
     def add(self, path, absorb=(0, 0, 0), fume=0.0, line=(0.10, 0.11, 0.13),
             kAmt=0.80, kPow=3.4, spec=1.0, decal=False, solid=False, lens=0.0,
-            min_thick=0.0, max_thick=60.0,
+            opaque=False, min_thick=0.0, max_thick=60.0,
             fume_stops=((1.0, 1.0, 1.0), (0.92, 0.95, 1.02),
                         (0.95, 0.90, 1.05), (1.02, 0.95, 0.86)),
             fume_pow=1.4, smooth=36.0, role=""):
@@ -280,7 +280,14 @@ class Renderer:
         camera draws contour - the piece stops reading as an X-ray of its own walls.
 
         role names the part so the passes can treat it as what it is: 'marbles' stand
-        proud of the wall, 'lines' are spun on before them and have to pass behind."""
+        proud of the wall, 'lines' are spun on before them and have to pass behind.
+
+        opaque=True is for the things in a shot that are not glass - board, foam, a
+        lighter. Every layer here composites by MULTIPLYING, which is what makes glass
+        work and what makes a box wrong: the wall of a box would otherwise be tinted by
+        whatever is behind it, and you could see the insert through the front panel.
+        An opaque object writes its colour instead of multiplying into it, so it
+        occludes, and the depth test decides which one of them wins."""
         v, n, f = load(path, smooth)
         lo, hi = v.min(axis=0), v.max(axis=0)
         self.bbox = ((lo, hi) if self.bbox is None
@@ -291,7 +298,7 @@ class Renderer:
                 for k, p in self.progs.items()}
         self.objs.append(dict(vaos=vaos, absorb=absorb, fume=fume, line=line,
                               kAmt=kAmt, kPow=kPow, spec=spec, decal=decal,
-                              solid=solid, lens=lens, role=role,
+                              solid=solid, lens=lens, role=role, opaque=opaque,
                               min_thick=min_thick, max_thick=max_thick,
                               fume_stops=fume_stops, fume_pow=fume_pow))
 
@@ -366,17 +373,27 @@ class Renderer:
         ctx.enable(moderngl.BLEND)
         ctx.blend_func = (moderngl.ZERO, moderngl.SRC_COLOR)      # multiply
 
-        # 3a tint (front faces, depth on)
+        # 3a tint (front faces, depth on). Glass multiplies into what is behind it;
+        # an opaque object writes over it, which is the whole difference between a
+        # wall and a window.
         ctx.enable(moderngl.DEPTH_TEST | moderngl.CULL_FACE); ctx.cull_face = 'back'
+        ctx.depth_func = '<='
         p = self.progs['tint']; setmats(p)
         self.back_tex.use(1); set_u(p, 'backTex', 1); set_u(p, 'res', (self.W, self.H))
         for o in self.objs:
+            if o['opaque']:
+                ctx.disable(moderngl.BLEND)
+            else:
+                ctx.enable(moderngl.BLEND)
+                ctx.blend_func = (moderngl.ZERO, moderngl.SRC_COLOR)
             set_u(p, 'absorb', o['absorb']); set_u(p, 'fume', o['fume'])
             for nm, col in zip(('fumeA', 'fumeB', 'fumeC', 'fumeD'), o['fume_stops']):
                 set_u(p, nm, tuple(col))
             set_u(p, 'fumePow', o['fume_pow'])
             set_u(p, 'minThick', o['min_thick']); set_u(p, 'maxThick', o['max_thick'])
             o['vaos']['tint'].render(moderngl.TRIANGLES)
+        ctx.enable(moderngl.BLEND)
+        ctx.blend_func = (moderngl.ZERO, moderngl.SRC_COLOR)
 
         # 3b density - every surface for see-through glass, front only for solid colour
         p = self.progs['dens']; setmats(p); ctx.depth_func = '<='

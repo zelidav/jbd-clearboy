@@ -71,7 +71,7 @@ P = dict(
     drip_seed=7,
 
     wig=5,                # stringers in the wig wag
-    wig_r=0.44,
+    wig_r=0.62,           # matched to the drips - a thinner stringer reads paler
     wig_z=(4.0, 19.0),    # the band it occupies, up from the bench
     wig_lobes=9,          # chevrons round the tube
     wig_amp=3.5,          # how far each stringer is run up and down
