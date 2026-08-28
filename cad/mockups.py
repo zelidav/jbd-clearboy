@@ -66,6 +66,42 @@ PIECES = {
      # posed, the piece hangs between Z 79 and 160 and off to +X, so it frames itself
      fit=True, fov=17.0, decal=None, size=(1200, 820),
      name="Hammer, posed", note="Angle 1 135 / Angle 3 30"),
+ "lighter": dict(
+     body="out/lighter.stl",
+     wig=("out/lighter_wig_a.stl", "out/lighter_wig_b.stl"),
+     fit=True, fov=17.0, decal=None, size=(820, 900),
+     name="Lighter sleeve", note="58 mm · an obround socket, a standard lighter drops in"),
+ "lighter_loaded": dict(
+     body="out/lighter.stl",
+     wig=("out/lighter_wig_a.stl", "out/lighter_wig_b.stl"),
+     parts=[("out/lighter_body.stl", "plastic"), ("out/lighter_hood.stl", "metal"),
+            ("out/lighter_wheel.stl", "steel")],
+     fit=True, fov=17.0, decal=None, size=(760, 1020),
+     name="Lighter sleeve, loaded", note="26 mm stands proud - it is struck in the sleeve"),
+ "tube": dict(
+     body="out/tube.stl", marbles="out/tube_marbles.stl", cork="out/tube_cork.stl",
+     drips="out/tube_drips.stl", wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
+     label="puff", decal=(48.0, 98.0, 11.0), stamp=(25.0, 42.0, 11.6),
+     fit=True, fov=17.0, size=(640, 1040),
+     name="Joint tube", note="124 mm · one gram, cork-stopped, drips and a wig wag"),
+ "tube_loaded": dict(
+     body="out/tube.stl", marbles="out/tube_marbles.stl", cork="out/tube_cork.stl",
+     drips="out/tube_drips.stl", wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
+     parts=[("out/tube_joint.stl", "paper")],
+     label="puff", decal=(48.0, 98.0, 11.0), stamp=(25.0, 42.0, 11.6),
+     fit=True, fov=17.0, size=(640, 1040),
+     name="Joint tube, loaded", note="a one-gram cone sealed in glass"),
+ "box": dict(
+     body="out/tube.stl", marbles="out/tube_marbles.stl", cork="out/tube_cork.stl",
+     drips="out/tube_drips.stl", wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
+     parts=[("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
+            ("out/box_foam.stl", "foam"), ("out/box_magnets.stl", "steel"),
+            ("out/tube_joint.stl", "paper")],
+     label="puff", decal=(48.0, 98.0, 11.0), stamp=(25.0, 42.0, 11.6),
+     # a box only reads open in three-quarter
+     yaw=38.0, decal_flip="180",
+     fit=True, fov=17.0, tilt=-90.0, size=(1200, 780),
+     name="Presentation box", note="rigid board, hinged lid, magnetic clasp"),
  "jar": dict(
      body="out/jar.stl", frit="out/jar_frit.stl", marbles="out/jar_marbles.stl",
      cork="out/jar_cork.stl", lines_body="out/jar_lines.stl",
@@ -130,6 +166,40 @@ WAYS = {
 }
 
 MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.62, 0.66, 0.70))
+
+# Everything below is not glass. The compositor is a Beer-Lambert tint over a clamped
+# thickness, so an opaque body is just a large absorption held between a floor and a
+# ceiling: the pair is what sets the colour, and the spec term is what sells the
+# material. Absorptions here are solved for a 6-7 mm slab.
+OPAQUE = {
+ # The shell of a disposable lighter, graphite. It is the same in every colourway on
+ # purpose: the lighter is a thing the customer already owns and drops in, so the
+ # sleeve is what carries the colour. A shell tinted to match the glass made the two
+ # read as one moulded object, which is the opposite of the point.
+ "plastic": dict(absorb=(0.262, 0.257, 0.249), line=(0.16, 0.17, 0.19),
+                 kAmt=0.44, kPow=1.9, spec=0.62, min_thick=6.5, max_thick=7.4),
+ # the pressed hood over the wheel
+ "metal": dict(absorb=(0.100, 0.094, 0.085), line=(0.30, 0.32, 0.35),
+               kAmt=0.30, kPow=2.2, spec=2.10, min_thick=5.8, max_thick=6.6),
+ # the flint wheel itself, darker and harder
+ "steel": dict(absorb=(0.285, 0.277, 0.262), line=(0.24, 0.25, 0.27),
+               kAmt=0.34, kPow=2.4, spec=0.60, min_thick=2.0, max_thick=2.6),
+ # rolling paper: near white, matte, no contour worth speaking of
+ # rolling paper: a warm off-white, matte. It is seen THROUGH the tube wall, so it
+ # needs enough body and enough edge shading to read as a solid in there rather than
+ # as a brighter patch of glass
+ # wrapped rigid board - matte, near black, and it must not read as glass at all
+ "board": dict(absorb=(0.189, 0.189, 0.183), line=(0.20, 0.21, 0.23),
+               kAmt=0.30, kPow=2.2, spec=0.34, min_thick=6.6, max_thick=7.4),
+ # Die-cut foam, in Puff's own blue. A charcoal insert in a black box was correct and
+ # useless: the glass is transmissive, so it takes the colour of whatever is behind it,
+ # and behind black it is black. The insert is what the piece is seen against, so it is
+ # the one part of the box that carries colour.
+ "foam": dict(absorb=(0.1590, 0.0359, 0.0010), line=(0.10, 0.20, 0.26),
+              kAmt=0.52, kPow=1.6, spec=0.10, min_thick=4.0, max_thick=4.6),
+ "paper": dict(absorb=(0.0396, 0.0490, 0.0793), line=(0.34, 0.32, 0.28),
+               kAmt=0.70, kPow=1.30, spec=0.26, min_thick=3.4, max_thick=4.2),
+}
 # cork is not glass: a thickness floor plus heavy absorption gives it a flat, matte body
 CORK = dict(absorb=(0.0225, 0.0430, 0.0790), line=(0.42, 0.33, 0.22),
             min_thick=6.0, max_thick=8.5, kAmt=0.50, kPow=1.9, spec=0.16)
@@ -269,6 +339,139 @@ def make_jar_sticker(path):
     return im.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.FLIP_LEFT_RIGHT)
 
 
+# ------------------------------------------------------- the Puff collab label
+# Puff's own colours, sampled off their pack art and their site: the tube blue, the
+# pink of the drip mark, and the gold of the grill in it. The wordmark on their pack
+# runs along the axis of the tube, so this one does too - it is the same gesture on a
+# tube that happens to be glass.
+PUFF = dict(blue=(47, 180, 245), pink=(232, 80, 144), gold=(232, 178, 31),
+            ink=(11, 13, 16), paper=(255, 255, 255))
+
+BRAND_FONTS = {"heavy": "assets/fonts/Poppins-ExtraBold.ttf",
+               "bold": "assets/fonts/Poppins-Bold.ttf",
+               "med": "assets/fonts/Poppins-Medium.ttf",
+               "round": "assets/fonts/VarelaRound-Regular.ttf"}
+_BF = {}
+
+
+def brand_font(kind, size):
+    k = (kind, int(size))
+    if k not in _BF:
+        _BF[k] = ImageFont.truetype(BRAND_FONTS[kind], int(size))
+    return _BF[k]
+
+
+def _pill(d, xy, text, font, fill, ink, pad, track=0.0):
+    """A small filled pill with letterspaced type in it - where the plain facts go."""
+    x, y = xy
+    tw = _tracked_width(d, text, font, track)
+    bb = font.getbbox(text)
+    hh = (bb[3] - bb[1]) + 2 * pad
+    d.rounded_rectangle([x, y - hh / 2, x + tw + 2 * pad * 1.6, y + hh / 2],
+                        radius=hh / 2, fill=fill + (255,))
+    _tracked_text(d, (x + pad * 1.6, y - hh / 2 + pad - bb[1]), text, font,
+                  ink + (255,), track)
+    return tw + 2 * pad * 1.6
+
+
+def make_puff_label(w=2600, h=915):
+    """PUFF x JEROME BAKER, printed up the tube.
+
+    Two houses, one lockup: their wordmark set in the geometric rounded face their own
+    is drawn in, ours in the same family a weight down, and the cross in the gold off
+    their grill. Under it, the plain facts in a pill in the pink of their drip mark.
+
+    The lockup gets the full width of the band and is shrunk until it fits it - nothing
+    here is set at one size and hoped for. This art is projected onto a curved wall at
+    58 mm long, so anything that overruns crashes into the edge of the piece.
+
+    The band is inset from the projector so glass shows past it, and it sits between the
+    wig wag and the drips rather than over either. Final artwork is Puff's to approve;
+    this is the lockup at the right size, in the right colours, in the right place.
+    """
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    # the band is inset from the projector on both axes: pushed to the edge, the
+    # art wraps round the shoulder of the tube and the ends go out of sight
+    m = int(h * 0.115)
+    band = [int(w * 0.035), m, int(w * 0.965), h - m]
+    bw, bh = band[2] - band[0], band[3] - band[1]
+    cy = (band[1] + band[3]) / 2
+    d.rounded_rectangle(band, radius=int(min(bh, bw) * 0.30),
+                        fill=PUFF["blue"] + (255,))
+    k = int(h * 0.045)
+    d.rounded_rectangle([band[0] + k, band[1] + k, band[2] - k, band[3] - k],
+                        radius=int(min(bh, bw) * 0.25), outline=PUFF["gold"] + (255,),
+                        width=max(int(h * 0.013), 3))
+
+    # type is sized off the band's short side, so a long thin band and a stubby one set
+    # at the same optical weight
+    u = min(bh, bw * 0.40)
+    room = bw * 0.80
+
+    scale = 1.0
+    for _ in range(9):
+        big = brand_font("heavy", max(int(u * 0.34 * scale), 8))
+        sub = brand_font("round", max(int(u * 0.125 * scale), 6))
+        ours = brand_font("bold", max(int(u * 0.215 * scale), 7))
+        tiny = brand_font("med", max(int(u * 0.105 * scale), 6))
+        cross = brand_font("heavy", max(int(u * 0.27 * scale), 7))
+        puff_w = d.textlength("PUFF", font=big)
+        pre_w = _tracked_width(d, "pre-rolls", sub, u * 0.024 * scale)
+        jb_w = d.textlength("JEROME BAKER", font=ours)
+        des_w = _tracked_width(d, "DESIGNS", tiny, u * 0.060 * scale)
+        left_w, right_w = max(puff_w, pre_w), max(jb_w, des_w)
+        x_w = d.textlength("\u00d7", font=cross)
+        gap = u * 0.26 * scale
+        total = left_w + gap + x_w + gap + right_w
+        if total <= room:
+            break
+        scale *= room / total
+
+    top = cy - u * 0.14
+    x = (band[0] + band[2] - total) / 2
+    d.text((x + (left_w - puff_w) / 2, top - u * 0.30 * scale), "PUFF", font=big,
+           fill=PUFF["paper"] + (255,))
+    _tracked_text(d, (x + (left_w - pre_w) / 2, top + u * 0.09 * scale), "pre-rolls",
+                  sub, PUFF["paper"] + (255,), u * 0.024 * scale)
+    x += left_w + gap
+    d.text((x, top - u * 0.18 * scale), "\u00d7", font=cross,
+           fill=PUFF["gold"] + (255,))
+    x += x_w + gap
+    d.text((x + (right_w - jb_w) / 2, top - u * 0.22 * scale), "JEROME BAKER",
+           font=ours, fill=PUFF["paper"] + (255,))
+    _tracked_text(d, (x + (right_w - des_w) / 2, top + u * 0.09 * scale), "DESIGNS",
+                  tiny, PUFF["gold"] + (255,), u * 0.060 * scale)
+
+    # the plain facts, in one pill under the lockup
+    fact = "1 GRAM  \u00b7  HAND BLOWN  \u00b7  NEW YORK"
+    fs = max(int(u * 0.095), 7)
+    fpad, ftrack = u * 0.062, u * 0.030
+    ff = brand_font("bold", fs)
+    fw = _tracked_width(d, fact, ff, ftrack) + 2 * fpad * 1.6
+    _pill(d, ((band[0] + band[2] - fw) / 2, cy + u * 0.335), fact, ff, PUFF["pink"],
+          PUFF["paper"], fpad, ftrack)
+
+    # No flip. The projector's u already runs the way the piece does - up the tube -
+    # and its v the way the art does, so a label that reads left to right on the sheet
+    # reads bottom to top on the glass. The stem label flips because the piece it is
+    # printed on is held the other way up.
+    return img
+
+
+def _flip(art, mode):
+    """Laying the assembly down with a camera tilt reverses the handedness of the
+    projected face, so a print that reads correctly on a standing piece comes out
+    mirrored. The art is flipped for that view rather than the piece re-modelled."""
+    if not mode:
+        return art
+    if mode in ("lr", "180"):
+        art = art.transpose(Image.FLIP_LEFT_RIGHT)
+    if mode in ("tb", "180"):
+        art = art.transpose(Image.FLIP_TOP_BOTTOM)
+    return art
+
+
 def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
     """decal_turn=180 prints the stem label the other way along the stem, for a piece
     laid in a case with its head at the other end.
@@ -277,6 +480,21 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
     only. The frit mesh is the only layer dropped; nothing else moves."""
     p, c = PIECES[piece], WAYS[key]
     r = render.Renderer(W, H)
+    # Whatever is in the shot that is not glass goes down FIRST - a lighter in its
+    # sleeve, a joint in its tube. Every pass depth-tests in the order things were
+    # added, so a solid added after the shell it sits inside is written off behind the
+    # shell's own front face and never appears. Added first, it lays down its depth,
+    # the glass in front of it passes, and the tint multiplies over it - which is the
+    # right answer anyway: it is being seen through the wall.
+    for path, mat in p.get("parts") or ():
+        if not os.path.exists(path):
+            continue
+        m = OPAQUE[mat]
+        r.add(path,
+              absorb=(c.get("plastic") if mat == "plastic" else None) or m["absorb"],
+              fume=0.0, line=m["line"], kAmt=m["kAmt"], kPow=m["kPow"], spec=m["spec"],
+              solid=True, min_thick=m["min_thick"], max_thick=m["max_thick"],
+              smooth=36.0, role="opaque")
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
           fume_stops=c["fume_stops"], fume_pow=c.get("fume_pow", 1.4),
           line=c["line"], kAmt=0.38, kPow=2.6, spec=1.0,
@@ -321,6 +539,19 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
                   line=(0.10, 0.12, 0.14), kAmt=0.55, kPow=2.6, spec=1.5,
                   solid=True, min_thick=1.6, max_thick=30.0, smooth=24.0,
                   role="lines")
+    # drips: one colour, laid on at the rim and let go. It is decoration standing on
+    # the surface, so it takes the linework role - it has to pass behind the marbles
+    if p.get("drips") and os.path.exists(p["drips"]):
+        r.add(p["drips"], absorb=c.get("wrap", (0.30, 0.085, 0.12)), fume=0.0,
+              line=c["fline"], kAmt=0.34, kPow=2.0, spec=1.35,
+              solid=True, min_thick=1.4, max_thick=9.0, smooth=24.0, role="lines")
+    # the wig wag at the base, alternate stringers in two colours
+    for i, w in enumerate(p.get("wig") or ()):
+        if os.path.exists(w):
+            r.add(w, absorb=(c["frit"] if i == 0 else c.get("wrap", c["frit"])),
+                  fume=0.0, line=c["fline"] if i == 0 else c["line"],
+                  kAmt=0.38, kPow=2.1, spec=1.30,
+                  solid=True, min_thick=1.2, max_thick=7.0, smooth=24.0, role="lines")
     for tag, mat in (("bling", "stone"), ("bling2", "stone2")):
         q = p.get(tag)
         if q and os.path.exists(q):
@@ -335,12 +566,25 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
               smooth=24.0, role="cork")
     if p["decal"]:
         z0, z1, rad = p["decal"]
-        art = c.get("sticker")
-        art = (load_sticker(art) if art
-               else make_label(TEXT, c["label"], c["label_text"]))
+        if p.get("label") == "puff":
+            art = make_puff_label()
+        else:
+            art = c.get("sticker")
+            art = (load_sticker(art) if art
+                   else make_label(TEXT, c["label"], c["label_text"]))
         if decal_turn:
             art = art.rotate(decal_turn, expand=True)
-        r.set_decal(art, z0, z1, rad)
+        # Laying the assembly down with a camera tilt reverses the handedness of the
+        # projected face, so a print that reads correctly standing comes out mirrored.
+        # The art is flipped for that view rather than the piece being re-modelled.
+        art = _flip(art, p.get("decal_flip"))
+        r.set_decal(art, z0, z1, rad, face=p.get("decal_face", 1.0))
+        # a piece can carry both: the print, and the maker's mark under it. The jar
+        # only ever wanted one, which is why these used to be the same branch
+        if p.get("stamp"):
+            s0, s1, srad = p["stamp"]
+            mk = _flip(make_stamp_decal(1100, 900), p.get("decal_flip"))
+            r.set_decal(mk, s0, s1, srad, face=p.get("decal_face", 1.0))
     elif p.get("stamp"):
         z0, z1, rad = p["stamp"]
         r.set_decal(make_stamp_decal(), z0, z1, rad)              # JB mark, front
@@ -426,8 +670,11 @@ def size_of(piece, W=None, H=None):
     return PIECES[piece].get("size", (760, 1000))
 
 
-def shot(piece, key, angle=SIDE, W=None, H=None, tag="", frit=True):
+def shot(piece, key, angle=None, W=None, H=None, tag="", frit=True):
     os.makedirs(OUT, exist_ok=True)
+    if angle is None:
+        # a box only reads open in three-quarter; a bottle only reads broadside
+        angle = SIDE + math.radians(PIECES[piece].get("yaw", 0.0))
     W, H = size_of(piece, W, H)
     im = frame(build_renderer(piece, key, W, H, frit=frit), piece, angle)
     im.save(f"{OUT}/{piece}_{key}{tag}.png")

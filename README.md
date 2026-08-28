@@ -19,6 +19,13 @@ up in two fumed colourways.
 | Glass | ≈ 81 g in boro 3.3 | ≈ 90 g + ≈ 10 g cork |
 | Frit + marbles | bowl end, 4 clear marbles | band under the rim, 7 marbles around the opening |
 
+Alongside them: a **joint tube** (124 mm, one gram, 4.5 mm wall so it survives a floor,
+cork-stopped, drips and a wig wag, the JB mark pressed in, two marbles so it will not
+roll) and its **presentation box** (rigid board, hinged lid, magnetic clasp), a **lighter sleeve** (58 mm obround socket for a
+standard full-size lighter), and the earlier **glass tip** and **joint holder**. The tube
+and the sleeve are each rendered empty and loaded - the tube with a one-gram cone in it,
+the sleeve with a lighter.
+
 Colourways: **bluish teal / silver fume** and **magenta / gold fume**, both frit-rolled with
 clear marbles.
 
@@ -43,6 +50,12 @@ scaling) moves if they come back different.
 | `cad/model.py` | Hammer solid — head lofted through 13 measured sections, hollowed, bowl funnel, stem bore, carb. STEP + STL. |
 | `cad/frit.py` | Frit grains and clear marbles for the hammer, built as meshes. |
 | `cad/jar.py` | Jar solid, cork lid, pressed maker's stamp, frit and rim marbles. |
+| `cad/tube.py` | Joint tube - flat-bottomed 124 mm tube for a one-gram cone, cork, two anti-roll marbles, drips off the rim, wig wag at the base, and the cone itself for the loaded shot. |
+| `cad/lighter.py` | Lighter sleeve - obround socket for a standard full-size lighter, finger notch through the front wall, wig wag at the base, and the lighter (shell / hood / wheel) for the loaded shot. |
+| `cad/box.py` | Presentation box - shell, hinged lid shown open, disc magnets, die-cut foam insert. Modelled around the tube where the tube already sits, so the glass meshes and the label projector are reused unchanged. |
+| `cad/puffdeck.py` | PUFF x Jerome Baker collab concept pack - page furniture, Puff's palette and type. |
+| `cad/puffdeck_slides.py` | The eleven pages of that pack. |
+| `cad/puffpage.py` | The interactive version of it - `docs/puff.html`, drag-to-spin, published on Pages. |
 | `cad/render.py` | Studio glass compositor (moderngl): sweep → Beer-Lambert tint with fume shift → density pass → specular → enamel decal. Not a path tracer. |
 | `cad/mockups.py` | Pieces, colourways, hero stills. |
 | `cad/turntable.py` | 72-position turntables, broadside start, rotating on the piece's own axis. |
@@ -66,6 +79,9 @@ python3.12 -m venv cadenv
 ./cadenv/Scripts/python cad/model.py out
 ./cadenv/Scripts/python cad/frit.py out
 ./cadenv/Scripts/python cad/jar.py out
+./cadenv/Scripts/python cad/tube.py out
+./cadenv/Scripts/python cad/lighter.py out
+./cadenv/Scripts/python cad/box.py out
 ./cadenv/Scripts/python cad/glb_export.py
 ./cadenv/Scripts/python cad/turntable.py      # ~0.4 s/frame, 288 frames
 ./cadenv/Scripts/python cad/encode.py
@@ -78,6 +94,8 @@ The hand-off is built on top of that:
 ./cadenv/Scripts/python cad/callouts.py    # dimensioned closeups -> shots/spec/
 ./cadenv/Scripts/python cad/specsheet.py   # spec sheet PDF + the zip, into docs/
 ./cadenv/Scripts/python cad/boxshot.py     # box composites + the leave-behind PDF
+./cadenv/Scripts/python cad/puffdeck.py   # PUFF x JBD concept pack -> shots/ and docs/
+./cadenv/Scripts/python cad/puffpage.py   # the interactive version -> docs/puff.html
 ```
 
 `cad/boxshot.py` needs the Boutiq box plates; the path is at the top of the file.

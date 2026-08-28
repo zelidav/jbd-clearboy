@@ -18,7 +18,8 @@ from mockups import WAYS
 # to tip it between standing and laid down - so it is rendered as a grid, not a spin.
 # Everything else is a plain turntable.
 GRID = ["hammer"]
-REV_A = ["hammer", "jar", "holder", "tip", "tip_spiral"]
+REV_A = ["hammer", "jar", "tube", "tube_loaded", "box", "lighter",
+         "lighter_loaded", "holder", "tip", "tip_spiral"]
 REV_B = ["hammer", "jar"]                      # the rest carry no frit either way
 POSED = ["pose135"]                            # its own tab, its own spinner
 

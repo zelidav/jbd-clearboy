@@ -192,7 +192,49 @@ def build_jar(d, out, vid):
                 fov=17.0, shadow=(0.5, 0.32, 0.130), decal=None)
 
 
-BUILDERS = {"hammer": build_hammer, "jar": build_jar}
+def build_tube(d, out, vid):
+    """The joint tube is parametric all the way down, decoration included."""
+    import tube
+    p = dict(tube.P); p.update(d)
+    body_path = os.path.join(out, "%s.stl" % vid)
+    solid = tube.build(p)
+    cq.exporters.export(solid, body_path, tolerance=0.03, angularTolerance=0.12)
+    cq.exporters.export(solid, os.path.join(out, "%s.step" % vid))
+    cq.exporters.export(tube.build_cork(p), os.path.join(out, "%s_cork.stl" % vid),
+                        tolerance=0.03, angularTolerance=0.12)
+    tube.build_marbles(p).export(os.path.join(out, "%s_marbles.stl" % vid))
+    tube.build_drips(p).export(os.path.join(out, "%s_drips.stl" % vid))
+    wa, wb = tube.build_wigwag(p)
+    wa.export(os.path.join(out, "%s_wig_a.stl" % vid))
+    wb.export(os.path.join(out, "%s_wig_b.stl" % vid))
+    return dict(body=body_path, cork=os.path.join(out, "%s_cork.stl" % vid),
+                marbles=os.path.join(out, "%s_marbles.stl" % vid),
+                drips=os.path.join(out, "%s_drips.stl" % vid),
+                wig=(os.path.join(out, "%s_wig_a.stl" % vid),
+                     os.path.join(out, "%s_wig_b.stl" % vid)))
+
+
+def build_lighter(d, out, vid):
+    """The sleeve is parametric too - and the lighter it holds never is, which is why
+    the socket is driven off the lighter's measured section rather than a slider."""
+    import lighter
+    p = dict(lighter.P); p.update(d)
+    body_path = os.path.join(out, "%s.stl" % vid)
+    solid = lighter.build(p)
+    cq.exporters.export(solid, body_path, tolerance=0.03, angularTolerance=0.12)
+    cq.exporters.export(solid, os.path.join(out, "%s.step" % vid))
+    wa, wb = lighter.build_wigwag(p)
+    wa.export(os.path.join(out, "%s_wig_a.stl" % vid))
+    wb.export(os.path.join(out, "%s_wig_b.stl" % vid))
+    return dict(body=body_path,
+                wig=(os.path.join(out, "%s_wig_a.stl" % vid),
+                     os.path.join(out, "%s_wig_b.stl" % vid)))
+
+
+# build_tip and build_holder were written but never registered, so a remodel request
+# for either came back as a KeyError even though the site offers their sliders
+BUILDERS = {"hammer": build_hammer, "jar": build_jar, "tube": build_tube,
+            "lighter": build_lighter, "tip": build_tip, "holder": build_holder}
 
 
 def run(req, frames_n=72):

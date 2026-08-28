@@ -48,7 +48,8 @@ REV_BY_KEY = {r["key"]: r for r in REVISIONS}
 REV_PIECES = ["hammer", "jar"]
 CURRENT = next(r for r in REVISIONS if r["current"])
 
-PIECES = ["hammer", "jar", "holder", "tip", "tip_spiral"]
+PIECES = ["hammer", "jar", "tube", "tube_loaded", "box", "lighter",
+          "lighter_loaded", "holder", "tip", "tip_spiral"]
 WAYS = ["teal_silver", "magenta_gold", "clear_silver", "clear_gold"]
 
 PIECE_META = {
@@ -60,6 +61,17 @@ PIECE_META = {
                    note="90 mm, flared bell grips any joint, marbles stop it rolling"),
     "tip":    dict(name="Glass tip", code="JBD-GT-19",
                    note="19 mm thick-walled filter tip, screen inside, raked paper slot end to end"),
+    "tube":   dict(name="Joint tube", code="JBD-JT-124",
+                   note="124 mm flat-bottomed tube for a one-gram pre-roll - 4.5 mm wall, drips, a wig wag at the base, the JB mark pressed in, two marbles to stop it rolling"),
+    "tube_loaded": dict(name="Joint tube, loaded", code="JBD-JT-124-L", variant_of="tube",
+                   note="the same tube with a one-gram cone in it and the cork seated"),
+    "box":    dict(name="Presentation box", code="JBD-BX-169", variant_of="tube",
+                   note="rigid board, lid hinged full height, two disc magnets in the front lip, die-cut foam insert"),
+    "lighter": dict(name="Lighter sleeve", code="JBD-LS-58",
+                   note="58 mm obround socket for a standard full-size lighter, wig wag at the base, finger notch through the front"),
+    "lighter_loaded": dict(name="Lighter sleeve, loaded", code="JBD-LS-58-L",
+                   variant_of="lighter",
+                   note="26 mm of lighter stands proud - it is struck in the sleeve, not taken out of it"),
     "tip_spiral": dict(name="Glass tip, rolled", code="JBD-GT-19R",
                        note="19 mm of rolled sheet - the gap between wraps is the slot"),
     # posed off the hammer, so a remodel request routes to the hammer builder
@@ -166,6 +178,32 @@ BASE = {
    dict(k="loop_t",     label="Ring section",     v=1.45, min=0.9, max=2.6, step=0.05, unit="mm"),
    dict(k="frit_from",  label="Frit starts at",   v=68,   min=30,  max=95,  step=1,   unit="%"),
  ],
+ "tube": [
+   dict(k="height",    label="Overall height",  v=124, min=95, max=160, step=1,   unit="mm"),
+   dict(k="bore",      label="Bore",            v=15,  min=11, max=22,  step=0.5, unit="mm"),
+   dict(k="wall",      label="Wall thickness",  v=4.5, min=1.8, max=7.0, step=0.1, unit="mm"),
+   dict(k="floor",     label="Base thickness",  v=7.0, min=2.0, max=12.0, step=0.2, unit="mm"),
+   dict(k="marbles",   label="Marbles",         v=2,   min=0,  max=5,   step=1,   unit=""),
+   dict(k="marble_r",  label="Marble radius",   v=4.6, min=3.0, max=6.5, step=0.1, unit="mm"),
+   dict(k="drips",     label="Drips",           v=6,   min=0,  max=14,  step=1,   unit=""),
+   dict(k="drip_r",    label="Drip section",    v=1.55, min=0.8, max=2.6, step=0.05, unit="mm"),
+   dict(k="drip_max",  label="Longest drip",    v=24,  min=8,  max=48,  step=1,   unit="mm"),
+   dict(k="wig",       label="Wig wag lines",   v=5,   min=0,  max=9,   step=1,   unit=""),
+   dict(k="wig_lobes", label="Chevrons round",  v=9,   min=4,  max=18,  step=1,   unit=""),
+   dict(k="wig_amp",   label="Chevron height",  v=4.6, min=1.5, max=8.0, step=0.1, unit="mm"),
+   dict(k="cork_h",    label="Cork length",     v=24,  min=14, max=36,  step=1,   unit="mm"),
+ ],
+ "lighter": [
+   dict(k="depth",     label="Socket depth",    v=55,  min=30, max=72,  step=1,   unit="mm"),
+   dict(k="wall",      label="Wall thickness",  v=3.0, min=2.0, max=6.0, step=0.1, unit="mm"),
+   dict(k="floor",     label="Base thickness",  v=3.4, min=2.0, max=8.0, step=0.2, unit="mm"),
+   dict(k="clear",     label="Slip fit",        v=1.1, min=0.4, max=2.4, step=0.05, unit="mm"),
+   dict(k="notch_w",   label="Notch width",     v=10.5, min=0, max=18,  step=0.5, unit="mm"),
+   dict(k="notch_h",   label="Notch depth",     v=17,  min=0,  max=34,  step=1,   unit="mm"),
+   dict(k="wig",       label="Wig wag lines",   v=5,   min=0,  max=9,   step=1,   unit=""),
+   dict(k="wig_lobes", label="Chevrons round",  v=8,   min=4,  max=16,  step=1,   unit=""),
+   dict(k="wig_amp",   label="Chevron height",  v=4.0, min=1.5, max=7.0, step=0.1, unit="mm"),
+ ],
  "jar": [
    dict(k="height",  label="Glass height",     v=92, min=70, max=130, step=1,   unit="mm"),
    dict(k="mouthid", label="Mouth opening",    v=38, min=28, max=53,  step=1,   unit="mm"),
@@ -199,6 +237,12 @@ def files():
             continue
         if stem.startswith("jar"):
             piece = "jar"
+        elif stem.startswith("tube"):
+            piece = "tube"
+        elif stem.startswith("box"):
+            piece = "box"
+        elif stem.startswith("lighter"):
+            piece = "lighter"
         elif stem.startswith("v-"):
             piece = "variant"
         else:
@@ -249,6 +293,23 @@ SPECS = {
                ["Grip cone", "&empty;6.4 &ndash; 15", "mm"],
                ["Mouthpiece", "&empty;9.6", "mm"],
                ["Glass", "&asymp; 20", "g"], ["Marbles", "3", "one side"]],
+    "tube":   [["Overall height", "124", "mm"], ["Body", "&empty;24", "mm straight"],
+               ["Bore", "&empty;15", "mm, 4.5 wall"],
+               ["Base", "7", "mm - it lands on this"],
+               ["Holds", "1 g", "king-size cone"],
+               ["Glass", "&asymp; 79", "g + cork"],
+               ["Marbles", "2", "one side, anti-roll"]],
+    "box":    [["Outside", "53 &times; 48 &times; 169", "mm"],
+               ["Board", "3.5", "mm rigid, wrapped"],
+               ["Clasp", "2 &times; &empty;9", "disc magnets"],
+               ["Insert", "die-cut foam", "one well"],
+               ["Holds", "JBD-JT-124", "and its cork"],
+               ["Relief", "front-cut", "lifts straight out"]],
+    "lighter": [["Overall height", "58.4", "mm"], ["Section", "30.4 &times; 19.2", "mm obround"],
+               ["Socket", "24.5 &times; 13.3", "mm"],
+               ["Wall", "3.0", "mm"],
+               ["Glass", "&asymp; 29", "g"],
+               ["Proud", "26", "mm of lighter"]],
     "jar":    [["Glass height", "92", "mm"], ["Body", "&empty;44", "mm straight"],
                ["Mouth", "&empty;38", "mm"], ["Wall", "3", "mm"],
                ["Glass", "&asymp; 90", "g + cork"], ["Marbles", "7", "at the opening"]],
@@ -332,6 +393,9 @@ def piece_meta():
 
 def base_dims():
     b = dict(BASE)
+    b["tube_loaded"] = BASE["tube"]
+    b["box"] = BASE["tube"]
+    b["lighter_loaded"] = BASE["lighter"]
     for v in variants():
         rows = []
         for row in BASE[v["piece"]]:
@@ -345,6 +409,9 @@ def base_dims():
 
 def piece_specs():
     sp = dict(SPECS)
+    # the loaded views are the same piece with something in it - one spec, two tabs
+    sp["tube_loaded"] = SPECS["tube"]
+    sp["lighter_loaded"] = SPECS["lighter"]
     for v in variants():
         rows = [list(r) for r in SPECS[v["piece"]]]
         d = v.get("dims", {})
@@ -643,7 +710,9 @@ def shell(title, body, script="", nav="index", standalone=False):
     # the spec sheet and the whole hand-off pack hang off every page, not just Downloads
     # the two newer pieces have their own sheets rather than a page each, so they hang
     # off the masthead where they can be found from anywhere
-    grabs = ('<a class="dl" href="JBD_Joint_Holder.pdf" target="_blank">Joint holder'
+    grabs = ('<a class="dl" href="puff.html">PUFF collab'
+             ' <span>LIVE</span></a>'
+             '<a class="dl" href="JBD_Joint_Holder.pdf" target="_blank">Joint holder'
              ' <span>PDF</span></a>'
              '<a class="dl" href="JBD_Glass_Tip.pdf" target="_blank">Glass tip'
              ' <span>PDF</span></a>'
