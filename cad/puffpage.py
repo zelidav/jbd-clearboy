@@ -34,7 +34,7 @@ PIECES = [
     dict(id="tube", name="The tube, empty", tag="JBD-JT-124",
          note="What it is once the joint is gone - which is the whole point.",
          specs=[("Overall height", "124 mm"), ("Body", "24 mm OD"),
-                ("Wall", "4.5 mm, base 7 mm"), ("Decoration", "wig wag, drips, 2 marbles"),
+                ("Wall", "4.5 mm, base 7 mm"), ("Decoration", "wig wag, drips, drip marbles"),
                 ("Mark", "JB pressed into the wall"), ("Print", "50 mm band, up the axis")]),
     dict(id="box", name="In the box", tag="JBD-BX-169",
          note="Rigid board, lid hinged full height, two disc magnets in the front lip.",
@@ -45,40 +45,23 @@ PIECES = [
 ]
 
 MARKS = [
-    ("Drips", "A band of colour laid on at the rim and let go. It runs, thins, and beads "
-              "where it stopped. No two are the same."),
-    ("Wig wag", "Stringers walked round the base while they are run up and down, stacked "
-                "into chevrons. Two colours, pulled by hand."),
-    ("Two marbles", "Set proud on one side, a few degrees apart. Laid down it beds on "
-                    "both and will not roll off a bench."),
+    ("Drips", "A band of gold laid on at the rim and let go. It runs, thins, and ends "
+              "in a marble where it stopped. No two are the same."),
+    ("Wig wag", "Stringers walked round the base while they are run up and down, "
+                "stacked into chevrons - in the same pink and gold as the drips, so "
+                "the two ends of the piece answer each other."),
+    ("Marbles for feet", "Every drip ends in one, walked right round the piece rather "
+                         "than set in a row down one side. To roll, the tube has to "
+                         "climb over one - so it stops however it lands."),
     ("The JB mark", "Pressed into the wall under the print. The piece is signed where a "
                     "piece of glass is signed, not on a sticker."),
     ("Heavy wall", "4.5 mm of wall and 7 mm of base - about twice what it needs to hold "
                    "anything. It is not holding anything; it is surviving the floor."),
 ]
 
-ROUTES = [
-    ("A", "The box is the package", "#2FB4F5",
-     "The opaque rigid box carries the opacity rule and the label; a certified CR band "
-     "or closure carries the other. The glass keeps its cork and its look.",
-     "Recommended. Nothing about the piece changes."),
-    ("B", "CR closure on the glass", "#E8B21F",
-     "An off-the-shelf certified CR cap replaces the cork on the loaded SKU. Stock "
-     "part, not tooling. Still needs an opaque outer or an exit bag.",
-     "Cork stays on the empty SKU."),
-    ("C", "CR shrink band over the cork", "#127BB0",
-     "The cheapest mechanism, and single-use - which both states allow for a package "
-     "holding one pre-roll. Gives tamper evidence for free.",
-     "Cheapest. Still needs the opaque outer."),
-    ("D", "Sold empty, alongside", "#E85090",
-     "An empty glass vessel is not a cannabis product: no CR, no opacity, no approval. "
-     "The pre-roll ships in the existing compliant pack.",
-     "Ships to states Puff is not in yet."),
-]
-
-TIERS = [("The test", "10,000 / state", "20,000 units, one way each"),
-         ("Programme", "25,000 / state", "rolling, two ways each"),
-         ("Standard pack", "100,000+ / yr", "the glass tube is the pack")]
+TIERS = [("Holiday drop", "10,000 / state", "20,000 units, one finish"),
+         ("Strain drops", "10,000 / state", "same piece, new strain"),
+         ("A year of it", "3 - 4 drops", "one occasion, then a cadence")]
 
 
 def frames():
@@ -232,11 +215,6 @@ section.alt .card{background:var(--wash)}
 .mark:nth-child(5){border-color:var(--ink-3)}
 .mark h3{font-size:16px;font-weight:700}
 .mark p{color:var(--ink-2);font-size:14.5px;margin-top:5px}
-.routeBody{background:var(--wash);border:1px solid var(--rule);border-radius:18px;
-  padding:24px 26px;margin-top:16px}
-.routeBody h3{font-size:22px;font-weight:800}
-.routeBody p{color:var(--ink-2);margin-top:10px}
-.routeBody .verdict{margin-top:14px;font-weight:700}
 .note{color:var(--ink-3);font-size:14.5px;margin-top:18px}
 .tiers{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
   margin-top:28px}
@@ -334,16 +312,6 @@ JS = r"""
     else { spinning = true; this.setAttribute('aria-pressed','true'); go(); }
   });
 
-  // routes
-  [].forEach.call(document.querySelectorAll('.tab[data-route]'), function(b){
-    b.addEventListener('click', function(){
-      [].forEach.call(document.querySelectorAll('.tab[data-route]'), function(o){
-        o.setAttribute('aria-selected', o === b ? 'true' : 'false'); });
-      [].forEach.call(document.querySelectorAll('.routeBody'), function(o){
-        o.hidden = o.dataset.route !== b.dataset.route; });
-    });
-  });
-
   pick(piece); go();
   // only autoplay while it is on screen - a spinner running in a background tab is
   // thirty image decodes a second for nobody
@@ -381,14 +349,6 @@ def build():
         for i, p in enumerate(PIECES))
     marks = "".join('<div class="mark"><h3>%s</h3><p>%s</p></div>' % (t, b)
                     for t, b in MARKS)
-    rtabs = "".join(
-        '<button class="tab" data-route="%s" aria-selected="%s">Route %s</button>'
-        % (r[0], "true" if i == 0 else "false", r[0]) for i, r in enumerate(ROUTES))
-    rbodies = "".join(
-        '<div class="routeBody" data-route="%s"%s><h3 style="color:%s">%s</h3>'
-        '<p>%s</p><p class="verdict" style="color:%s">%s</p></div>'
-        % (r[0], "" if i == 0 else " hidden", r[2], r[1], r[3], r[2], r[4])
-        for i, r in enumerate(ROUTES))
     tiers = "".join('<div class="tier"><b>%s</b><em>%s</em><span>%s</span></div>'
                     % t for t in TIERS)
 
@@ -397,8 +357,8 @@ def build():
 <meta charset="utf-8">
 <title>PUFF &times; Jerome Baker &mdash; the pre-roll that comes in glass</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="A hand-blown Jerome Baker tube for the Puff one-gram \
-pre-roll. Concept pack: the piece, the set, the box, the compliance routes and the drop.">
+<meta name="description" content="A holiday collab drop: the Puff one-gram in a \
+hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <meta name="robots" content="noindex">
 %(favicon)s
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -412,7 +372,6 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
     <nav>
       <a href="#piece">The piece</a>
       <a href="#box">The box</a>
-      <a href="#routes">Compliance</a>
       <a href="#drop">The drop</a>
       <a href="PUFF_x_JBD.pdf">PDF</a>
     </nav>
@@ -422,13 +381,13 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
 
 <div class="wrap hero" id="piece">
   <h1>The pre-roll<br>that comes in glass</h1>
-  <p class="sub">Puff has sold more than twenty million pre-rolls, and every one went out
-  in a printed plastic tube &mdash; the cheapest component in the package, and the only
-  one the customer still has an hour later. This is that tube in hand-blown boro.</p>
+  <p class="sub">One holiday drop: the Puff one-gram in a hand-blown Jerome Baker tube,
+  paired with a strain worth the occasion, in a box worth opening. Same format, same
+  wordmark up the side &mdash; in a vessel that outlives the joint.</p>
   <div class="pills">
     <span class="pill">Concept pack</span>
     <span class="pill g">California + New York</span>
-    <span class="pill k">Drag the piece to turn it</span>
+    <span class="pill k">Holiday 2026</span>
   </div>
 
   <div class="stage">
@@ -482,9 +441,10 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
       millimetres proud of the wall, so the well is cut as a stadium &mdash; wide across
       the marbles, close on the other axis. That is also what stops the tube turning and
       facing its label at the lid.</p></div>
-      <div class="card"><h3>It survives being kept</h3><p>53 &times; 48 &times; 169 mm,
-      3.5 mm board, wrapped inside and out. It opens with a click and closes the same
-      way.</p></div>
+      <div class="card"><h3>Your mark inside the lid</h3><p>The collab lockup sits on
+      the board itself, foil-stamped rather than printed on a panel &mdash; the first
+      thing seen when it opens. 53 &times; 52 &times; 169 mm, 3.5 mm board, wrapped
+      inside and out.</p></div>
     </div>
   </div>
 </section>
@@ -492,55 +452,33 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
 <section>
   <div class="wrap">
     <div class="eyebrow">The premise</div>
-    <h2 class="big">Twenty million pre-rolls.<br>Twenty million plastic tubes.</h2>
-    <p class="lede">That tube already does the brand&rsquo;s hardest work &mdash; it
-    carries the wordmark down its own axis, it sits on the counter, it comes out at the
-    table. It gets thrown away because of what it is made of, and nothing else about it
-    needs to change.</p>
+    <h2 class="big">Twenty million sold.<br>Nothing to keep.</h2>
+    <p class="lede">Twenty million pre-rolls says the audience is there and that it comes
+    back. What it has never been handed is a reason to keep the tube. This is not a
+    proposal to change what twenty million pre-rolls ship in &mdash; it is one drop, at
+    the end of the year, in the weeks people are buying for someone else.</p>
     <div class="stats">
       <div class="stat"><b>20M+</b><span>pre-rolls sold, on Puff&rsquo;s own count</span></div>
       <div class="stat"><b>2</b><span>states they are legally sold in today &mdash;
         California and New York</span></div>
       <div class="stat"><b>79 g</b><span>of boro in the tube. The weight is half of why
         it feels worth keeping</span></div>
-      <div class="stat"><b>0</b><span>of those plastic tubes kept</span></div>
+      <div class="stat"><b>1</b><span>drop a year, at the moment people buy
+        gifts</span></div>
     </div>
-    <p class="note">Source: puffprerolls.com, August 2026.</p>
-  </div>
-</section>
-
-<section class="alt" id="routes">
-  <div class="wrap">
-    <div class="eyebrow" style="color:#B8860B">The constraint</div>
-    <h2 class="big">Two rules, not one</h2>
-    <p class="lede">Both states ask for two things of a retail pre-roll pack, and the
-    box answers the harder one.</p>
-    <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
-      <div class="card"><h3>Child-resistant</h3><p>Every route below is a stock
-      component &mdash; a certified closure, a shrink band, a pouch. None of it is
-      tooling.</p></div>
-      <div class="card"><h3>Opaque</h3><p>The retail package may not show the product
-      through it. A clear tube with a joint in it cannot be the retail package, and a
-      clear pouch does not fix that. Something opaque has to be outside it &mdash;
-      which is what the box already is.</p></div>
-    </div>
-    <div class="tabs" style="margin-top:26px">%(rtabs)s</div>
-    %(rbodies)s
-    <p class="note"><b>Recommended:</b> Route A with a Route C band inside it &mdash;
-    the box makes it opaque, the band makes it child-resistant, and the piece is
-    untouched. Route D runs alongside from day one, because it needs nothing at all.</p>
+    <p class="note">Volumes on puffprerolls.com, August 2026.</p>
   </div>
 </section>
 
 <section id="drop">
   <div class="wrap">
-    <div class="eyebrow">The test</div>
-    <h2 class="big">Ten thousand a state.<br>Then decide.</h2>
-    <p class="lede">One piece, one finish, both states - allocated by door count
-    rather than evenly, into doors that already carry Puff. The read is
-    sell-through per door over sixty days against the same SKU in plastic. Twenty
-    thousand is the floor, not the ambition &mdash; and if it works, the glass tube
-    stops being a drop and becomes what the one-gram ships in.</p>
+    <div class="eyebrow">The drop</div>
+    <h2 class="big">A holiday drop,<br>not a packaging change.</h2>
+    <p class="lede">On shelf for the gifting weeks, in California and New York, ten
+    thousand a state. One piece, one finish, paired with a strain chosen for the drop
+    and named on the box &mdash; allocated by door count into doors that already carry
+    Puff. After it: the same piece, a new strain, a drop a quarter if the first one
+    lands.</p>
     <div class="tiers">%(tiers)s</div>
     <p class="note">Capacity is in place for all three bands. The body and the
     decoration run as two jobs and the line is in place. Samples in hand inside three
@@ -553,7 +491,7 @@ pre-roll. Concept pack: the piece, the set, the box, the compliance routes and t
     <h2 class="big">Say yes to the shape of it,<br>and we spec it</h2>
     <p class="lede">Four decisions and this becomes a quote and a sample.</p>
     <div class="steps">
-      <div class="step"><b>1 &nbsp;Pick a route</b><span>A with a band in it, D alongside</span></div>
+      <div class="step"><b>1 &nbsp;Pick the strain</b><span>the one the drop is named for</span></div>
       <div class="step"><b>2 &nbsp;Confirm the finish</b><span>Puff Blue, silver fumed</span></div>
       <div class="step"><b>3 &nbsp;Sign the lockup</b><span>your artwork replaces the stand-in</span></div>
       <div class="step"><b>4 &nbsp;Samples</b><span>in hand inside three weeks</span></div>
@@ -582,8 +520,8 @@ window.__WAY__ = "%(way)s";
 </script>
 <script>%(js)s</script>
 </html>
-""" % dict(css=CSS, js=JS, tabs=tabs, marks=marks, rtabs=rtabs,
-           rbodies=rbodies, tiers=tiers, contact=CONTACT,
+""" % dict(css=CSS, js=JS, tabs=tabs, marks=marks,
+           tiers=tiers, contact=CONTACT,
            lock=lockup("26px"), flock=lockup("22px"), favicon=FAVICON,
            way=WAY, frames=json.dumps(fr, separators=(",", ":")),
            pieces=json.dumps(PIECES, separators=(",", ":")))

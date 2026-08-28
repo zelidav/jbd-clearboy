@@ -85,21 +85,28 @@ PIECES = {
      fit=True, fov=17.0, size=(640, 1040),
      name="Joint tube", note="124 mm · one gram, cork-stopped, drips and a wig wag"),
  "tube_loaded": dict(
-     body="out/tube.stl", marbles="out/tube_marbles.stl", cork="out/tube_cork.stl",
-     drips="out/tube_drips.stl", wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
+     body="out/tube.stl", cork="out/tube_cork.stl",
+     drips=("out/tube_drips_a.stl", "out/tube_drips_b.stl"),
+     wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
      parts=[("out/tube_joint.stl", "paper")],
-     label="puff", decal=(48.0, 98.0, 11.0), stamp=(25.0, 42.0, 11.6),
+     label="puff", decal=(34.0, 95.0, 11.0),
+     stamp=(44.0, 68.0, 11.6), stamp_face=-1.0,
      fit=True, fov=17.0, size=(640, 1040),
      name="Joint tube, loaded", note="a one-gram cone sealed in glass"),
  "box": dict(
-     body="out/tube.stl", marbles="out/tube_marbles.stl", cork="out/tube_cork.stl",
-     drips="out/tube_drips.stl", wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
-     parts=[("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
-            ("out/box_foam.stl", "foam"), ("out/box_magnets.stl", "steel"),
-            ("out/tube_joint.stl", "paper")],
-     label="puff", decal=(48.0, 98.0, 11.0), stamp=(25.0, 42.0, 11.6),
+     body="out/tube.stl", cork="out/tube_cork.stl",
+     drips=("out/tube_drips_a.stl", "out/tube_drips_b.stl"),
+     wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
+     # nearest first: the passes depth-test in add order, and multiply. A shell added
+     # before the insert it sits behind tints the insert its own colour - which is how
+     # a cream insert in a blue box came out blue.
+     parts=[("out/tube_joint.stl", "paper"), ("out/box_foam.stl", "foam"),
+            ("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
+            ("out/box_magnets.stl", "steel")],
+     label="puff", decal=(34.0, 95.0, 11.0),
+     stamp=(44.0, 68.0, 11.6), stamp_face=-1.0,
      # a box only reads open in three-quarter
-     yaw=38.0, decal_flip="180",
+     yaw=38.0, decal_flip="180", lid_label=True,
      fit=True, fov=17.0, tilt=-90.0, size=(1200, 780),
      name="Presentation box", note="rigid board, hinged lid, magnetic clasp"),
  "jar": dict(
@@ -205,15 +212,17 @@ OPAQUE = {
  # rolling paper: a warm off-white, matte. It is seen THROUGH the tube wall, so it
  # needs enough body and enough edge shading to read as a solid in there rather than
  # as a brighter patch of glass
- # wrapped rigid board - matte, near black, and it must not read as glass at all
- "board": dict(absorb=(0.189, 0.189, 0.183), line=(0.20, 0.21, 0.23),
-               kAmt=0.30, kPow=2.2, spec=0.34, min_thick=6.6, max_thick=7.4),
- # Die-cut foam, in Puff's own blue. A charcoal insert in a black box was correct and
- # useless: the glass is transmissive, so it takes the colour of whatever is behind it,
- # and behind black it is black. The insert is what the piece is seen against, so it is
- # the one part of the box that carries colour.
- "foam": dict(absorb=(0.1590, 0.0359, 0.0010), line=(0.10, 0.20, 0.26),
-              kAmt=0.52, kPow=1.6, spec=0.10, min_thick=4.0, max_thick=4.6),
+ # Wrapped rigid board in Puff's blue. It was black, which is the default answer for
+ # a presentation box and the wrong one here: the box is a brand surface before it is
+ # a container, and it is the first thing seen.
+ "board": dict(absorb=(0.3290, 0.1240, 0.0469), line=(0.05, 0.14, 0.20),
+               kAmt=0.34, kPow=2.1, spec=0.20, min_thick=6.6, max_thick=7.4),
+ # Die-cut foam in a warm off-white. Blue glass absorbs red, so anything warm or dark
+ # behind it goes black - a black insert, a pink one and a gold one were all tried and
+ # all of them swallowed the piece. It has to be light and close to neutral for the
+ # body to read as blue glass at all, and cream is the one that also flatters the gold.
+ "foam": dict(absorb=(0.0188, 0.0218, 0.0279), line=(0.42, 0.40, 0.36),
+              kAmt=0.46, kPow=1.7, spec=0.10, min_thick=7.6, max_thick=8.4),
  "paper": dict(absorb=(0.0396, 0.0490, 0.0793), line=(0.34, 0.32, 0.28),
                kAmt=0.70, kPow=1.30, spec=0.26, min_thick=3.4, max_thick=4.2),
 }
@@ -489,6 +498,103 @@ def _flip(art, mode):
     return art
 
 
+def make_box_label(w=2200, h=980):
+    """The collab lockup for the inside of the lid, drawn to sit on the board itself.
+
+    No panel behind it: on a blue box the mark reads as foil stamped into the board,
+    which is what this would actually be. White and gold only - the pink is already
+    doing work on the glass and a third colour up here would fight it."""
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = w / 2.0, h / 2.0
+    room = w * 0.86
+
+    # the lockup is measured and shrunk until it fits the plate. The first version of
+    # this was set at a fixed size and ran off both ends of the lid - PUFF lost its P
+    # and JEROME BAKER lost its ER, which is not a thing to hand a partner
+    scale = 1.0
+    for _ in range(9):
+        u = h * scale
+        big = brand_font("heavy", max(int(u * 0.30), 8))
+        sub = brand_font("round", max(int(u * 0.105), 6))
+        ours = brand_font("bold", max(int(u * 0.185), 7))
+        tiny = brand_font("med", max(int(u * 0.085), 6))
+        cross = brand_font("heavy", max(int(u * 0.23), 7))
+        puff_w = d.textlength("PUFF", font=big)
+        pre_w = _tracked_width(d, "pre-rolls", sub, u * 0.020)
+        jb_w = d.textlength("JEROME BAKER", font=ours)
+        des_w = _tracked_width(d, "DESIGNS", tiny, u * 0.050)
+        left_w, right_w = max(puff_w, pre_w), max(jb_w, des_w)
+        x_w = d.textlength("×", font=cross)
+        gap = u * 0.20
+        total = left_w + gap + x_w + gap + right_w
+        if total <= room:
+            break
+        scale *= room / total
+
+    x = cx - total / 2
+    top = cy - u * 0.10
+    d.text((x + (left_w - puff_w) / 2, top - u * 0.27), "PUFF", font=big,
+           fill=PUFF["paper"] + (255,))
+    _tracked_text(d, (x + (left_w - pre_w) / 2, top + u * 0.07), "pre-rolls", sub,
+                  PUFF["paper"] + (255,), u * 0.020)
+    x += left_w + gap
+    d.text((x, top - u * 0.16), "×", font=cross, fill=PUFF["gold"] + (255,))
+    x += x_w + gap
+    d.text((x + (right_w - jb_w) / 2, top - u * 0.19), "JEROME BAKER", font=ours,
+           fill=PUFF["paper"] + (255,))
+    _tracked_text(d, (x + (right_w - des_w) / 2, top + u * 0.07), "DESIGNS", tiny,
+                  PUFF["gold"] + (255,), u * 0.050)
+
+    # a gold hairline and the occasion under it
+    rw = total * 0.86
+    d.rectangle([cx - rw / 2, cy + u * 0.245, cx + rw / 2, cy + u * 0.253],
+                fill=PUFF["gold"] + (255,))
+    line = "HOLIDAY COLLAB  ·  HAND BLOWN GLASS"
+    ls = u * 0.070
+    for _ in range(7):
+        lf = brand_font("bold", max(int(ls), 6))
+        lw = _tracked_width(d, line, lf, ls * 0.43)
+        if lw <= room:
+            break
+        ls *= room / lw
+    _tracked_text(d, (cx - lw / 2, cy + u * 0.300), line, lf,
+                  PUFF["paper"] + (255,), ls * 0.43)
+    return img
+
+
+def _persp_coeffs(dst, src):
+    """Solve the eight coefficients PIL wants for a perspective warp.
+
+    PIL maps OUTPUT pixels back to INPUT, so the system is written that way round:
+    give it where each corner of the artwork lands on the canvas and it returns the
+    inverse map."""
+    import numpy as np
+    A, B = [], []
+    for (x, y), (u, v) in zip(dst, src):
+        A.append([x, y, 1, 0, 0, 0, -u * x, -u * y]); B.append(u)
+        A.append([0, 0, 0, x, y, 1, -v * x, -v * y]); B.append(v)
+    return tuple(np.linalg.solve(np.array(A, "f8"), np.array(B, "f8")))
+
+
+def place_lid_label(im, r, angle, kw, art=None):
+    """Warp the collab lockup onto the inside of the lid, where the lid actually is."""
+    import numpy as np
+    import box as boxmod
+    art = make_box_label() if art is None else art
+    quad = np.asarray(boxmod.lid_label_quad(), "f8")
+    px = r.project(quad, angle=angle, **{k: v for k, v in kw.items()
+                                         if k != "shadow"})
+    W, H = im.size
+    src = [(0, 0), (art.width, 0), (art.width, art.height), (0, art.height)]
+    warped = art.transform((W, H), Image.PERSPECTIVE,
+                           _persp_coeffs([tuple(q) for q in px], src),
+                           Image.BICUBIC)
+    im = im.convert("RGB")
+    im.paste(warped, (0, 0), warped)
+    return im
+
+
 def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
     """decal_turn=180 prints the stem label the other way along the stem, for a piece
     laid in a case with its head at the other end.
@@ -556,19 +662,19 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
                   line=(0.10, 0.12, 0.14), kAmt=0.55, kPow=2.6, spec=1.5,
                   solid=True, min_thick=1.6, max_thick=30.0, smooth=24.0,
                   role="lines")
-    # drips: one colour, laid on at the rim and let go. It is decoration standing on
-    # the surface, so it takes the linework role - it has to pass behind the marbles
-    if p.get("drips") and os.path.exists(p["drips"]):
-        r.add(p["drips"], absorb=c.get("wrap", (0.30, 0.085, 0.12)), fume=0.0,
-              line=c["fline"], kAmt=0.34, kPow=2.0, spec=1.35,
-              solid=True, min_thick=1.4, max_thick=9.0, smooth=24.0, role="lines")
-    # the wig wag at the base, alternate stringers in two colours
-    for i, w in enumerate(p.get("wig") or ()):
-        if os.path.exists(w):
-            r.add(w, absorb=(c["frit"] if i == 0 else c.get("wrap", c["frit"])),
+    # Drips and wig wag are the same two colours, alternating - one pair of courses at
+    # the rim and one at the base, so the piece reads as one decision rather than two.
+    # Both take the linework role: they stand on the surface and have to pass behind
+    # anything set proud of it.
+    pairs = [(p.get("drips"), 1.4, 9.0), (p.get("wig"), 1.2, 7.0)]
+    for meshes, lo, hi in pairs:
+        for i, m in enumerate(meshes or ()):
+            if not os.path.exists(m):
+                continue
+            r.add(m, absorb=(c["frit"] if i == 0 else c.get("wrap", c["frit"])),
                   fume=0.0, line=c["fline"] if i == 0 else c["line"],
-                  kAmt=0.38, kPow=2.1, spec=1.30,
-                  solid=True, min_thick=1.2, max_thick=7.0, smooth=24.0, role="lines")
+                  kAmt=0.36, kPow=2.05, spec=1.32,
+                  solid=True, min_thick=lo, max_thick=hi, smooth=24.0, role="lines")
     for tag, mat in (("bling", "stone"), ("bling2", "stone2")):
         q = p.get(tag)
         if q and os.path.exists(q):
@@ -600,8 +706,11 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
         # only ever wanted one, which is why these used to be the same branch
         if p.get("stamp"):
             s0, s1, srad = p["stamp"]
+            # the print and the maker's mark sit on opposite faces of the piece, so
+            # neither is read through the other and the tube has two sides worth turning
             mk = _flip(make_stamp_decal(1100, 900), p.get("decal_flip"))
-            r.set_decal(mk, s0, s1, srad, face=p.get("decal_face", 1.0))
+            r.set_decal(mk, s0, s1, srad,
+                        face=p.get("stamp_face", p.get("decal_face", 1.0)))
     elif p.get("stamp"):
         z0, z1, rad = p["stamp"]
         r.set_decal(make_stamp_decal(), z0, z1, rad)              # JB mark, front
@@ -660,15 +769,17 @@ def fit(r, angle=SIDE, fov=17.0, tilt=0.0, shift=None, pad=0.14, elev=5.0):
                 tilt=tilt, shift=shift)
 
 
-def frame(r, piece, angle, tilt=None):
+def frame(r, piece, angle, tilt=None, want_kw=False):
     """tilt=None uses the piece's own orientation. Pass a tilt in degrees to sweep
     between standing (0) and laid down (-90): the camera pulls back and the piece
     slides across so it stays framed the whole way."""
     p = PIECES[piece]
     if tilt is None:
         if p.get("fit"):                  # posed geometry frames itself - see fit()
-            return r.frame(angle, **fit(r, SIDE, p["fov"], p.get("tilt", 0.0),
-                                        p.get("shift"), p.get("pad", 0.14)))
+            kw = fit(r, SIDE, p["fov"], p.get("tilt", 0.0), p.get("shift"),
+                     p.get("pad", 0.14))
+            im = r.frame(angle, **kw)
+            return (im, kw) if want_kw else im
         return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
                        shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
     t = abs(tilt) / 90.0                      # 0 standing, 1 flat on its side
@@ -693,7 +804,12 @@ def shot(piece, key, angle=None, W=None, H=None, tag="", frit=True):
         # a box only reads open in three-quarter; a bottle only reads broadside
         angle = SIDE + math.radians(PIECES[piece].get("yaw", 0.0))
     W, H = size_of(piece, W, H)
-    im = frame(build_renderer(piece, key, W, H, frit=frit), piece, angle)
+    r = build_renderer(piece, key, W, H, frit=frit)
+    if PIECES[piece].get("lid_label"):
+        im, kw = frame(r, piece, angle, want_kw=True)
+        im = place_lid_label(im, r, angle, kw)
+    else:
+        im = frame(r, piece, angle)
     im.save(f"{OUT}/{piece}_{key}{tag}.png")
     print("wrote", piece, key + tag, im.size)
     return im

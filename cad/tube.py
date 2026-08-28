@@ -24,13 +24,18 @@ runs down the outside in teardrops of its own length, each ending in a bead wher
 stopped. Nothing about it is drawn twice the same, which is the point - it is the one
 piece of decoration that proves a human stood there and let it happen.
 
-Two marbles, set proud on one side, are the whole anti-roll. Laid down it beds on the
-two of them and the far wall - three points - and to roll it has to climb over a stone,
-which it will not do on a table. They are set a few degrees apart round the clock rather
-than in one straight line: a straight row is one hinge, and a tube will pivot on a hinge.
+The anti-roll is the drips. Each run ends in a small marble, and those marbles are the
+feet: they stand proud of the wall, they are walked right round the piece rather than
+set in a row down one side, and to roll the tube has to climb over one. Marbles on one
+side only stop it in one orientation - a ring of them stops it however it lands, which
+is what a tube on a counter actually needs.
+
+That also means the decoration is doing the work. There is no separate row of clear
+marbles on the wall any more; the thing that stops it rolling is the thing that makes
+it look like a Jerome Baker.
 
     python tube.py out   -> out/tube.stl/.step, out/tube_cork.stl,
-                            out/tube_marbles.stl, out/tube_drips.stl,
+                            out/tube_drips_a.stl, out/tube_drips_b.stl,
                             out/tube_wig_a.stl, out/tube_wig_b.stl, out/tube_joint.stl
 """
 import math, os, sys
@@ -46,10 +51,11 @@ P = dict(
     floor=7.0,            # flat closed bottom - it stands on it and it lands on it
     lip=1.1,              # rolled rim
 
-    marbles=2,
+    # the wall carries no marbles of its own now - the drips end in them
+    marbles=0,
     marble_r=4.6,
-    marble_z=(40.0, 86.0),   # up the tube, low enough that it beds flat
-    marble_spread=26.0,      # degrees between the two, so it is a bed and not a hinge
+    marble_z=(40.0, 86.0),
+    marble_spread=26.0,
 
     cork_h=24.0,
     cork_seat=9.0,        # how far down the bore it goes - it must clear the joint
@@ -58,9 +64,9 @@ P = dict(
 
     drips=6,              # runs hanging off the rim band
     drip_r=1.55,          # the band, and the top of each run
-    drip_bead=2.10,       # the bead a run ends in where it stopped moving
-    drip_min=7.0,         # shortest run
-    drip_max=24.0,        # longest - it has to stop clear of the print
+    drip_marble=3.30,     # the marble each run ends in - these are the feet
+    drip_min=13.0,        # shortest run. The spread is kept tight on purpose: the
+    drip_max=23.0,        # marbles are feet, so they want to land in one band
     collar_z=4.2,         # how far below the rim the band sits
     drip_seed=7,
 
@@ -153,47 +159,55 @@ def build_marbles(p=None):
 
 
 def build_drips(p=None):
-    """The band at the rim, and what runs out of it.
+    """The band at the rim, what runs out of it, and the marble each run ends in.
 
     A drip is not a stripe: it is thick where it left the band, thins as gravity pulls
-    it, and thickens again into a bead at the bottom where it cooled and stopped. Each
-    run gets its own length off one seed, so a colourway is repeatable on the bench and
-    no two runs on a piece are the same.
+    it, and finishes in a bead where it cooled and stopped. Here that bead is a marble
+    and the marble is a foot, so the run lengths are kept in a tighter band than a free
+    drip would give - the piece has to sit on them.
 
-    Returns one mesh - the band and every run - so the whole drip takes a single colour,
-    which is how it is actually applied."""
+    Returned as two meshes, alternate runs in each, so the drips are laid in the same
+    two colours as the wig wag at the other end of the piece. The rim band goes in the
+    first, which is what ties the two together rather than reading as two ideas."""
     p = dict(P, **(p or {}))
     n = int(p["drips"])
     r = p["drip_r"]
+    mr = p["drip_marble"]
     top = p["height"] - p["collar_z"]
-    parts = []
+    a_side, b_side = [], []
 
     # the band: one course of colour laid right round the rim
+    band = []
     steps = 132
     for i in range(steps):
         a = 2 * math.pi * i / steps
-        parts.append(_sphere(r, surface_pt(top, a, out=r * 0.42, p=p), subdiv=1))
+        band.append(_sphere(r, surface_pt(top, a, out=r * 0.42, p=p), subdiv=1))
+    a_side.append(trimesh.util.concatenate(band))
     if n <= 0:
-        return trimesh.util.concatenate(parts)
+        return trimesh.util.concatenate(a_side), trimesh.Trimesh()
 
     rng = np.random.RandomState(int(p["drip_seed"]))
     for i in range(n):
-        # walked round the piece rather than dropped at random, so no two runs fuse
-        a = 2 * math.pi * i / n + rng.uniform(-0.28, 0.28)
-        run = p["drip_min"] + (p["drip_max"] - p["drip_min"]) * rng.random_sample() ** 1.35
+        # walked evenly round the piece - as feet they have to be, or it rocks
+        a = 2 * math.pi * i / n + rng.uniform(-0.16, 0.16)
+        run = p["drip_min"] + (p["drip_max"] - p["drip_min"]) * rng.random_sample()
         beads = max(int(run / 0.55), 24)
+        parts = []
         for k in range(beads + 1):
             t = k / float(beads)
             z = top - run * t
-            # thick at the band, drawn thin by the fall, and heavy again at the end
             gr = r * (1.0 - 0.42 * t ** 0.75)
-            if t > 0.86:
-                u = (t - 0.86) / 0.14
-                gr = gr + (p["drip_bead"] - gr) * math.sin(u * math.pi / 2) ** 1.4
-            # a run wanders a little as it falls - glass does not fall plumb
             aa = a + 0.055 * math.sin(t * 2.4 + i)
             parts.append(_sphere(gr, surface_pt(z, aa, out=gr * 0.40, p=p), subdiv=1))
-    return trimesh.util.concatenate(parts)
+        # the foot. Set further off the wall than the run it hangs from, because the
+        # piece rests on it and a marble flush with the glass is not a foot
+        parts.append(_sphere(mr, surface_pt(top - run, a, out=mr * 0.45, p=p),
+                             subdiv=2))
+        (a_side if i % 2 == 0 else b_side).append(trimesh.util.concatenate(parts))
+
+    cat = trimesh.util.concatenate
+    return (cat(a_side) if a_side else trimesh.Trimesh(),
+            cat(b_side) if b_side else trimesh.Trimesh())
 
 
 def build_wigwag(p=None):
@@ -281,11 +295,13 @@ if __name__ == "__main__":
     j = build_joint()
     cq.exporters.export(j, os.path.join(out, "tube_joint.stl"),
                         tolerance=0.03, angularTolerance=0.12)
-    build_marbles().export(os.path.join(out, "tube_marbles.stl"))
-    build_drips().export(os.path.join(out, "tube_drips.stl"))
+    da, db = build_drips()
+    da.export(os.path.join(out, "tube_drips_a.stl"))
+    db.export(os.path.join(out, "tube_drips_b.stl"))
     wa, wb = build_wigwag()
     wa.export(os.path.join(out, "tube_wig_a.stl"))
     wb.export(os.path.join(out, "tube_wig_b.stl"))
-    print("tube %.0f OD x %.0f, bore %.0f, %d marbles, %d drips, %d-line wig wag, "
-          "cork %.0f tall" % (od(), P["height"], P["bore"], P["marbles"], P["drips"],
-                              P["wig"], P["cork_h"]))
+    print("tube %.0f OD x %.0f, bore %.0f, %d drips ending in %.1f mm marbles, "
+          "%d-line wig wag, cork %.0f tall"
+          % (od(), P["height"], P["bore"], P["drips"], P["drip_marble"], P["wig"],
+             P["cork_h"]))

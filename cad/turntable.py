@@ -21,9 +21,13 @@ def spin(piece, key, n=72, W=None, H=None, out=None, frit=True, tag=""):
     os.makedirs(out, exist_ok=True)
     W, H = mockups.size_of(piece, W, H)
     r = mockups.build_renderer(piece, key, W, H, frit=frit)
+    # start where the piece reads best, not at whatever yaw zero happens to be. A box
+    # only reads open in three-quarter, so a spinner that starts broadside opens on the
+    # back of it - and frame zero is also the poster and the still on the page.
+    start = SIDE + math.radians(mockups.PIECES[piece].get("yaw", 0.0))
     t0 = time.time()
     for i in range(n):
-        im = mockups.frame(r, piece, SIDE + 2 * math.pi * i / n)
+        im = mockups.frame(r, piece, start + 2 * math.pi * i / n)
         im.save(os.path.join(out, "%03d.png" % i))
     print("  %s / %s%s: %d frames in %.1fs"
           % (piece, key, tag, n, time.time() - t0), flush=True)
@@ -41,10 +45,11 @@ def grid(piece, key, n=24, tilts=None, W=None, H=None, out=None, frit=True):
     os.makedirs(out, exist_ok=True)
     W, H = mockups.size_of(piece, W, H)
     r = mockups.build_renderer(piece, key, W, H, frit=frit)
+    start = SIDE + math.radians(mockups.PIECES[piece].get("yaw", 0.0))
     t0 = time.time()
     for j, tl in enumerate(tilts):
         for i in range(n):
-            im = mockups.frame(r, piece, SIDE + 2 * math.pi * i / n, tilt=tl)
+            im = mockups.frame(r, piece, start + 2 * math.pi * i / n, tilt=tl)
             im.save(os.path.join(out, "t%02d_r%03d.png" % (j, i)))
     print("  %s / %s: %d x %d grid in %.1fs"
           % (piece, key, len(tilts), n, time.time() - t0), flush=True)
