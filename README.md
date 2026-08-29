@@ -58,7 +58,7 @@ scaling) moves if they come back different.
 | `cad/puffdeck_slides.py` | The nine pages of that pack. |
 | `cad/variable_art.py` | The parts of the pack that change per drop - beauty card, band, tissue seal, compliance sticker - drawn flat. |
 | `cad/box_variants.py` | The same box rendered three times with a different sleeve and card on each. |
-| `cad/puffpage.py` | The interactive version of it - `docs/puff.html`, drag-to-spin, published on Pages. |
+| `cad/puffpage.py` | The interactive version of it - `docs/puff.html`, drag-to-spin, published on Pages. Also writes the 1200x630 link-preview card. |
 | `cad/render.py` | Studio glass compositor (moderngl): sweep → Beer-Lambert tint with fume shift → density pass → specular → enamel decal. Not a path tracer. |
 | `cad/mockups.py` | Pieces, colourways, hero stills. |
 | `cad/turntable.py` | 72-position turntables, broadside start, rotating on the piece's own axis. |

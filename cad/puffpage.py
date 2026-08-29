@@ -16,6 +16,8 @@ sign-off.
 import hashlib, json, os, sys
 
 SITE = "docs"
+SITE_URL = "https://zelidav.github.io/jbd-clearboy/"
+SHARE = "puff_share.png"
 OUT = os.path.join(SITE, "puff.html")
 CONTACT = "david@canismajorpartners.com"
 
@@ -58,6 +60,61 @@ MARKS = [
 TIERS = [("Holiday drop", "10,000 / state", "20,000 units, one finish"),
          ("Strain drops", "10,000 / state", "same piece, new strain"),
          ("A year of it", "3 - 4 drops", "one occasion, then a cadence")]
+
+
+def share_card(w=1200, h=630):
+    """The image a link preview shows.
+
+    Without one of these a shared link unfurls as a grey box, which is what a pitch
+    looks like when nobody has thought about how it arrives. 1200 x 630 is what every
+    unfurler wants; the piece goes on a panel of its own because the renders are shot
+    on a studio sweep and would otherwise sit as a grey rectangle on the colour.
+    """
+    from PIL import Image, ImageDraw
+    sys.path.insert(0, "cad")
+    import mockups
+    from mockups import PUFF, brand_font, puff_mark, _tracked_text, _tracked_width
+
+    im = Image.new("RGB", (w, h), PUFF["blue"])
+    d = ImageDraw.Draw(im)
+
+    shot = os.path.join("shots", "tube_loaded_puff_blue.png")
+    if os.path.exists(shot):
+        art = Image.open(shot).convert("RGB")
+        ph, pw = int(h * 0.86), int(w * 0.30)
+        k = min(pw / art.width, ph / art.height)
+        art = art.resize((max(int(art.width * k), 1), max(int(art.height * k), 1)),
+                         Image.LANCZOS)
+        px, py = int(w * 0.665), (h - art.height) // 2
+        panel = Image.new("RGB", (art.width + 40, art.height + 40), (240, 246, 249))
+        panel.paste(art, (20, 20))
+        mask = Image.new("L", panel.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle([0, 0, panel.width - 1, panel.height - 1],
+                                              radius=26, fill=255)
+        im.paste(panel, (px, py - 20), mask)
+
+    x0 = int(w * 0.065)
+    mark = puff_mark(int(h * 0.115), PUFF["paper"])
+    im.paste(mark, (x0, int(h * 0.115)), mark)
+    xf = x0 + mark.width + int(h * 0.045)
+    cf = brand_font("heavy", int(h * 0.055))
+    d.text((xf, int(h * 0.155)), "\u00d7", font=cf, fill=PUFF["gold"])
+    xf += d.textlength("\u00d7", font=cf) + int(h * 0.045)
+    jf = brand_font("bold", int(h * 0.055))
+    d.text((xf, int(h * 0.150)), "JEROME BAKER", font=jf, fill=PUFF["paper"])
+
+    hf = brand_font("heavy", int(h * 0.088))
+    y = int(h * 0.34)
+    for line in ("THE ONLY PRE-ROLL", "THEY'LL STILL HAVE", "NEXT CHRISTMAS"):
+        d.text((x0, y), line, font=hf, fill=PUFF["paper"])
+        y += int(h * 0.105)
+
+    sf = brand_font("bold", int(h * 0.032))
+    t = "HOLIDAY 2026  \u00b7  CALIFORNIA + NEW YORK"
+    tw = _tracked_width(d, t, sf, h * 0.012)
+    _tracked_text(d, (x0, int(h * 0.80)), t, sf, PUFF["gold"], h * 0.012)
+    im.save(os.path.join(SITE, SHARE))
+    return os.path.join(SITE, SHARE)
 
 
 def build_id():
@@ -368,6 +425,7 @@ FAVICON = ('<link rel="icon" href="data:image/svg+xml,'
 def build():
     global BUILD
     BUILD = build_id()
+    share_card()
     fr = frames()
     tabs = "".join(
         '<button class="tab" data-piece="%s" aria-selected="%s">%s</button>'
@@ -381,12 +439,22 @@ def build():
     html = """<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<title>PUFF &times; Jerome Baker &mdash; the pre-roll that comes in glass</title>
+<title>PUFF &times; Jerome Baker &mdash; the only pre-roll they'll still have next Christmas</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="A holiday collab drop: the Puff one-gram in a \
 hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
-<meta name="robots" content="noindex">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta property="og:type" content="website">
+<meta property="og:title" content="PUFF &times; Jerome Baker">
+<meta property="og:description" content="The only pre-roll they'll still have next Christmas. A holiday collab drop: the Puff one-gram in a hand-blown Jerome Baker tube.">
+<meta property="og:url" content="%(site)spuff.html">
+<meta property="og:image" content="%(site)s%(share)s?v=%(build)s">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PUFF &times; Jerome Baker">
+<meta name="twitter:description" content="The only pre-roll they'll still have next Christmas.">
+<meta name="twitter:image" content="%(site)s%(share)s?v=%(build)s">
 %(favicon)s
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -595,7 +663,7 @@ window.__WAY__ = "%(way)s";
 """ % dict(css=CSS, js=JS, tabs=tabs, marks=marks,
            tiers=tiers, contact=CONTACT,
            lock=lockup("26px"), flock=lockup("22px"), favicon=FAVICON,
-           way=WAY, build=BUILD,
+           way=WAY, build=BUILD, site=SITE_URL, share=SHARE,
            frames=json.dumps(fr, separators=(",", ":")),
            pieces=json.dumps(PIECES, separators=(",", ":")))
 
