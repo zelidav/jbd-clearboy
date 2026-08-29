@@ -450,10 +450,30 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
   <div class="wrap">
     <div class="eyebrow">What is on the glass</div>
     <h2 class="big">Five things, all of them by hand</h2>
-    <p class="lede">None of this is a mould. Every one of these is a separate trip to the
-    torch, which is why two tubes off the same bench are the same object and not the same
-    piece &mdash; and that is what a limited drop is actually selling.</p>
+    <p class="lede">Every one of these is a separate trip to the torch, which is why two
+    tubes off the same bench are the same object and not the same piece. That is what a
+    limited drop is actually selling.</p>
     <div class="marks">%(marks)s</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Why us, why you</div>
+    <h2 class="big">Two names that already<br>stand on their own</h2>
+    <p class="lede">Neither of us needs the other to have a good year, which is exactly
+    what makes this worth doing: one object, one season, both names on it.</p>
+    <div class="grid3">
+      <div class="card"><h3>California is yours</h3><p>The audience, the doors and the
+      flower. Twenty million pre-rolls is a standing invitation nobody else in this
+      conversation has.</p></div>
+      <div class="card"><h3>New York is moving for us</h3><p>Jerome Baker is opening
+      doors in New York quickly right now. A drop across both states lands in a market
+      each of us is already being asked for by name.</p></div>
+      <div class="card"><h3>Nobody&rsquo;s licence is involved</h3><p>The glass ships
+      from the non-cannabis entity. Nothing about the collab touches either side&rsquo;s
+      licence.</p></div>
+    </div>
   </div>
 </section>
 
@@ -544,10 +564,10 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <section class="cta">
   <div class="wrap">
     <h2 class="big">Say go, and you hold one<br>in three weeks</h2>
-    <p class="lede">There is nothing to specify to start. Strain, finish, artwork
-    &mdash; you will want changes, and they are easier to make with the piece in your
-    hand than in a meeting about it. Everything else happens on the sample rather than
-    on paper.</p>
+    <p class="lede">You already know the work, so there is nothing here to prove on
+    paper. Strain, finish, artwork &mdash; you will want changes, and they are easier to
+    make with the piece in your hand than in a meeting about it. Nothing to specify to
+    start.</p>
     <div class="btns">
       <a class="btn" href="mailto:%(contact)s?subject=PUFF%%20x%%20Jerome%%20Baker">Say go</a>
       <a class="btn k" href="PUFF_x_JBD.pdf?v=%(build)s">Download the pack (PDF)</a>

@@ -140,25 +140,24 @@ def s03_piece():
 def s04_why():
     pg, d = _page(BLACK)
     d.rectangle([0, 0, PAGE[0], 8], fill=BLUE)
-    eyebrow(d, (110, 130), "WHY THIS GLASS", GOLD)
+    eyebrow(d, (110, 130), "WHY US, WHY YOU", GOLD)
     head(d, (110, 182), "Not a glass tube.\nA Jerome Baker.", 66, WHITE, 1000)
     y = para(d, (110, 386), "Jerome Baker Designs has been blowing glass since the "
              "nineties. The name is the point: it is the reason a customer keeps the "
-             "tube on a shelf instead of in a drawer, and the reason the second one is "
-             "bought without a joint in it.", "r", 25, (172, 180, 190), 820)
-    para(d, (110, y + 26), "The drips run where they run. Two tubes off the same bench "
-         "are the same object and not the same piece - and at twenty thousand units "
-         "that is not a limitation, it is the only thing plastic cannot copy.",
-         "r", 25, (172, 180, 190), 820)
+             "piece instead of the pack, and the reason the second one gets bought "
+             "without a joint in it at all.", "r", 25, (172, 180, 190), 820)
+    para(d, (110, y + 26), "Neither of us needs the other to have a good year. That is "
+         "exactly what makes this worth doing - two names that already stand on their "
+         "own, on one object, for one season.", "r", 25, (172, 180, 190), 820)
 
-    cards = [("NO TOOLING TO AMORTISE", "Injection moulding wants fifty thousand units "
-              "before the tool pays for itself. Glass has no tool - a ten thousand unit "
-              "run is a normal run, and the second colourway costs nothing to add."),
-             ("WORKED, NOT MOULDED", "Boro 3.3. The body is formed to spec; the wig "
-              "wag, the drips, the marbles and the mark are laid on by hand, which is "
-              "what a mould cannot do at any volume."),
-             ("NON PLANT-TOUCHING", "The glass ships from the non-cannabis entity, so "
-              "nothing about the collab touches either licence.")]
+    cards = [("CALIFORNIA IS YOURS", "The audience, the doors and the flower. Twenty "
+              "million pre-rolls is a standing invitation nobody else in this "
+              "conversation has."),
+             ("NEW YORK IS MOVING FOR US", "Jerome Baker is opening doors in New York "
+              "quickly right now. A drop across both states lands in a market "
+              "each of us is already being asked for by name."),
+             ("NOBODY'S LICENCE IS INVOLVED", "The glass ships from the non-cannabis "
+              "entity. Nothing about the collab touches either side's licence.")]
     x = 1030
     for i, (t, b) in enumerate(cards):
         yy = 300 + i * 216
@@ -343,12 +342,11 @@ def s09_close():
 
     lockup(d, (110, 120), 62, WHITE, BLACK)
     head(d, (110, 340), "Say go, and you\nhold one in\nthree weeks.", 68, WHITE, 900)
-    para(d, (110, 604), "Everything else happens on the sample rather than on paper. "
-         "Strain, finish, artwork - you will want changes and they are easier to make "
-         "with the piece in your hand than in a meeting about it.",
+    para(d, (110, 604), "You already know the work, so there is nothing here to prove "
+         "on paper. Strain, finish, artwork - you will want changes, and they are "
+         "easier to make with the piece in your hand than in a meeting about it.",
          "r", 25, (224, 244, 254), 880)
-    para(d, (110, 730), "There is nothing to specify to start. Say go.", "b", 28,
-         WHITE, 880)
+    para(d, (110, 730), "Nothing to specify to start. Say go.", "b", 28, WHITE, 880)
 
     d.text((110, PAGE[1] - 108), "JEROME BAKER DESIGNS", font=font("b", 22), fill=WHITE)
     d.text((110, PAGE[1] - 74), "david@canismajorpartners.com", font=font("m", 19),
