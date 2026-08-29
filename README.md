@@ -6,6 +6,10 @@ up in two fumed colourways.
 
 **Site:** https://zelidav.github.io/jbd-clearboy/ — spinners, survey, downloads.
 
+**PUFF collab:** https://puffxjb.cannacrypted.com — its own subdomain, built out of
+this repo with `python cad/puffpage.py --export ~/puffxjb` and pushed to
+`zelidav/puffxjb`. `docs/puff.html` is a forwarder to it.
+
 ## The pieces
 
 | | Clearboy hammer | Nug jar |

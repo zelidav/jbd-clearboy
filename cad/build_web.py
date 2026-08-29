@@ -710,7 +710,7 @@ def shell(title, body, script="", nav="index", standalone=False):
     # the spec sheet and the whole hand-off pack hang off every page, not just Downloads
     # the two newer pieces have their own sheets rather than a page each, so they hang
     # off the masthead where they can be found from anywhere
-    grabs = ('<a class="dl" href="puff.html">PUFF collab'
+    grabs = ('<a class="dl" href="https://puffxjb.cannacrypted.com/">PUFF collab'
              ' <span>LIVE</span></a>'
              '<a class="dl" href="JBD_Joint_Holder.pdf" target="_blank">Joint holder'
              ' <span>PDF</span></a>'

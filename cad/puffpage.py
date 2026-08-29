@@ -18,6 +18,7 @@ import hashlib, json, os, sys
 SITE = "docs"
 SITE_URL = "https://zelidav.github.io/jbd-clearboy/"
 SHARE = "puff_share.png"
+PAGE = "puff.html"      # "" when the page is the index of its own domain
 OUT = os.path.join(SITE, "puff.html")
 CONTACT = "david@canismajorpartners.com"
 
@@ -422,7 +423,81 @@ FAVICON = ('<link rel="icon" href="data:image/svg+xml,'
            "%3Ccircle cx='16' cy='24' r='3' fill='%236050C0'/%3E%3C/svg%3E\">")
 
 
-def build():
+REDIRECT = """<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>PUFF &times; Jerome Baker</title>
+<link rel="canonical" href="%(to)s">
+<meta http-equiv="refresh" content="0; url=%(to)s">
+<meta name="robots" content="noindex">
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#00A0C0;color:#fff;font:16px/1.6 "Poppins","Segoe UI",system-ui,sans-serif;
+  text-align:center;padding:24px}
+a{color:#fff}
+</style>
+<div>
+  <p style="font-size:22px;font-weight:700;margin:0 0 10px">This has moved.</p>
+  <p style="margin:0">
+    <a href="%(to)s">%(to)s</a>
+  </p>
+</div>
+<script>location.replace("%(to)s");</script>
+</html>
+"""
+
+
+def write_redirect(to="https://puffxjb.cannacrypted.com/"):
+    """Leave a forwarder where the page used to live.
+
+    GitHub Pages cannot serve a 301, so this is the next best thing: a canonical link
+    for anything that reads the page, a meta refresh for anything that does not run
+    JavaScript, and a replace() so the old URL does not sit in the back button."""
+    path = os.path.join(SITE, "puff.html")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(REDIRECT % {"to": to})
+    print("wrote redirect", path, "->", to)
+    return path
+
+
+def export(dest, url):
+    """Write the page and everything it needs into a standalone site directory.
+
+    The page is served from its own subdomain rather than as one file inside the
+    Clearboy programme, so it needs its own copy of the frames it spins. Paths in the
+    page are already relative, so the only thing that changes is where they are rooted
+    and what the absolute URL in the share tags points at.
+    """
+    import shutil
+    global SITE_URL, PAGE
+    was, SITE_URL = SITE_URL, url
+    was_page, PAGE = PAGE, ""
+    try:
+        os.makedirs(dest, exist_ok=True)
+        html = build(write=False)
+        with open(os.path.join(dest, "index.html"), "w", encoding="utf-8") as f:
+            f.write(html)
+        for p in PIECES:                       # only the spinners this page uses
+            src = os.path.join(SITE, "spin", "%s_%s" % (p["id"], WAY))
+            if os.path.isdir(src):
+                dst = os.path.join(dest, "spin", "%s_%s" % (p["id"], WAY))
+                shutil.rmtree(dst, ignore_errors=True)
+                shutil.copytree(src, dst)
+        for name in (SHARE, "puff_variable.png", "puff_box_variants.png",
+                     "PUFF_x_JBD.pdf"):
+            src = os.path.join(SITE, name)
+            if os.path.exists(src):
+                shutil.copyfile(src, os.path.join(dest, name))
+        with open(os.path.join(dest, "CNAME"), "w", encoding="utf-8") as f:
+            f.write(url.split("//")[-1].strip("/") + "\n")
+        open(os.path.join(dest, ".nojekyll"), "w").close()
+        print("exported to", dest)
+    finally:
+        SITE_URL, PAGE = was, was_page
+    return dest
+
+
+def build(write=True):
     global BUILD
     BUILD = build_id()
     share_card()
@@ -447,7 +522,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="PUFF &times; Jerome Baker">
 <meta property="og:description" content="The only pre-roll they'll still have next Christmas. A holiday collab drop: the Puff one-gram in a hand-blown Jerome Baker tube.">
-<meta property="og:url" content="%(site)spuff.html">
+<meta property="og:url" content="%(site)s%(page)s">
 <meta property="og:image" content="%(site)s%(share)s?v=%(build)s">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -663,10 +738,12 @@ window.__WAY__ = "%(way)s";
 """ % dict(css=CSS, js=JS, tabs=tabs, marks=marks,
            tiers=tiers, contact=CONTACT,
            lock=lockup("26px"), flock=lockup("22px"), favicon=FAVICON,
-           way=WAY, build=BUILD, site=SITE_URL, share=SHARE,
+           way=WAY, build=BUILD, site=SITE_URL, share=SHARE, page=PAGE,
            frames=json.dumps(fr, separators=(",", ":")),
            pieces=json.dumps(PIECES, separators=(",", ":")))
 
+    if not write:
+        return html
     os.makedirs(SITE, exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(html)
@@ -675,4 +752,10 @@ window.__WAY__ = "%(way)s";
 
 
 if __name__ == "__main__":
+    if "--redirect" in sys.argv:
+        write_redirect()
+        raise SystemExit(0)
     build()
+    if "--export" in sys.argv:
+        export(sys.argv[sys.argv.index("--export") + 1],
+               "https://puffxjb.cannacrypted.com/")
