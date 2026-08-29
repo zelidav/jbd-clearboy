@@ -105,8 +105,9 @@ PIECES = {
      parts=[("out/tube_joint.stl", "paper"), ("out/box_tissue.stl", "tissue"),
             ("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
             ("out/box_magnets.stl", "steel")],
-     label="puff", decal=(34.0, 95.0, 11.0),
-     stamp=(44.0, 68.0, 11.6), stamp_face=-1.0,
+     # the piece arrives wrapped, so what prints in this scene is the seal on the
+     # sleeve - the label and the maker's mark are under the tissue
+     label="seal", decal=(52.0, 90.0, 18.8), stamp=None,
      # a box only reads open in three-quarter
      yaw=38.0, decal_flip="180", lid_label=True,
      fit=True, fov=17.0, tilt=-90.0, size=(1200, 780),
@@ -179,12 +180,19 @@ WAYS = {
  # pulled in their purple and their gold. Three colours, all off their own pack art.
  "puff_blue": dict(
      sticker=None,
-     body=(0.1550, 0.0290, 0.0110), frit=(0.030, 0.150, 0.045),
-     fume=1.15, fume_pow=1.00,
+     # Opaque colour glass, not a tint. Their packaging is solid saturated colour, so
+     # the body is pushed until it reads as colour rather than as a window, and the
+     # silver fume goes over the top of it - fume on colour is where the flash comes
+     # from, and it is the thing a photograph of plastic cannot do.
+     body=(0.3050, 0.0560, 0.0335), body_min_thick=5.2, body_max_thick=12.0,
+     frit=(0.066, 0.025, 0.256),                    # lime
+     wig_cols=((0.097, 0.168, 0.025),               # purple
+               (0.020, 0.055, 0.170)),              # gold
+     fume=1.55, fume_pow=0.95,
      fume_stops=((1.00, 1.00, 1.00), (0.90, 0.95, 1.06),
                  (0.92, 0.88, 1.10), (1.06, 0.98, 0.86)),
-     line=(0.02, 0.11, 0.14), fline=(0.05, 0.02, 0.12),
-     wrap=(0.020, 0.055, 0.170),
+     line=(0.02, 0.11, 0.14), fline=(0.02, 0.10, 0.05),
+     wrap=(0.014, 0.077, 0.179),   # orange
      label=(0, 160, 192), label_text=(255, 255, 255),
      lines="frit",
      name="Puff teal \u00b7 silver fume",
@@ -217,8 +225,8 @@ OPAQUE = {
  # Wrapped rigid board in Puff's blue. It was black, which is the default answer for
  # a presentation box and the wrong one here: the box is a brand surface before it is
  # a container, and it is the first thing seen.
- "board": dict(absorb=(0.4200, 0.1150, 0.0620), line=(0.04, 0.13, 0.17),
-               kAmt=0.34, kPow=2.1, spec=0.20, min_thick=6.6, max_thick=7.4),
+ "board": dict(absorb=(0.4020, 0.0430, 0.0230), line=(0.04, 0.13, 0.17),
+               kAmt=0.26, kPow=2.1, spec=0.24, min_thick=5.4, max_thick=6.1),
  # Die-cut board, natural kraft. The insert is the one part of a box like this that
  # usually cannot go in the recycling with the rest of it, so it is board and tissue
  # rather than foam - and kraft against a blue box is the right look anyway.
@@ -226,8 +234,8 @@ OPAQUE = {
                kAmt=0.48, kPow=1.7, spec=0.12, min_thick=7.6, max_thick=8.4),
  # Branded tissue, folded up the sides. Kept light and close to neutral: blue glass
  # absorbs red, so anything warm or dark behind it takes the piece down with it.
- "tissue": dict(absorb=(0.0125, 0.0155, 0.0225), line=(0.44, 0.38, 0.40),
-                kAmt=0.40, kPow=1.8, spec=0.08, min_thick=5.6, max_thick=6.2),
+ "tissue": dict(absorb=(0.0070, 0.0092, 0.0140), line=(0.46, 0.42, 0.44),
+                kAmt=0.30, kPow=1.9, spec=0.09, min_thick=4.6, max_thick=5.2),
  "paper": dict(absorb=(0.0396, 0.0490, 0.0793), line=(0.34, 0.32, 0.28),
                kAmt=0.70, kPow=1.30, spec=0.26, min_thick=3.4, max_thick=4.2),
 }
@@ -503,7 +511,7 @@ def make_puff_label(w=2600, h=915):
     d.text((x + (right_w - jb_w) / 2, top - u * 0.22 * scale), "JEROME BAKER",
            font=ours, fill=PUFF["paper"] + (255,))
     _tracked_text(d, (x + (right_w - des_w) / 2, top + u * 0.09 * scale), "DESIGNS",
-                  tiny, PUFF["gold"] + (255,), u * 0.060 * scale)
+                  tiny, PUFF["paper"] + (255,), u * 0.060 * scale)
 
     # the plain facts, in one pill under the lockup
     fact = "1 GRAM  \u00b7  HAND BLOWN GLASS"
@@ -511,7 +519,7 @@ def make_puff_label(w=2600, h=915):
     fpad, ftrack = u * 0.062, u * 0.030
     ff = brand_font("bold", fs)
     fw = _tracked_width(d, fact, ff, ftrack) + 2 * fpad * 1.6
-    _pill(d, ((band[0] + band[2] - fw) / 2, cy + u * 0.335), fact, ff, PUFF["navy"],
+    _pill(d, ((band[0] + band[2] - fw) / 2, cy + u * 0.335), fact, ff, PUFF["orange"],
           PUFF["paper"], fpad, ftrack)
 
     # No flip. The projector's u already runs the way the piece does - up the tube -
@@ -591,7 +599,7 @@ def make_box_label(w=2200, h=980):
     d.text((x + (right_w - jb_w) / 2, top - u * 0.19), "JEROME BAKER", font=ours,
            fill=PUFF["paper"] + (255,))
     _tracked_text(d, (x + (right_w - des_w) / 2, top + u * 0.07), "DESIGNS", tiny,
-                  PUFF["gold"] + (255,), u * 0.050)
+                  PUFF["paper"] + (255,), u * 0.050)
 
     # a gold hairline and the occasion under it
     rw = total * 0.86
@@ -622,6 +630,49 @@ def _persp_coeffs(dst, src):
         A.append([x, y, 1, 0, 0, 0, -u * x, -u * y]); B.append(u)
         A.append([0, 0, 0, x, y, 1, -v * x, -v * y]); B.append(v)
     return tuple(np.linalg.solve(np.array(A, "f8"), np.array(B, "f8")))
+
+
+def make_seal(w=1267, h=1000):
+    """The sticker that closes the tissue. Round, their mark, nothing else.
+
+    Transparent outside the disc, because it is projected onto the sleeve and the
+    tissue has to show round it."""
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, cy = w / 2.0, h / 2.0
+    rr = min(w, h) * 0.30
+    d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], fill=PUFF["blue"] + (255,))
+    k = rr * 0.10
+    d.ellipse([cx - rr + k, cy - rr + k, cx + rr - k, cy + rr - k],
+              outline=PUFF["gold"] + (255,), width=max(int(rr * 0.045), 3))
+
+    u = rr
+    scale = 1.0
+    for _ in range(9):
+        mark = puff_mark(max(u * 0.42 * scale, 6), PUFF["paper"])
+        ours = brand_font("bold", max(int(u * 0.155 * scale), 6))
+        if mark.width <= rr * 1.15 and d.textlength("JEROME BAKER",
+                                                    font=ours) <= rr * 1.30:
+            break
+        scale *= 0.9
+    img.paste(mark, (int(cx - mark.width / 2), int(cy - u * 0.46)), mark)
+    jb = "JEROME BAKER"
+    jw = d.textlength(jb, font=ours)
+    d.text((cx - jw / 2, cy + u * 0.06), jb, font=ours, fill=PUFF["paper"] + (255,))
+    f, lw, tr = _fit_track(d, "HOLIDAY COLLAB", "bold", u * 0.115, rr * 1.30, 0.30)
+    _tracked_text(d, (cx - lw / 2, cy + u * 0.34), "HOLIDAY COLLAB", f,
+                  PUFF["gold"] + (255,), tr)
+    return img
+
+
+def _fit_track(d, text, kind, size, max_w, track=0.0):
+    for _ in range(9):
+        f = brand_font(kind, max(int(size), 5))
+        w = _tracked_width(d, text, f, size * track)
+        if w <= max_w:
+            return f, w, size * track
+        size *= max_w / w
+    return f, w, size * track
 
 
 def make_box_wrap(w=2400, h=740):
@@ -667,14 +718,14 @@ def make_box_wrap(w=2400, h=740):
     d.text((x + (right_w - jb_w) / 2, top - u * 0.22 * scale), "JEROME BAKER",
            font=ours, fill=PUFF["paper"] + (255,))
     _tracked_text(d, (x + (right_w - des_w) / 2, top + u * 0.09 * scale), "DESIGNS",
-                  tiny, PUFF["gold"] + (255,), u * 0.060 * scale)
+                  tiny, PUFF["paper"] + (255,), u * 0.060 * scale)
 
     fact = "HOLIDAY COLLAB  \u00b7  1 GRAM  \u00b7  HAND BLOWN GLASS"
     fs = max(int(u * 0.095), 7)
     fpad, ftrack = u * 0.062, u * 0.030
     ff = brand_font("bold", fs)
     fwid = _tracked_width(d, fact, ff, ftrack) + 2 * fpad * 1.6
-    _pill(d, (cx - fwid / 2, cy + u * 0.335), fact, ff, PUFF["navy"], PUFF["paper"],
+    _pill(d, (cx - fwid / 2, cy + u * 0.335), fact, ff, PUFF["orange"], PUFF["paper"],
           fpad, ftrack)
     return img
 
@@ -761,14 +812,15 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
         r.add(path,
               absorb=(c.get("plastic") if mat == "plastic" else None) or m["absorb"],
               fume=0.0, line=m["line"], kAmt=m["kAmt"], kPow=m["kPow"], spec=m["spec"],
-              solid=True, opaque=True,
+              solid=True, opaque=True, decal=(mat == "tissue"),
               min_thick=m["min_thick"], max_thick=m["max_thick"],
               smooth=36.0, role="opaque")
     r.add(p["body"], absorb=c["body"], fume=c["fume"],
           fume_stops=c["fume_stops"], fume_pow=c.get("fume_pow", 1.4),
           line=c["line"], kAmt=0.38, kPow=2.6, spec=1.0,
           decal=(p["decal"] is not None) or (p.get("stamp") is not None),
-          solid=True, min_thick=2.2, role="body")
+          solid=True, min_thick=c.get("body_min_thick", 2.2),
+          max_thick=c.get("body_max_thick", 60.0), role="body")
     # the holder wears spun linework instead, so frit is optional now
     if p.get("frit") and frit:
         r.add(p["frit"], absorb=c["frit"], fume=0.0, line=c["fline"],
@@ -812,11 +864,15 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
     # the rim and one at the base, so the piece reads as one decision rather than two.
     # Both take the linework role: they stand on the surface and have to pass behind
     # anything set proud of it.
-    for meshes in (p.get("drips"), p.get("wig")):
+    # drips and wig wag take a pair of colours each. They used to share one pair,
+    # which is fine on a two-colour brand and wrong on one that runs four at once.
+    pairs = ((p.get("drips"), (c["frit"], c.get("wrap", c["frit"]))),
+             (p.get("wig"), c.get("wig_cols") or (c["frit"], c.get("wrap", c["frit"]))))
+    for meshes, cols in pairs:
         for i, m in enumerate(meshes or ()):
             if not os.path.exists(m):
                 continue
-            r.add(m, absorb=(c["frit"] if i == 0 else c.get("wrap", c["frit"])),
+            r.add(m, absorb=cols[i % len(cols)],
                   fume=0.0, line=c["fline"] if i == 0 else c["line"],
                   kAmt=0.36, kPow=2.05, spec=1.32, solid=True,
                   min_thick=1.4, max_thick=9.0, smooth=24.0, role="lines")
@@ -834,7 +890,9 @@ def build_renderer(piece, key, W, H, decal_turn=0, frit=True):
               smooth=24.0, role="cork")
     if p["decal"]:
         z0, z1, rad = p["decal"]
-        if p.get("label") == "puff":
+        if p.get("label") == "seal":
+            art = _art(make_seal)
+        elif p.get("label") == "puff":
             art = make_puff_label()
         else:
             art = c.get("sticker")

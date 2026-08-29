@@ -8,7 +8,7 @@ same way, and it survives being kept.
     Board       3.5 mm rigid, wrapped inside and out
     Lid         hinged full-height along one long edge, swings clear
     Clasp       two 9 mm disc magnets in the front lip, two in the lid
-    Inside      the piece, wrapped in branded tissue and sealed with a sticker
+    Inside      the piece, wrapped in branded tissue and sealed with a collab sticker
 
 The whole thing is modelled around the tube where the tube already sits - base at Z 0,
 axis on Z - so the glass, the cork, the decoration and the printed band are the same
@@ -54,12 +54,14 @@ P = dict(
     # The notch clears the GLASS, not the marbles: the ribs are placed between the
     # drips so they never meet one. Cutting to the marbles ate the whole rib and left
     # three tabs standing at the back.
+    # the sleeve stands clear of the drip marbles, which reach 16.8 from the axis
+    tissue_r=17.2,
     tissue_t=0.9,
-    tissue_rise=0.70,     # how far up the side walls the tissue comes
+    tissue_z=(3.0, 133.0),
     insert_top=145.0,
 
-    magnet_d=7.0,
-    magnet_t=1.5,
+    magnet_d=5.0,
+    magnet_t=1.1,
     magnet_z=(30.0, 118.0),
 )
 
@@ -199,21 +201,23 @@ def face_normal(name, p=None):
 
 
 def tissue(p=None):
-    """A sheet of branded tissue, folded up the sides of the box with the piece on it.
+    """The tissue, wrapped round the piece - not lining the box.
 
-    Modelled as the liner it is rather than as crumple - the point of it on the page is
-    that there is tissue and not foam, and a clean fold reads that at a glance."""
+    An earlier version of this was a liner folded up the sides, which is a different
+    thing entirely: you open the box and the glass is just lying there. Wrapped, the
+    box opens on a sealed parcel, and the piece is something you get to rather than
+    something you are handed.
+
+    A straight sleeve standing clear of the drip marbles. The seal that closes it is
+    printed on, through the same projector the label uses."""
     p = dict(P, **(p or {}))
-    hx, y0, y1, b, ox, oy0, oy1 = _dims(p)
-    t, rise = p["tissue_t"], p["tissue_rise"]
-    ymid = y1 - 0.6
-    top = y0 + (ymid - y0) * (1.0 - rise)
-    # a U in section: up one wall, across the back, up the other
-    pts = [(-hx + 0.6, ymid), (hx - 0.6, ymid), (hx - 0.6, top),
-           (hx - 0.6 - t, top), (hx - 0.6 - t, ymid - t),
-           (-hx + 0.6 + t, ymid - t), (-hx + 0.6 + t, top), (-hx + 0.6, top)]
-    return (cq.Workplane("XY").workplane(offset=p["z0"] + 2)
-            .polyline(pts).close().extrude(p["insert_top"] - p["z0"] - 4))
+    r_in = p["tissue_r"]
+    r_out = r_in + p["tissue_t"]
+    z0, z1 = p["tissue_z"]
+    outer = (cq.Workplane("XY").workplane(offset=z0).circle(r_out)
+             .extrude(z1 - z0))
+    return outer.cut(cq.Workplane("XY").workplane(offset=z0 - 1).circle(r_in)
+                     .extrude(z1 - z0 + 2))
 
 
 if __name__ == "__main__":

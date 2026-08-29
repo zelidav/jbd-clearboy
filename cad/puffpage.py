@@ -26,16 +26,11 @@ WAY = "puff_blue"
 # One piece and the box it ships in. The rest of the programme has its own site; a
 # partner deck that wanders into it is a deck about us rather than about the collab.
 PIECES = [
-    dict(id="tube_loaded", name="The tube, loaded", tag="JBD-JT-124",
-         note="A one-gram cone, sealed under cork.",
+    dict(id="tube_loaded", name="The piece", tag="JBD-JT-124",
+         note="Opaque colour glass, silver fumed over the top of it.",
          specs=[("Overall height", "124 mm"), ("Body", "24 mm OD"),
                 ("Wall", "4.5 mm, base 7 mm"), ("Bore", "15 mm - a 1 g king cone"),
                 ("Glass", "approx. 79 g, boro 3.3"), ("Closure", "tapered natural cork")]),
-    dict(id="tube", name="The tube, empty", tag="JBD-JT-124",
-         note="What it is once the joint is gone - which is the whole point.",
-         specs=[("Overall height", "124 mm"), ("Body", "24 mm OD"),
-                ("Wall", "4.5 mm, base 7 mm"), ("Decoration", "wig wag, drips, drip marbles"),
-                ("Mark", "JB pressed into the wall"), ("Print", "50 mm band, up the axis")]),
     dict(id="box", name="In the box", tag="JBD-BX-169",
          note="Rigid board, lid hinged full height, two disc magnets in the front lip.",
          specs=[("Outside", "53 x 48 x 169 mm"), ("Board", "3.5 mm rigid, wrapped"),
@@ -529,10 +524,10 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <section class="alt" id="variable">
   <div class="wrap">
     <div class="eyebrow">What changes</div>
-    <h2 class="big">One piece. Any strain.</h2>
-    <p class="lede">The glass is not tied to a strain, and nothing a regulator can move
-    is printed on it. Paper does all of that &mdash; so a second drop is a print run,
-    not a new piece.</p>
+    <h2 class="big">One box. Any strain.</h2>
+    <p class="lede">Nothing that changes is printed on the glass or the box. Two pieces
+    of paper carry all of it &mdash; which means a second drop is a sleeve and a
+    sticker, not a new product.</p>
     <p style="margin-top:26px"><img src="puff_box_variants.png?v=%(build)s"
       alt="The same box and the same glass with three different sleeves and cards"
       style="border-radius:16px;border:1px solid var(--rule)"></p>
@@ -540,13 +535,12 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
       alt="Beauty card, band, tissue seal and compliance sticker, flat, in two strain variants"
       style="border-radius:16px;border:1px solid var(--rule)"></p>
     <div class="grid3">
-      <div class="card"><h3>The beauty card</h3><p>Sits over the piece in the box.
-      Strain, artwork, whatever the drop is called. New card, new drop.</p></div>
-      <div class="card"><h3>The band</h3><p>Round the tube, off in one motion. The
-      cheapest thing in the pack to change and the first thing seen.</p></div>
-      <div class="card"><h3>The seal and the sticker</h3><p>The seal closes the tissue
-      and carries the lockup. The compliance sticker takes batch, potency, dates and
-      warnings &mdash; so nothing a regulator asks for ever touches the glass.</p></div>
+      <div class="card"><h3>The box</h3><p>Printed once. No strain on it, no batch, no
+      potency &mdash; so one run of board covers every drop there will ever be.</p></div>
+      <div class="card"><h3>The sleeve</h3><p>Slips over it. The strain and its colour,
+      and the only thing that has to be reprinted to make a new drop.</p></div>
+      <div class="card"><h3>The sticker</h3><p>Strain and potency, printed the week it
+      is packed rather than the quarter before. The tissue seal closes the wrap.</p></div>
     </div>
   </div>
 </section>

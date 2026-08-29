@@ -210,20 +210,20 @@ def s06_variable():
     """
     pg, d = _page(WHITE)
     eyebrow(d, (110, 110), "WHAT CHANGES")
-    head(d, (110, 162), "One piece. Any strain.", 58, BLACK, 1200)
-    para(d, (110, 268), "The glass is not tied to a strain, and nothing a regulator "
-         "can move is printed on it. Paper does all of that.",
-         "r", 23, (58, 64, 72), 1080)
+    head(d, (110, 162), "One box. Any strain.", 58, BLACK, 1200)
+    para(d, (110, 268), "Nothing that changes is printed on the glass or the box. Two "
+         "pieces of paper carry all of it, which is the cheapest packaging decision in "
+         "the whole programme.", "r", 23, (58, 64, 72), 1080)
 
     art = shot("puff_box_variants_row", (1160, 660))
     pg.paste(art, (110, 356))
 
-    items = [("THE SLEEVE", BLUE, "Printed on the box. The strain, in its own colour, "
-              "on the same board with the same die."),
-             ("THE CARD", PINK, "Goes in the box over the piece. Strain, artwork, "
-              "whatever the drop is called."),
-             ("THE STICKER", GOLD, "Batch, potency, dates, warnings. It goes on last, "
-              "so nothing a regulator asks for ever touches the glass.")]
+    items = [("THE BOX", BLUE, "Printed once. No strain on it, no batch, no potency - "
+              "so one run of board covers every drop there will ever be."),
+             ("THE SLEEVE", PINK, "Slips over it. The strain and its colour, and the "
+              "only thing that has to be reprinted to make a new drop."),
+             ("THE STICKER", GOLD, "Strain and potency. Printed the week it is packed "
+              "rather than the quarter before.")]
     y = 360
     for t, col, b in items:
         d.rounded_rectangle([1310, y, 1810, y + 190], radius=18, fill=(247, 249, 251))
@@ -278,51 +278,42 @@ def s07_drop():
 
 # --------------------------------------------------------------------------- 08
 def s08_capacity():
-    """Capacity, stated rather than argued.
+    """Timing, not process.
 
-    An earlier draft of this page showed its working and read like a supplier hoping it
-    could cope. Twenty thousand a quarter is a normal run here; the page says that and
-    moves on.
+    This page used to be about how the work gets done - two jobs, bench hours, a cell of
+    decorators. Nobody buying a holiday drop cares. What they care about is that holiday
+    is a fixed date and the runway to it is short.
     """
     pg, d = _page(PAPER)
-    eyebrow(d, (110, 118), "CAPACITY")
-    head(d, (110, 170), "Capacity is not the question", 54, BLACK, 1300)
-    para(d, (110, 268), "The body and the decoration are two different jobs, and both "
-         "are already running. Twenty thousand pieces for a holiday window is a normal "
-         "run - the line is in place, the hand-off pack is drawn, and the date is the "
-         "only thing left to agree.", "r", 23, (58, 64, 72), 1050)
+    eyebrow(d, (110, 118), "TIMING")
+    head(d, (110, 170), "Holiday only\nhappens once.", 58, BLACK, 1300)
+    para(d, (110, 330), "To be on shelf for the gifting weeks the glass has to be on the "
+         "bench in September. That is the whole constraint - everything after it is "
+         "ordinary lead time, and none of it can be compressed by wanting it more.",
+         "r", 24, (58, 64, 72), 1050)
 
-    split = [("THE BODY", BLUE, "Drawn boro tubing, cut to 124, base closed flat at 7 "
-              "and the rim rolled. Standard tube-shop work - runs in the tens of "
-              "thousands are routine, and the hand-off pack is already drawn for a "
-              "factory, in English and in Chinese."),
-             ("THE DECORATION", PINK, "Wig wag, drips, two marbles and the pressed "
-              "mark: four passes by hand on a finished body. A staffed decorating cell "
-              "does this work already - it is the part nobody can copy, and it is not "
-              "the part that limits the run.")]
+    steps = [("Say go", "September", "nothing to specify first"),
+             ("Samples in hand", "3 weeks later", "changes happen on the piece"),
+             ("Production", "8 - 10 weeks", "20,000 across both states"),
+             ("Delivered", "late October", "in time to allocate and ship"),
+             ("On shelf", "mid November", "through to Christmas")]
     x = 110
-    for t, col, b in split:
-        d.rounded_rectangle([x, 380, x + 830, 570], radius=20, fill=WHITE)
-        d.rounded_rectangle([x, 380, x + 830, 570], radius=20,
+    for i, (a, when, note) in enumerate(steps):
+        d.rounded_rectangle([x, 470, x + 316, 700], radius=20, fill=WHITE)
+        d.rounded_rectangle([x, 470, x + 316, 700], radius=20,
                             outline=(228, 232, 238), width=2)
-        d.rectangle([x + 30, 414, x + 36, 538], fill=col)
-        d.text((x + 58, 410), t, font=font("h", 24), fill=BLACK)
-        para(d, (x + 58, 452), b, "r", 18, (84, 90, 98), 740, lead=1.42)
-        x += 870
+        d.rectangle([x + 28, 502, x + 34, 560], fill=(BLUE, PINK, GOLD, DEEP, BLUE)[i])
+        d.text((x + 54, 498), a, font=font("b", 22), fill=BLACK)
+        d.text((x + 54, 534), when, font=font("h", 28), fill=BLUE)
+        para(d, (x + 54, 584), note, "r", 18, (110, 116, 124), 236, lead=1.42)
+        x += 340
 
-    nums = [("20,000", "units in the drop - both states"),
-            ("1 quarter", "from sign-off to delivered"),
-            ("3 weeks", "from sign-off to samples in hand"),
-            ("4 a year", "the same piece, a new strain each time")]
-    x = 110
-    for big, lab in nums:
-        d.text((x, 664), big, font=font("h", 52), fill=BLACK)
-        para(d, (x, 738), lab, "m", 19, MUTE, 380)
-        x += 440
-    para(d, (110, 856), "One piece and one finish keeps it simple all the way down: "
-         "one spec on the bench, one label, one SKU on the shelf in both states - and "
-         "the strain is the only thing that changes next time.",
-         "r", 21, (58, 64, 72), 1700)
+    para(d, (110, 748), "Every piece is worked by hand, so no two are the same - which "
+         "is the reason it is worth owning and the reason the calendar is not "
+         "negotiable.", "b", 24, BLACK, 1700)
+    para(d, (110, 828), "Capacity is not the question. The line is in place and twenty "
+         "thousand for a holiday window is a normal run. The date is.",
+         "r", 22, (58, 64, 72), 1700)
     foot(d, 8)
     return pg
 
