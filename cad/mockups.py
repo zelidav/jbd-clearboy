@@ -79,9 +79,11 @@ PIECES = {
      fit=True, fov=17.0, decal=None, size=(760, 1020),
      name="Lighter sleeve, loaded", note="26 mm stands proud - it is struck in the sleeve"),
  "tube": dict(
-     body="out/tube.stl", marbles="out/tube_marbles.stl", cork="out/tube_cork.stl",
-     drips="out/tube_drips.stl", wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
-     label="puff", decal=(48.0, 98.0, 11.0), stamp=(25.0, 42.0, 11.6),
+     body="out/tube.stl", cork="out/tube_cork.stl",
+     drips=("out/tube_drips_a.stl", "out/tube_drips_b.stl"),
+     wig=("out/tube_wig_a.stl", "out/tube_wig_b.stl"),
+     label="puff", decal=(34.0, 95.0, 11.0),
+     stamp=(44.0, 68.0, 11.6), stamp_face=-1.0,
      fit=True, fov=17.0, size=(640, 1040),
      name="Joint tube", note="124 mm · one gram, cork-stopped, drips and a wig wag"),
  "tube_loaded": dict(
@@ -485,6 +487,17 @@ def make_puff_label(w=2600, h=915):
     return img
 
 
+_ART = {}
+
+
+def _art(fn):
+    """Artwork built once. The composites run per frame now, and regenerating a
+    2400 px plate seventy-two times a turntable is pure waste."""
+    if fn.__name__ not in _ART:
+        _ART[fn.__name__] = fn()
+    return _ART[fn.__name__]
+
+
 def _flip(art, mode):
     """Laying the assembly down with a camera tilt reverses the handedness of the
     projected face, so a print that reads correctly on a standing piece comes out
@@ -883,6 +896,9 @@ def frame(r, piece, angle, tilt=None, want_kw=False):
             kw = fit(r, SIDE, p["fov"], p.get("tilt", 0.0), p.get("shift"),
                      p.get("pad", 0.14))
             im = r.frame(angle, **kw)
+            if p.get("lid_label"):
+                im = place_lid_label(im, r, angle, kw, _art(make_box_label))
+                im = place_box_wrap(im, r, angle, kw, _art(make_box_wrap))
             return (im, kw) if want_kw else im
         return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
                        shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))
@@ -909,12 +925,7 @@ def shot(piece, key, angle=None, W=None, H=None, tag="", frit=True):
         angle = SIDE + math.radians(PIECES[piece].get("yaw", 0.0))
     W, H = size_of(piece, W, H)
     r = build_renderer(piece, key, W, H, frit=frit)
-    if PIECES[piece].get("lid_label"):
-        im, kw = frame(r, piece, angle, want_kw=True)
-        im = place_lid_label(im, r, angle, kw)
-        im = place_box_wrap(im, r, angle, kw)
-    else:
-        im = frame(r, piece, angle)
+    im = frame(r, piece, angle)
     im.save(f"{OUT}/{piece}_{key}{tag}.png")
     print("wrote", piece, key + tag, im.size)
     return im
