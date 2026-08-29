@@ -102,9 +102,9 @@ PIECES = {
      # nearest first: the passes depth-test in add order, and multiply. A shell added
      # before the insert it sits behind tints the insert its own colour - which is how
      # a cream insert in a blue box came out blue.
-     parts=[("out/tube_joint.stl", "paper"), ("out/box_foam.stl", "foam"),
-            ("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
-            ("out/box_magnets.stl", "steel")],
+     parts=[("out/tube_joint.stl", "paper"), ("out/box_tissue.stl", "tissue"),
+            ("out/box_insert.stl", "kraft"), ("out/box_shell.stl", "board"),
+            ("out/box_lid.stl", "board"), ("out/box_magnets.stl", "steel")],
      label="puff", decal=(34.0, 95.0, 11.0),
      stamp=(44.0, 68.0, 11.6), stamp_face=-1.0,
      # a box only reads open in three-quarter
@@ -219,12 +219,15 @@ OPAQUE = {
  # a container, and it is the first thing seen.
  "board": dict(absorb=(0.3290, 0.1240, 0.0469), line=(0.05, 0.14, 0.20),
                kAmt=0.34, kPow=2.1, spec=0.20, min_thick=6.6, max_thick=7.4),
- # Die-cut foam in a warm off-white. Blue glass absorbs red, so anything warm or dark
- # behind it goes black - a black insert, a pink one and a gold one were all tried and
- # all of them swallowed the piece. It has to be light and close to neutral for the
- # body to read as blue glass at all, and cream is the one that also flatters the gold.
- "foam": dict(absorb=(0.0188, 0.0218, 0.0279), line=(0.42, 0.40, 0.36),
-              kAmt=0.46, kPow=1.7, spec=0.10, min_thick=7.6, max_thick=8.4),
+ # Die-cut board, natural kraft. The insert is the one part of a box like this that
+ # usually cannot go in the recycling with the rest of it, so it is board and tissue
+ # rather than foam - and kraft against a blue box is the right look anyway.
+ "kraft": dict(absorb=(0.0482, 0.0725, 0.1085), line=(0.34, 0.30, 0.24),
+               kAmt=0.48, kPow=1.7, spec=0.12, min_thick=7.6, max_thick=8.4),
+ # Branded tissue, folded up the sides. Kept light and close to neutral: blue glass
+ # absorbs red, so anything warm or dark behind it takes the piece down with it.
+ "tissue": dict(absorb=(0.0086, 0.0213, 0.0176), line=(0.44, 0.38, 0.40),
+                kAmt=0.40, kPow=1.8, spec=0.08, min_thick=5.6, max_thick=6.2),
  "paper": dict(absorb=(0.0396, 0.0490, 0.0793), line=(0.34, 0.32, 0.28),
                kAmt=0.70, kPow=1.30, spec=0.26, min_thick=3.4, max_thick=4.2),
 }

@@ -53,10 +53,11 @@ MARKS = [
     ("Marbles for feet", "Every drip ends in one, walked right round the piece rather "
                          "than set in a row down one side. To roll, the tube has to "
                          "climb over one - so it stops however it lands."),
-    ("The JB mark", "Pressed into the wall under the print. The piece is signed where a "
-                    "piece of glass is signed, not on a sticker."),
-    ("Heavy wall", "4.5 mm of wall and 7 mm of base - about twice what it needs to hold "
-                   "anything. It is not holding anything; it is surviving the floor."),
+    ("The JB mark", "Pressed into the glass on the face opposite the print. The piece "
+                    "is signed the way a piece of glass is signed."),
+    ("Weight", "4.5 mm of wall and 7 mm of base - about twice what it needs. That is "
+               "not for the joint, it is so the piece survives being knocked off a "
+               "counter for years."),
 ]
 
 TIERS = [("Holiday drop", "10,000 / state", "20,000 units, one finish"),
@@ -403,6 +404,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     <nav>
       <a href="#piece">The piece</a>
       <a href="#box">The box</a>
+      <a href="#variable">What changes</a>
       <a href="#drop">The drop</a>
       <a href="PUFF_x_JBD.pdf?v=%(build)s">PDF</a>
     </nav>
@@ -411,10 +413,10 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <div class="drip"></div>
 
 <div class="wrap hero" id="piece">
-  <h1>The pre-roll<br>that comes in glass</h1>
+  <h1>The pre-roll<br>they keep the box for</h1>
   <p class="sub">One holiday drop: the Puff one-gram in a hand-blown Jerome Baker tube,
-  paired with a strain worth the occasion, in a box worth opening. Same format, same
-  wordmark up the side &mdash; in a vessel that outlives the joint.</p>
+  in a box worth opening. Same format, same wordmark up the side &mdash; in a piece they
+  keep using long after the joint is gone.</p>
   <div class="pills">
     <span class="pill">Concept pack</span>
     <span class="pill g">California + New York</span>
@@ -459,19 +461,18 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
   <div class="wrap">
     <div class="eyebrow">The box</div>
     <h2 class="big">Rigid board, hinged lid,<br>magnetic clasp</h2>
-    <p class="lede">A keepsake handed over in a paper bag is a keepsake nobody
-    photographs. The lid is hinged full height and closes onto two disc magnets in the
-    front lip; the insert is die-cut foam with one well, relieved at the front so the
-    piece lifts straight out. Switch the viewer above to <b>In the box</b> to turn it
-    over.</p>
+    <p class="lede">The lid is hinged full height and closes onto two disc magnets. It
+    opens with a click, and it is the kind of box people keep things in afterwards
+    rather than flatten and bin. Switch the viewer above to <b>In the box</b> to turn
+    it over.</p>
     <div class="grid3">
-      <div class="card"><h3>The insert carries the colour</h3><p>Glass is transmissive:
-      behind a black insert the piece reads black. The lining is the one part of the box
-      that is coloured, because it is what the piece is seen against.</p></div>
-      <div class="card"><h3>The well is not a bore</h3><p>The marbles stand four
-      millimetres proud of the wall, so the well is cut as a stadium &mdash; wide across
-      the marbles, close on the other axis. That is also what stops the tube turning and
-      facing its label at the lid.</p></div>
+      <div class="card"><h3>Board and tissue, no foam</h3><p>Die-cut board ribs and
+      branded tissue. Foam is the one part of a box like this that cannot go in the
+      recycling with the rest of it, and a piece sold on lasting should not arrive
+      bedded in the thing that does not.</p></div>
+      <div class="card"><h3>It holds the piece the right way round</h3><p>The ribs are
+      notched so the tube cannot turn in the box &mdash; the print faces the person
+      opening it rather than the lid.</p></div>
       <div class="card"><h3>Your mark inside the lid</h3><p>The collab lockup sits on
       the board itself, foil-stamped rather than printed on a panel &mdash; the first
       thing seen when it opens. 53 &times; 52 &times; 169 mm, 3.5 mm board, wrapped
@@ -482,22 +483,43 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 
 <section>
   <div class="wrap">
-    <div class="eyebrow">The premise</div>
-    <h2 class="big">Twenty million sold.<br>Nothing to keep.</h2>
-    <p class="lede">Twenty million pre-rolls says the audience is there and that it comes
-    back. What it has never been handed is a reason to keep the tube. This is not a
-    proposal to change what twenty million pre-rolls ship in &mdash; it is one drop, at
-    the end of the year, in the weeks people are buying for someone else.</p>
+    <div class="eyebrow">The idea</div>
+    <h2 class="big">It stays on the shelf,<br>and it stays yours.</h2>
+    <p class="lede">A hand-blown glass tube is not packaging. It is an object somebody
+    chose, and it goes where objects like that go &mdash; on a shelf, in the drawer they
+    open every day, out on the table in front of people. From then on it is where they
+    keep a joint. Any joint: one of yours, one from somewhere else, one they rolled
+    themselves. And every time they take one out of it, they are holding your name. You
+    paid for that placement once, at Christmas, and it keeps working all year.</p>
     <div class="stats">
-      <div class="stat"><b>20M+</b><span>pre-rolls sold, on Puff&rsquo;s own count</span></div>
-      <div class="stat"><b>2</b><span>states they are legally sold in today &mdash;
-        California and New York</span></div>
-      <div class="stat"><b>79 g</b><span>of boro in the tube. The weight is half of why
-        it feels worth keeping</span></div>
-      <div class="stat"><b>1</b><span>drop a year, at the moment people buy
-        gifts</span></div>
+      <div class="stat"><b>1</b><span>piece, kept &mdash; not a pack, opened</span></div>
+      <div class="stat"><b>365</b><span>days it sits somewhere they look</span></div>
+      <div class="stat"><b>79 g</b><span>of glass. The weight is half of why it feels
+        worth keeping</span></div>
+      <div class="stat"><b>3&ndash;4</b><span>drops a year the same piece can
+        carry</span></div>
     </div>
-    <p class="note">Volumes on puffprerolls.com, August 2026.</p>
+  </div>
+</section>
+
+<section class="alt" id="variable">
+  <div class="wrap">
+    <div class="eyebrow">What changes</div>
+    <h2 class="big">One piece. Any strain.</h2>
+    <p class="lede">The glass is not tied to a strain, and nothing a regulator can move
+    is printed on it. Paper does all of that &mdash; so a second drop is a print run,
+    not a new piece.</p>
+    <p style="margin-top:26px"><img src="puff_variable.png?v=%(build)s"
+      alt="Beauty card, band and compliance sticker, shown flat in two strain variants"
+      style="border-radius:16px;border:1px solid var(--rule)"></p>
+    <div class="grid3">
+      <div class="card"><h3>The beauty card</h3><p>Sits over the piece in the box.
+      Strain, artwork, whatever the drop is called. New card, new drop.</p></div>
+      <div class="card"><h3>The band</h3><p>Round the tube, off in one motion. The
+      cheapest thing in the pack to change and the first thing seen.</p></div>
+      <div class="card"><h3>The sticker</h3><p>Batch, potency, dates, warnings. It goes
+      on last, so nothing a regulator asks for ever touches the glass.</p></div>
+    </div>
   </div>
 </section>
 
@@ -522,7 +544,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     <h2 class="big">Say yes to the shape of it,<br>and we spec it</h2>
     <p class="lede">Four decisions and this becomes a quote and a sample.</p>
     <div class="steps">
-      <div class="step"><b>1 &nbsp;Pick the strain</b><span>the one the drop is named for</span></div>
+      <div class="step"><b>1 &nbsp;Pick the strain</b><span>it prints on the card, not the glass</span></div>
       <div class="step"><b>2 &nbsp;Confirm the finish</b><span>Puff Blue, silver fumed</span></div>
       <div class="step"><b>3 &nbsp;Sign the lockup</b><span>your artwork replaces the stand-in</span></div>
       <div class="step"><b>4 &nbsp;Samples</b><span>in hand inside three weeks</span></div>

@@ -22,7 +22,7 @@ up in two fumed colourways.
 Alongside them: a **joint tube** (124 mm, one gram, 4.5 mm wall so it survives a floor,
 cork-stopped, a wig wag at the base and drips off the rim in the same two colours,
 the JB mark pressed into the far face, and a marble on the end of every drip so it will
-not roll) and its **presentation box** (rigid board, hinged lid, magnetic clasp), a **lighter sleeve** (58 mm obround socket cut to BIC's published
+not roll) and its **presentation box** (rigid board, hinged lid, magnetic clasp, die-cut board and tissue inside - no foam), a **lighter sleeve** (58 mm obround socket cut to BIC's published
 J26 Maxi envelope, 81 x 25 x 14), and the earlier **glass tip** and **joint holder**. The tube
 and the sleeve are each rendered empty and loaded - the tube with a one-gram cone in it,
 the sleeve with a lighter.
@@ -55,7 +55,8 @@ scaling) moves if they come back different.
 | `cad/lighter.py` | Lighter sleeve - obround socket for a standard full-size lighter, finger notch through the front wall, wig wag at the base, and the lighter (shell / hood / wheel) for the loaded shot. |
 | `cad/box.py` | Presentation box - shell, hinged lid shown open, disc magnets, die-cut foam insert. Modelled around the tube where the tube already sits, so the glass meshes and the label projector are reused unchanged. |
 | `cad/puffdeck.py` | PUFF x Jerome Baker pitch - page furniture, Puff's palette and type. One piece, one finish: the joint tube in the `puff_blue` colourway. |
-| `cad/puffdeck_slides.py` | The eight pages of that pack. |
+| `cad/puffdeck_slides.py` | The nine pages of that pack. |
+| `cad/variable_art.py` | The parts of the pack that change per drop - beauty card, band, compliance sticker - drawn flat. |
 | `cad/puffpage.py` | The interactive version of it - `docs/puff.html`, drag-to-spin, published on Pages. |
 | `cad/render.py` | Studio glass compositor (moderngl): sweep → Beer-Lambert tint with fume shift → density pass → specular → enamel decal. Not a path tracer. |
 | `cad/mockups.py` | Pieces, colourways, hero stills. |
@@ -96,6 +97,7 @@ The hand-off is built on top of that:
 ./cadenv/Scripts/python cad/specsheet.py   # spec sheet PDF + the zip, into docs/
 ./cadenv/Scripts/python cad/boxshot.py     # box composites + the leave-behind PDF
 ./cadenv/Scripts/python cad/puffdeck.py   # PUFF x JBD concept pack -> shots/ and docs/
+./cadenv/Scripts/python cad/variable_art.py  # the per-drop printed parts -> shots/
 ./cadenv/Scripts/python cad/puffpage.py   # the interactive version -> docs/puff.html
 ```
 

@@ -1,6 +1,6 @@
 """The pages of the PUFF x JEROME BAKER concept pack.
 
-Eight slides, one piece, one finish. The pack is the joint tube and the box it ships
+Nine slides, one piece, one finish. The pack is the joint tube and the box it ships
 in - the rest of the programme has its own site and does not belong in a partner's deck.
 
 The first five are the idea and the object; the last three are how the drop runs.
@@ -49,10 +49,10 @@ def s01_cover():
     card(pg, d, (1210, 300), (600, 720), "tube_loaded_puff_blue", radius=30)
 
     lockup(d, (110, 74), 74, WHITE, BLACK)
-    head(d, (110, 430), "The pre-roll\nthat comes\nin glass", 96, WHITE, 900)
+    head(d, (110, 430), "The pre-roll\nthey keep\nthe box for", 88, WHITE, 900)
     para(d, (110, 800), "A hand-blown Jerome Baker tube for the Puff one-gram - the "
-         "same format, the same wordmark up the side - one holiday drop, in a vessel "
-         "that outlives the joint.", "r", 27, (176, 184, 194), 780)
+         "wordmark up the side - one holiday drop, in a piece they keep using long "
+         "after the joint is gone.", "r", 27, (176, 184, 194), 780)
     x = 110
     x += pill(d, (x, 930), "CONCEPT PACK", 19, PINK, WHITE) + 14
     x += pill(d, (x, 930), "CALIFORNIA + NEW YORK", 19, GOLD, BLACK) + 14
@@ -63,30 +63,34 @@ def s01_cover():
 
 # --------------------------------------------------------------------------- 02
 def s02_premise():
-    pg, d = _page(PAPER)
-    eyebrow(d, (110, 120), "THE PREMISE")
-    head(d, (110, 172), "Twenty million sold.\nNothing to keep.", 62, BLACK, 1200)
-    y = para(d, (110, 372), "Twenty million pre-rolls says the audience is there and "
-             "that it comes back. What it has never once been handed is a reason to "
-             "keep the tube - every one of them went out in printed plastic and every "
-             "one of them went in the bin.", "r", 26, (58, 64, 72), 900)
-    y = para(d, (110, y + 26), "This is not a proposal to change what twenty million "
-             "pre-rolls ship in. It is one drop, once, at the end of the year: the "
-             "same tube in hand-blown glass, paired with a strain worth the occasion, "
-             "in a box worth opening.", "r", 26, (58, 64, 72), 900)
-    para(d, (110, y + 34), "A pre-roll people queue for, and a piece they still have "
-         "next Christmas.", "b", 27, BLACK, 900)
+    """The premise page.
 
-    # the three numbers
+    An earlier draft of this argued against plastic - twenty million tubes, all of them
+    binned. Wrong fight. Nobody buys a premium object because the cheap one is bad; they
+    buy it because they want it. This page is about what the piece is worth having, and
+    about the thing that happens after the joint is gone, which is where the brand
+    actually gets paid.
+    """
+    pg, d = _page(PAPER)
+    eyebrow(d, (110, 120), "THE IDEA")
+    head(d, (110, 172), "It stays on the shelf,\nand it stays yours.", 62, BLACK, 1200)
+    y = para(d, (110, 372), "A hand-blown glass tube is not packaging. It is an object "
+             "somebody chose, and it goes where objects like that go - on a shelf, in a "
+             "drawer they open every day, out on the table in front of people.",
+             "r", 26, (58, 64, 72), 900)
+    y = para(d, (110, y + 26), "From then on it is where they keep a joint. Any joint: "
+             "one of yours, one from somewhere else, one they rolled themselves. And "
+             "every single time they take one out of it, they are holding your name.",
+             "r", 26, (58, 64, 72), 900)
+    para(d, (110, y + 34), "You paid for that placement once, at Christmas, and it "
+         "keeps working all year.", "b", 27, BLACK, 900)
+
     d.rounded_rectangle([1080, 350, 1810, 866], radius=26, fill=WHITE)
     d.rounded_rectangle([1080, 350, 1810, 866], radius=26, outline=(226, 231, 237),
                         width=2)
-    # the labels are kept to one line each: three stacked stats that each wrap to three
-    # lines is a list, not a set of numbers
-    stat(d, (1136, 400), "20M+", "pre-rolls sold", size=56)
-    stat(d, (1136, 566), "2", "states: California and New York", size=56, sub=MUTE)
-    stat(d, (1136, 732), "1", "drop a year, at gifting season", size=56)
-    para(d, (1080, 894), "Volumes on puffprerolls.com, August 2026.", "m", 18, MUTE, 700)
+    stat(d, (1136, 400), "1", "piece, kept - not a pack, opened", size=56)
+    stat(d, (1136, 566), "365", "days it sits somewhere they look", size=56)
+    stat(d, (1136, 732), "3-4", "drops a year it can carry", size=56)
     foot(d, 2)
     return pg
 
@@ -100,16 +104,16 @@ def s03_piece():
 
     eyebrow(d, (760, 120), "THE PIECE  ·  JBD-JT-124")
     head(d, (760, 172), "The joint tube", 66, BLACK, 1000)
-    y = para(d, (760, 286), "A straight, flat-bottomed tube in boro 3.3, blown to take "
-             "a one-gram king-size cone with room to shake it back out. It stands on a "
-             "counter, it stops on a table, and it is finished the way a piece of glass "
-             "is finished rather than the way a component is.", "r", 24, (58, 64, 72), 1010)
+    y = para(d, (760, 286), "Hand-blown, heavy in the hand, and finished the way a "
+             "piece of glass is finished. It takes a one-gram cone with room to shake "
+             "it back out, it stands on a counter, and it will not roll off a table.",
+             "r", 24, (58, 64, 72), 1010)
 
     rows = [("Overall height", "124 mm"), ("Body", "24 mm OD, 4.5 mm wall"),
             ("Bore", "15 mm - takes a 1 g cone"),
             ("Base", "7 mm, flat and closed"),
             ("Glass", "approx. 79 g, boro 3.3"),
-            ("Colourway", "Puff Blue, silver fumed"),
+            ("Finish", "Puff Blue, silver fumed"),
             ("Closure", "tapered natural cork, 24 mm"),
             ("Print", "50 mm label band, up the axis")]
     y = table(d, (760, y + 40), rows, 1010)
@@ -172,29 +176,65 @@ def s05_box():
     eyebrow(d, (110, 130), "THE BOX", GOLD)
     head(d, (110, 182), "Rigid board,\nhinged lid,\nmagnetic clasp.",
          60, WHITE, 800)
-    y = para(d, (110, 430), "A keepsake handed over in a paper bag is a keepsake nobody "
-             "photographs. The lid is hinged full height and closes onto two disc magnets "
-             "in the front lip. It opens with a click and closes the same way.",
+    y = para(d, (110, 430), "The lid is hinged full height and closes onto two disc "
+             "magnets. It opens with a click, and it is the kind of box people keep "
+             "things in afterwards rather than flatten and bin.",
              "r", 23, (172, 180, 190), 740)
-    rows = [("Outside", "53 x 48 x 169 mm"), ("Board", "3.5 mm rigid, wrapped"),
-            ("Clasp", "2 x 9 mm disc magnets"), ("Insert", "die-cut foam, one well"),
-            ("Relief", "front-cut - lifts straight out")]
+    rows = [("Outside", "53 x 52 x 169 mm"), ("Board", "3.5 mm rigid, wrapped"),
+            ("Clasp", "2 x 9 mm disc magnets"),
+            ("Insert", "die-cut board and tissue"),
+            ("No foam", "the insert recycles with the box")]
     yy = y + 34
     for a, b in rows:
         d.text((110, yy), a, font=font("m", 21), fill=(126, 134, 144))
         d.text((400, yy), b, font=font("b", 21), fill=WHITE)
         yy += 56
         rule(d, yy - 18, 110, 830, (34, 38, 44), 1)
-    para(d, (110, yy + 20), "The lining carries the colour. Glass is transmissive, so "
-         "behind a black insert the piece reads black - the insert is what it is seen "
-         "against, and it is the one part of the box that is not black.",
-         "r", 20, (150, 158, 168), 740)
+    para(d, (110, yy + 20), "Board ribs and branded tissue instead of foam. Foam is "
+         "the one part of a box like this that cannot go in the recycling with the "
+         "rest of it, and a piece sold on lasting should not arrive bedded in the "
+         "thing that does not.", "r", 20, (150, 158, 168), 740)
     foot(d, 5, (96, 102, 112))
     return pg
 
 
+# --------------------------------------------------------------------------- 06
+def s06_variable():
+    """What changes per drop, and what does not.
+
+    The piece is not tied to one strain, and it should not be: the glass is one print
+    run and everything that has to vary lives on paper. That is what makes a second
+    drop cheap, and it is what keeps the regulator off the glass.
+    """
+    pg, d = _page(WHITE)
+    eyebrow(d, (110, 110), "WHAT CHANGES")
+    head(d, (110, 162), "One piece. Any strain.", 58, BLACK, 1200)
+    para(d, (110, 268), "The glass is not tied to a strain, and nothing a regulator "
+         "can move is printed on it. Paper does all of that.",
+         "r", 23, (58, 64, 72), 1080)
+
+    art = shot("puff_variable", (1150, 660))
+    pg.paste(art, (110, 356))
+
+    items = [("THE BEAUTY CARD", BLUE, "Sits over the piece in the box. Strain, "
+              "artwork, whatever the drop is called. New card, new drop."),
+             ("THE BAND", PINK, "Round the tube, off in one motion. The cheapest thing "
+              "in the pack to change and the first thing seen."),
+             ("THE STICKER", GOLD, "Batch, potency, dates, warnings. It goes on last, "
+              "so nothing a regulator asks for ever touches the glass.")]
+    y = 360
+    for t, col, b in items:
+        d.rounded_rectangle([1310, y, 1810, y + 190], radius=18, fill=(247, 249, 251))
+        d.rectangle([1342, y + 30, 1348, y + 150], fill=col)
+        d.text((1374, y + 26), t, font=font("b", 21), fill=BLACK)
+        para(d, (1374, y + 62), b, "r", 18, (84, 90, 98), 400, lead=1.44)
+        y += 212
+    foot(d, 6)
+    return pg
+
+
 # --------------------------------------------------------------------------- 07
-def s06_drop():
+def s07_drop():
     """The volume page.
 
     This started life as a limited-drop page - numbered pieces, one release, gone. At
@@ -211,10 +251,10 @@ def s06_drop():
             ("Markets", "California and New York"),
             ("Volume", "10,000 units per state - 20,000 in total"),
             ("The piece", "one finish - Puff Blue, silver fumed"),
-            ("Paired with", "a strain chosen for the drop, named on the box"),
+            ("Paired with", "whatever strain the drop is - it is on the card"),
             ("Allocation", "by door count, into doors that already carry Puff"),
-            ("After it", "the same piece, a new strain - a drop a quarter "
-                         "if the first one lands")]
+            ("After it", "same piece, new card - a drop a quarter if the "
+                         "first one lands")]
     y = 452
     for a, b in rows:
         d.text((110, y), a, font=font("m", 21), fill=(126, 134, 144))
@@ -230,12 +270,12 @@ def s06_drop():
         d.text((x, y + 76), a, font=font("m", 19), fill=(126, 134, 144))
         d.text((x, y + 104), b, font=font("h", 34), fill=BLUE)
         x += 420
-    foot(d, 6, (96, 102, 112))
+    foot(d, 7, (96, 102, 112))
     return pg
 
 
 # --------------------------------------------------------------------------- 08
-def s07_capacity():
+def s08_capacity():
     """Capacity, stated rather than argued.
 
     An earlier draft of this page showed its working and read like a supplier hoping it
@@ -281,12 +321,12 @@ def s07_capacity():
          "one spec on the bench, one label, one SKU on the shelf in both states - and "
          "the strain is the only thing that changes next time.",
          "r", 21, (58, 64, 72), 1700)
-    foot(d, 7)
+    foot(d, 8)
     return pg
 
 
 # --------------------------------------------------------------------------- 10
-def s08_close():
+def s09_close():
     pg, d = _page(BLUE)
     # the bar goes down first and the blue runs into it - drips drawn under a bar are
     # drips nobody sees
@@ -296,7 +336,7 @@ def s08_close():
 
     lockup(d, (110, 120), 62, WHITE, BLACK)
     head(d, (110, 340), "Say yes to the\nshape of it,\nand we spec it.", 68, WHITE, 880)
-    steps = [("1", "Pick the strain", "the one the drop is named for"),
+    steps = [("1", "Pick the strain", "it prints on the card, not the glass"),
              ("2", "Confirm the finish", "Puff Blue, silver fumed"),
              ("3", "Sign the lockup", "Puff's own artwork replaces the stand-in"),
              ("4", "Samples", "in hand inside three weeks")]
@@ -318,7 +358,7 @@ def s08_close():
 
 
 SLIDES = [s01_cover, s02_premise, s03_piece, s04_why, s05_box,
-          s06_drop, s07_capacity, s08_close]
+          s06_variable, s07_drop, s08_capacity, s09_close]
 
 
 def build():
