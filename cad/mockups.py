@@ -102,9 +102,11 @@ PIECES = {
      # nearest first: the passes depth-test in add order, and multiply. A shell added
      # before the insert it sits behind tints the insert its own colour - which is how
      # a cream insert in a blue box came out blue.
+     # The magnets are modelled and they are in the spec, but they are not in the
+     # shot: concealed under the wrap on a real box, they rendered as two loose grey
+     # balls sitting on the tissue. A clasp you can see is a clasp done badly.
      parts=[("out/tube_joint.stl", "paper"), ("out/box_tissue.stl", "tissue"),
-            ("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
-            ("out/box_magnets.stl", "steel")],
+            ("out/box_shell.stl", "board"), ("out/box_lid.stl", "board")],
      # the piece arrives wrapped, so what prints in this scene is the seal on the
      # sleeve - the label and the maker's mark are under the tissue
      label="seal", decal=(52.0, 90.0, 18.8), stamp=None,
