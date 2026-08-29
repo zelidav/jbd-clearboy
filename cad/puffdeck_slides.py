@@ -49,7 +49,7 @@ def s01_cover():
     card(pg, d, (1210, 300), (600, 720), "tube_loaded_puff_blue", radius=30)
 
     lockup(d, (110, 74), 74, WHITE, BLACK)
-    head(d, (110, 430), "The pre-roll\nthey keep\nthe box for", 88, WHITE, 900)
+    head(d, (110, 400), "The only pre-roll\nthey'll still have\nnext Christmas", 72, WHITE, 940)
     para(d, (110, 800), "A hand-blown Jerome Baker tube for the Puff one-gram - the "
          "wordmark up the side - one holiday drop, in a piece they keep using long "
          "after the joint is gone.", "r", 27, (176, 184, 194), 780)
@@ -73,14 +73,16 @@ def s02_premise():
     """
     pg, d = _page(PAPER)
     eyebrow(d, (110, 120), "THE IDEA")
-    head(d, (110, 172), "It stays on the shelf,\nand it stays yours.", 62, BLACK, 1200)
-    y = para(d, (110, 372), "A hand-blown glass tube is not packaging. It is an object "
-             "somebody chose, and it goes where objects like that go - on a shelf, in a "
-             "drawer they open every day, out on the table in front of people.",
-             "r", 26, (58, 64, 72), 900)
-    y = para(d, (110, y + 26), "From then on it is where they keep a joint. Any joint: "
-             "one of yours, one from somewhere else, one they rolled themselves. And "
-             "every single time they take one out of it, they are holding your name.",
+    head(d, (110, 172), "Twenty million thrown away.\nTwenty thousand kept forever.",
+         56, BLACK, 1300)
+    y = para(d, "", "", "r", 26, (0, 0, 0), 900) if False else para(
+        d, (110, 372), "Twenty million pre-rolls have gone out, and twenty million "
+        "tubes have gone in the bin with them. That is the volume, and it is exactly "
+        "why the opposite of it is worth doing once a year.", "r", 26, (58, 64, 72), 900)
+    y = para(d, (110, y + 26), "Twenty thousand pieces that nobody throws away. From "
+             "the day it is opened it is where they keep a joint - any joint, one of "
+             "yours, one from somewhere else, one they rolled themselves - and every "
+             "time they take one out, they are holding your name.",
              "r", 26, (58, 64, 72), 900)
     para(d, (110, y + 34), "You paid for that placement once, at Christmas, and it "
          "keeps working all year.", "b", 27, BLACK, 900)
@@ -88,9 +90,9 @@ def s02_premise():
     d.rounded_rectangle([1080, 350, 1810, 866], radius=26, fill=WHITE)
     d.rounded_rectangle([1080, 350, 1810, 866], radius=26, outline=(226, 231, 237),
                         width=2)
-    stat(d, (1136, 400), "1", "piece, kept - not a pack, opened", size=56)
-    stat(d, (1136, 566), "365", "days it sits somewhere they look", size=56)
-    stat(d, (1136, 732), "3-4", "drops a year it can carry", size=56)
+    stat(d, (1136, 400), "20M+", "sold, and binned with their tubes", size=56)
+    stat(d, (1136, 566), "20,000", "in the drop, and kept", size=56)
+    stat(d, (1136, 732), "3-4", "drops a year the same piece carries", size=56)
     foot(d, 2)
     return pg
 
@@ -180,20 +182,20 @@ def s05_box():
              "magnets. It opens with a click, and it is the kind of box people keep "
              "things in afterwards rather than flatten and bin.",
              "r", 23, (172, 180, 190), 740)
-    rows = [("Outside", "53 x 52 x 169 mm"), ("Board", "3.5 mm rigid, wrapped"),
+    rows = [("Outside", "44 x 48 x 157 mm"), ("Board", "3.5 mm rigid, wrapped"),
             ("Clasp", "2 x 9 mm disc magnets"),
-            ("Insert", "die-cut board and tissue"),
-            ("No foam", "the insert recycles with the box")]
+            ("Inside", "tissue wrap, sticker seal"),
+            ("No insert", "the box is cut to the piece")]
     yy = y + 34
     for a, b in rows:
         d.text((110, yy), a, font=font("m", 21), fill=(126, 134, 144))
         d.text((400, yy), b, font=font("b", 21), fill=WHITE)
         yy += 56
         rule(d, yy - 18, 110, 830, (34, 38, 44), 1)
-    para(d, (110, yy + 20), "Board ribs and branded tissue instead of foam. Foam is "
-         "the one part of a box like this that cannot go in the recycling with the "
-         "rest of it, and a piece sold on lasting should not arrive bedded in the "
-         "thing that does not.", "r", 20, (150, 158, 168), 740)
+    para(d, (110, yy + 20), "No insert and no foam. The box is cut to the piece, the "
+         "piece is wrapped in branded tissue and closed with a seal, and a box that "
+         "fits does not need anything holding the thing still.",
+         "r", 20, (150, 158, 168), 740)
     foot(d, 5, (96, 102, 112))
     return pg
 
@@ -325,29 +327,29 @@ def s08_capacity():
     return pg
 
 
-# --------------------------------------------------------------------------- 10
+# --------------------------------------------------------------------------- 09
 def s09_close():
+    """The close.
+
+    This used to be a four-step checklist - pick a strain, confirm the finish, sign the
+    lockup, then quote. Every one of those is a decision, and a page of decisions is a
+    page of reasons to come back to it later. There is one decision here, and everything
+    that would have been a decision happens on a sample instead.
+    """
     pg, d = _page(BLUE)
-    # the bar goes down first and the blue runs into it - drips drawn under a bar are
-    # drips nobody sees
     d.rectangle([0, PAGE[1] - 150, PAGE[0], PAGE[1]], fill=BLACK)
     _drips(d, 40, PAGE[0] - 40, PAGE[1] - 152, 108, BLUE, n=14, seed=21)
     card(pg, d, (1330, 130), (470, 790), "tube_puff_blue", radius=28)
 
     lockup(d, (110, 120), 62, WHITE, BLACK)
-    head(d, (110, 340), "Say yes to the\nshape of it,\nand we spec it.", 68, WHITE, 880)
-    steps = [("1", "Pick the strain", "it prints on the card, not the glass"),
-             ("2", "Confirm the finish", "Puff Blue, silver fumed"),
-             ("3", "Sign the lockup", "Puff's own artwork replaces the stand-in"),
-             ("4", "Samples", "in hand inside three weeks")]
-    y = 630
-    for n, t, b in steps:
-        d.ellipse([110, y, 156, y + 46], fill=BLACK)
-        w = d.textlength(n, font=font("b", 22))
-        d.text((133 - w / 2, y + 10), n, font=font("b", 22), fill=WHITE)
-        d.text((182, y + 2), t, font=font("b", 23), fill=WHITE)
-        d.text((182, y + 34), b, font=font("m", 18), fill=(214, 238, 252))
-        y += 74
+    head(d, (110, 340), "Say go, and you\nhold one in\nthree weeks.", 68, WHITE, 900)
+    para(d, (110, 604), "Everything else happens on the sample rather than on paper. "
+         "Strain, finish, artwork - you will want changes and they are easier to make "
+         "with the piece in your hand than in a meeting about it.",
+         "r", 25, (224, 244, 254), 880)
+    para(d, (110, 730), "There is nothing to specify to start. Say go.", "b", 28,
+         WHITE, 880)
+
     d.text((110, PAGE[1] - 108), "JEROME BAKER DESIGNS", font=font("b", 22), fill=WHITE)
     d.text((110, PAGE[1] - 74), "david@canismajorpartners.com", font=font("m", 19),
            fill=(150, 200, 230))

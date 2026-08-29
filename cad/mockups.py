@@ -103,8 +103,8 @@ PIECES = {
      # before the insert it sits behind tints the insert its own colour - which is how
      # a cream insert in a blue box came out blue.
      parts=[("out/tube_joint.stl", "paper"), ("out/box_tissue.stl", "tissue"),
-            ("out/box_insert.stl", "kraft"), ("out/box_shell.stl", "board"),
-            ("out/box_lid.stl", "board"), ("out/box_magnets.stl", "steel")],
+            ("out/box_shell.stl", "board"), ("out/box_lid.stl", "board"),
+            ("out/box_magnets.stl", "steel")],
      label="puff", decal=(34.0, 95.0, 11.0),
      stamp=(44.0, 68.0, 11.6), stamp_face=-1.0,
      # a box only reads open in three-quarter

@@ -8,26 +8,20 @@ same way, and it survives being kept.
     Board       3.5 mm rigid, wrapped inside and out
     Lid         hinged full-height along one long edge, swings clear
     Clasp       two 9 mm disc magnets in the front lip, two in the lid
-    Insert      die-cut board - a back panel and three notched ribs, no foam
+    Inside      the piece, wrapped in branded tissue and sealed with a sticker
 
 The whole thing is modelled around the tube where the tube already sits - base at Z 0,
 axis on Z - so the glass, the cork, the decoration and the printed band are the same
 meshes the standing renders use and the label projector still lands where it should. The
 shot lays the assembly down with a camera tilt rather than by rotating any geometry.
 
-The insert is die-cut board and tissue. No foam: it is the one part of a box like this
-that cannot be recycled with the rest of it, and a piece sold on the fact that it lasts
-should not arrive bedded in the thing that does not.
+There is no insert. The box is cut to the piece - just enough room for the tube and the
+tissue round it - and a box that fits does not need anything holding the thing still.
+That is cheaper, it is one less part to source, and there is no foam in it: foam is the
+one component of a box like this that cannot go in the recycling with the rest of it.
 
-A back panel takes the length of the box, three notched ribs stand off it, and the tube
-lies in the notches wrapped in tissue. The notch is a stadium rather than a half-round
-because the piece is thirty-one millimetres across its drip marbles and twenty-four
-across the glass - it has to clear the marbles and still hold the tube from turning, so
-the label faces the person opening it rather than the lid.
-
-The cavity is deliberately not centred on the piece. A cavity centred on it leaves
-nothing behind the tube at all; offset back, there is room for the panel, the ribs and
-the tissue under it.
+Earlier versions had a die-cut board cradle in here. It looked like a cradle, which is
+to say it looked like packaging, and the piece is not being sold on its packaging.
 
     python box.py out   -> out/box_shell.stl, out/box_lid.stl, out/box_foam.stl,
                            out/box_magnets.stl
@@ -43,11 +37,14 @@ import tube
 
 P = dict(
     board=3.5,            # rigid board thickness
-    inner_x=46.0,         # cavity, across the marbles
-    y_front=-18.0,        # cavity, towards the lid. The piece is on the axis at y 0,
-    y_back=24.0,          # so these are not symmetric - the bed is the difference
-    z0=-14.0,             # cavity floor, relative to the tube's own base
-    z1=148.0,             # cavity ceiling - the cork tops out at 139
+    # Cut to the piece. It is 33.6 across the drip marbles and 24 across the glass, and
+    # the cork tops out at 139 - so the cavity is that plus the tissue plus a finger of
+    # clearance, and nothing else.
+    inner_x=37.0,
+    y_front=-18.5,
+    y_back=18.5,
+    z0=-5.0,
+    z1=145.0,
 
     open_x=40.0,          # the mouth cut through the front board
     open_pad=3.0,         # lip left round it, top and bottom
@@ -57,14 +54,9 @@ P = dict(
     # The notch clears the GLASS, not the marbles: the ribs are placed between the
     # drips so they never meet one. Cutting to the marbles ate the whole rib and left
     # three tabs standing at the back.
-    well_x=27.0,          # the rib notch, across the glass
-    well_floor=13.0,      # how deep the notch is cut - the rest is the rib
-    insert_board=1.6,     # the insert's own board, thinner than the shell's
-    ribs=(14.0, 51.0, 88.0),    # up the length, all three below the drips
-    rib_w=7.0,            # how wide each rib reads end on
     tissue_t=0.9,
-    tissue_rise=0.62,     # how far up the side walls the tissue comes
-    insert_top=148.0,
+    tissue_rise=0.70,     # how far up the side walls the tissue comes
+    insert_top=145.0,
 
     magnet_d=7.0,
     magnet_t=1.5,
@@ -206,29 +198,6 @@ def face_normal(name, p=None):
             "end_low": (0, 0, -1), "end_high": (0, 0, 1)}[name]
 
 
-def insert(p=None):
-    """Die-cut board: one back panel, three notched ribs standing off it.
-
-    The tube lies across the notches rather than sitting in a moulded bed, which is
-    what lets the whole insert be one flat die-cut sheet folded up - and what lets it
-    go in the same recycling as the box."""
-    p = dict(P, **(p or {}))
-    hx, y0, y1, b, ox, oy0, oy1 = _dims(p)
-    t = p["insert_board"]
-    # the back panel, down the length of the box
-    part = _slab(hx - 0.4, y1 - 0.4 - t, y1 - 0.4, p["z0"] + 2, p["insert_top"])
-    wx, wy = p["well_x"], p["well_floor"] - y0 + 6
-    for z in p["ribs"]:
-        rib = _slab(hx - 0.4, y0 + 0.4, y1 - 0.4 - t, z - p["rib_w"] / 2,
-                    z + p["rib_w"] / 2)
-        notch = (cq.Workplane("XY").workplane(offset=z - p["rib_w"])
-                 .center(0, (y0 - 6 + p["well_floor"]) / 2)
-                 .slot2D(max(wx - wy, 0.01) + wy, wy, 0)
-                 .extrude(p["rib_w"] * 3))
-        part = part.union(rib.cut(notch))
-    return part
-
-
 def tissue(p=None):
     """A sheet of branded tissue, folded up the sides of the box with the piece on it.
 
@@ -237,7 +206,7 @@ def tissue(p=None):
     p = dict(P, **(p or {}))
     hx, y0, y1, b, ox, oy0, oy1 = _dims(p)
     t, rise = p["tissue_t"], p["tissue_rise"]
-    ymid = y1 - 0.4 - p["insert_board"]
+    ymid = y1 - 0.6
     top = y0 + (ymid - y0) * (1.0 - rise)
     # a U in section: up one wall, across the back, up the other
     pts = [(-hx + 0.6, ymid), (hx - 0.6, ymid), (hx - 0.6, top),
@@ -258,8 +227,7 @@ if __name__ == "__main__":
           % (tube.od(), tube.P["height"], tube.P["height"] + tube.P["cork_h"]
              - tube.P["cork_seat"]))
     for name, wp in (("box_shell", shell()), ("box_lid", lid()),
-                     ("box_insert", insert()), ("box_tissue", tissue()),
-                     ("box_magnets", magnets())):
+                     ("box_tissue", tissue()), ("box_magnets", magnets())):
         cq.exporters.export(wp, os.path.join(out, name + ".stl"),
                             tolerance=0.05, angularTolerance=0.2)
         print("  wrote", name)

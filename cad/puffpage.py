@@ -413,7 +413,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <div class="drip"></div>
 
 <div class="wrap hero" id="piece">
-  <h1>The pre-roll<br>they keep the box for</h1>
+  <h1>The only pre-roll<br>they&rsquo;ll still have<br>next Christmas</h1>
   <p class="sub">One holiday drop: the Puff one-gram in a hand-blown Jerome Baker tube,
   in a box worth opening. Same format, same wordmark up the side &mdash; in a piece they
   keep using long after the joint is gone.</p>
@@ -466,13 +466,13 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     rather than flatten and bin. Switch the viewer above to <b>In the box</b> to turn
     it over.</p>
     <div class="grid3">
-      <div class="card"><h3>Board and tissue, no foam</h3><p>Die-cut board ribs and
-      branded tissue. Foam is the one part of a box like this that cannot go in the
-      recycling with the rest of it, and a piece sold on lasting should not arrive
-      bedded in the thing that does not.</p></div>
-      <div class="card"><h3>It holds the piece the right way round</h3><p>The ribs are
-      notched so the tube cannot turn in the box &mdash; the print faces the person
-      opening it rather than the lid.</p></div>
+      <div class="card"><h3>Tissue and a seal, no insert</h3><p>The piece is wrapped in
+      branded tissue and closed with a sticker seal. No foam, no cradle &mdash; a box
+      cut to the piece does not need anything holding it still, and there is nothing in
+      it that cannot go in the recycling with the box.</p></div>
+      <div class="card"><h3>Cut to the piece</h3><p>44 &times; 48 &times; 157 mm. Just
+      enough room for the tube and the tissue round it, which is cheaper to make, cheaper
+      to ship and better to open.</p></div>
       <div class="card"><h3>Your mark inside the lid</h3><p>The collab lockup sits on
       the board itself, foil-stamped rather than printed on a panel &mdash; the first
       thing seen when it opens. 53 &times; 52 &times; 169 mm, 3.5 mm board, wrapped
@@ -484,20 +484,21 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <section>
   <div class="wrap">
     <div class="eyebrow">The idea</div>
-    <h2 class="big">It stays on the shelf,<br>and it stays yours.</h2>
-    <p class="lede">A hand-blown glass tube is not packaging. It is an object somebody
-    chose, and it goes where objects like that go &mdash; on a shelf, in the drawer they
-    open every day, out on the table in front of people. From then on it is where they
-    keep a joint. Any joint: one of yours, one from somewhere else, one they rolled
-    themselves. And every time they take one out of it, they are holding your name. You
-    paid for that placement once, at Christmas, and it keeps working all year.</p>
+    <h2 class="big">Twenty million thrown away.<br>Twenty thousand kept forever.</h2>
+    <p class="lede">Twenty million pre-rolls have gone out, and twenty million tubes have
+    gone in the bin with them. That is the volume &mdash; and it is exactly why the
+    opposite of it is worth doing once a year. Twenty thousand pieces that nobody throws
+    away. From the day it is opened it is where they keep a joint: any joint, one of
+    yours, one from somewhere else, one they rolled themselves. Every time they take one
+    out, they are holding your name. You paid for that placement once, at Christmas, and
+    it keeps working all year.</p>
     <div class="stats">
-      <div class="stat"><b>1</b><span>piece, kept &mdash; not a pack, opened</span></div>
-      <div class="stat"><b>365</b><span>days it sits somewhere they look</span></div>
+      <div class="stat"><b>20M+</b><span>sold, and binned with their tubes</span></div>
+      <div class="stat"><b>20,000</b><span>in the drop, and kept</span></div>
       <div class="stat"><b>79 g</b><span>of glass. The weight is half of why it feels
         worth keeping</span></div>
-      <div class="stat"><b>3&ndash;4</b><span>drops a year the same piece can
-        carry</span></div>
+      <div class="stat"><b>3&ndash;4</b><span>drops a year the same piece
+        carries</span></div>
     </div>
   </div>
 </section>
@@ -510,15 +511,16 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     is printed on it. Paper does all of that &mdash; so a second drop is a print run,
     not a new piece.</p>
     <p style="margin-top:26px"><img src="puff_variable.png?v=%(build)s"
-      alt="Beauty card, band and compliance sticker, shown flat in two strain variants"
+      alt="Beauty card, band, tissue seal and compliance sticker, flat, in two strain variants"
       style="border-radius:16px;border:1px solid var(--rule)"></p>
     <div class="grid3">
       <div class="card"><h3>The beauty card</h3><p>Sits over the piece in the box.
       Strain, artwork, whatever the drop is called. New card, new drop.</p></div>
       <div class="card"><h3>The band</h3><p>Round the tube, off in one motion. The
       cheapest thing in the pack to change and the first thing seen.</p></div>
-      <div class="card"><h3>The sticker</h3><p>Batch, potency, dates, warnings. It goes
-      on last, so nothing a regulator asks for ever touches the glass.</p></div>
+      <div class="card"><h3>The seal and the sticker</h3><p>The seal closes the tissue
+      and carries the lockup. The compliance sticker takes batch, potency, dates and
+      warnings &mdash; so nothing a regulator asks for ever touches the glass.</p></div>
     </div>
   </div>
 </section>
@@ -541,16 +543,13 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 
 <section class="cta">
   <div class="wrap">
-    <h2 class="big">Say yes to the shape of it,<br>and we spec it</h2>
-    <p class="lede">Four decisions and this becomes a quote and a sample.</p>
-    <div class="steps">
-      <div class="step"><b>1 &nbsp;Pick the strain</b><span>it prints on the card, not the glass</span></div>
-      <div class="step"><b>2 &nbsp;Confirm the finish</b><span>Puff Blue, silver fumed</span></div>
-      <div class="step"><b>3 &nbsp;Sign the lockup</b><span>your artwork replaces the stand-in</span></div>
-      <div class="step"><b>4 &nbsp;Samples</b><span>in hand inside three weeks</span></div>
-    </div>
+    <h2 class="big">Say go, and you hold one<br>in three weeks</h2>
+    <p class="lede">There is nothing to specify to start. Strain, finish, artwork
+    &mdash; you will want changes, and they are easier to make with the piece in your
+    hand than in a meeting about it. Everything else happens on the sample rather than
+    on paper.</p>
     <div class="btns">
-      <a class="btn" href="mailto:%(contact)s?subject=PUFF%%20x%%20Jerome%%20Baker">Start the spec</a>
+      <a class="btn" href="mailto:%(contact)s?subject=PUFF%%20x%%20Jerome%%20Baker">Say go</a>
       <a class="btn k" href="PUFF_x_JBD.pdf?v=%(build)s">Download the pack (PDF)</a>
     </div>
   </div>

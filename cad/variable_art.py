@@ -31,6 +31,7 @@ SCALE = 5.6                      # px per mm on the plate
 CARD = (44.0, 150.0)             # the beauty card, mm - it lies over the piece
 BAND = (150.0, 26.0)             # the band round the tube, laid flat
 STICKER = (46.0, 30.0)           # the compliance sticker
+SEAL = 30.0                      # the seal that closes the tissue, dia
 
 
 def mm(v):
@@ -123,6 +124,25 @@ def band(name, accent):
     return im
 
 
+def seal():
+    """The sticker that closes the tissue round the piece.
+
+    It is the first thing a hand touches and the last thing between them and the glass,
+    so it carries the lockup and nothing else."""
+    d0 = mm(SEAL)
+    im = Image.new("RGBA", (d0, d0), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.ellipse([0, 0, d0 - 1, d0 - 1], fill=PUFF["blue"] + (255,))
+    k = int(d0 * 0.085)
+    d.ellipse([k, k, d0 - 1 - k, d0 - 1 - k], outline=PUFF["gold"] + (255,),
+              width=max(int(d0 * 0.022), 2))
+    _lockup(d, d0 / 2, d0 * 0.36, d0 * 0.15, max_w=d0 * 0.66)
+    f, w, tr = _fit(d, "HOLIDAY COLLAB", "bold", d0 * 0.075, d0 * 0.60, 0.30)
+    _tracked_text(d, ((d0 - w) / 2, d0 * 0.58), "HOLIDAY COLLAB", f,
+                  PUFF["gold"] + (255,), tr)
+    return im
+
+
 def sticker():
     """The compliance sticker: batch, potency, the symbol, the warnings. It goes on
     last and it is the only thing a regulator makes you change."""
@@ -151,10 +171,11 @@ def build():
     cards = [beauty_card(n, c) for n, c in DROPS]
     bands = [band(n, c) for n, c in DROPS]
     st = sticker()
+    sl = seal()
 
     pad = mm(9)
     col_w = cards[0].width
-    w = pad * 5 + col_w * 2 + max(bands[0].width, st.width)
+    w = pad * 5 + col_w * 2 + max(bands[0].width, st.width + mm(SEAL) + pad)
     h = pad * 2 + cards[0].height + mm(16)
     plate = Image.new("RGB", (w, h), (244, 247, 250))
     d = ImageDraw.Draw(plate)
@@ -174,9 +195,12 @@ def build():
         y += b.height + pad
     d.text((x, y + mm(2)), "COMPLIANCE STICKER", font=f, fill=(60, 66, 74))
     plate.paste(st, (x, y + mm(9)), st)
+    sx = x + st.width + pad
+    d.text((sx, y + mm(2)), "TISSUE SEAL", font=f, fill=(60, 66, 74))
+    plate.paste(sl, (sx, y + mm(9)), sl)
 
-    note = ("The glass never changes. The card, the band and the sticker do - "
-            "so a new strain is a print run, not a new piece.")
+    note = ("The glass never changes. The card, the band, the seal and the sticker do "
+            "- so a new strain is a print run, not a new piece.")
     d.text((pad, h - mm(9)), note, font=brand_font("med", mm(3.2)), fill=(110, 116, 124))
     plate.save(OUT)
     print("wrote", OUT, plate.size)
