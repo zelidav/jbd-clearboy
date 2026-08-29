@@ -148,7 +148,7 @@ def s04_why():
              "no joint in it at all.", "r", 25, (172, 180, 190), 820)
     para(d, (110, y + 26), "Put those together in the one week of the year when people "
          "are buying an object instead of a price, and it is not a hard sell to "
-         "anybody. Small, finite, and nothing either of us has to unpick afterwards.",
+         "anybody. Small, finite, and easy to walk away from if it is not for you.",
          "r", 25, (172, 180, 190), 820)
 
     cards = [("THE REACH", "Twenty million pre-rolls and the doors that go with them. "

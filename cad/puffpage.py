@@ -602,8 +602,8 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     <p class="lede">You have the reach and the doors. We have been blowing glass since
     the nineties and a name people collect. Put those together in the one week of the
     year when people are buying an object instead of a price, and it is not a hard sell
-    to anybody &mdash; small, finite, and nothing either of us has to unpick
-    afterwards.</p>
+    to anybody &mdash; small, finite, and easy to walk away from if it is not for
+    you.</p>
     <div class="grid3">
       <div class="card"><h3>The reach</h3><p>Twenty million pre-rolls and the doors that
       go with them. Nothing we make gets in front of that many people on its
