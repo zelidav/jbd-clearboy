@@ -19,13 +19,15 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mockups
-from mockups import PUFF, brand_font, _tracked_text, _tracked_width, _pill
+from mockups import (PUFF, brand_font, puff_mark, _tracked_text,
+                     _tracked_width, _pill)
 
 OUT = os.path.join("shots", "puff_variable.png")
 
 # Puff's own strain names, off their storefront - the point of the page is that these
 # are the only thing that changes
-DROPS = [("GRAPE DRINK", (122, 78, 190)), ("ORANGE TREE", (232, 128, 40))]
+DROPS = [("GRAPE DRINK", (96, 80, 192)), ("ORANGE TREE", (224, 128, 80)),
+         ("OG KUSH", (14, 158, 90))]
 
 SCALE = 5.6                      # px per mm on the plate
 CARD = (44.0, 150.0)             # the beauty card, mm - it lies over the piece
@@ -50,28 +52,24 @@ def _fit(d, text, kind, size, max_w, track=0.0):
     return f, w, size * track
 
 
-def _lockup(d, cx, y, h, ink=PUFF["paper"], gold=PUFF["gold"], max_w=None):
-    """PUFF x JEROME BAKER, small, centred, fitted to the width it is given."""
+def _lockup(im, d, cx, y, h, ink=PUFF["paper"], gold=PUFF["gold"], max_w=None):
+    """Their mark, a cross, our name. Their half is their own file rather than a
+    typesetting of it - PUFF is a display face nothing else matches."""
     for _ in range(9):
-        big = brand_font("heavy", max(int(h), 5))
+        mark = puff_mark(max(h * 1.55, 6), ink)
         ours = brand_font("bold", max(int(h * 0.62), 4))
         cross = brand_font("heavy", max(int(h * 0.78), 4))
-        total = (d.textlength("PUFF", font=big) + d.textlength("×", font=cross)
+        total = (mark.width + d.textlength("×", font=cross)
                  + d.textlength("JEROME BAKER", font=ours) + h * 0.84)
         if max_w is None or total <= max_w:
             break
         h *= max_w / total
-    big = brand_font("heavy", int(h))
-    pw = d.textlength("PUFF", font=big)
     xw = d.textlength("×", font=cross)
-    jw = d.textlength("JEROME BAKER", font=ours)
-    gap = h * 0.42
-    total = pw + gap + xw + gap + jw
     x = cx - total / 2
-    d.text((x, y), "PUFF", font=big, fill=ink + (255,))
-    x += pw + gap
+    im.paste(mark, (int(x), int(y - mark.height * 0.16)), mark)
+    x += mark.width + h * 0.42
     d.text((x, y + h * 0.10), "×", font=cross, fill=gold + (255,))
-    x += xw + gap
+    x += xw + h * 0.42
     d.text((x, y + h * 0.14), "JEROME BAKER", font=ours, fill=ink + (255,))
 
 
@@ -85,7 +83,7 @@ def beauty_card(name, accent):
     d.rounded_rectangle([k, k, w - k, h - k], radius=int(w * 0.10),
                         outline=PUFF["gold"] + (255,), width=max(int(w * 0.012), 2))
 
-    _lockup(d, w / 2, h * 0.085, w * 0.115, max_w=w * 0.80)
+    _lockup(im, d, w / 2, h * 0.075, w * 0.115, max_w=w * 0.80)
 
     # the strain, which is the only thing that changes
     d.rectangle([w * 0.20, h * 0.185, w * 0.80, h * 0.189], fill=PUFF["gold"] + (255,))
@@ -136,10 +134,10 @@ def seal():
     k = int(d0 * 0.085)
     d.ellipse([k, k, d0 - 1 - k, d0 - 1 - k], outline=PUFF["gold"] + (255,),
               width=max(int(d0 * 0.022), 2))
-    _lockup(d, d0 / 2, d0 * 0.36, d0 * 0.15, max_w=d0 * 0.66)
+    _lockup(im, d, d0 / 2, d0 * 0.34, d0 * 0.13, max_w=d0 * 0.66)
     f, w, tr = _fit(d, "HOLIDAY COLLAB", "bold", d0 * 0.075, d0 * 0.60, 0.30)
     _tracked_text(d, ((d0 - w) / 2, d0 * 0.58), "HOLIDAY COLLAB", f,
-                  PUFF["gold"] + (255,), tr)
+                  PUFF["paper"] + (255,), tr)
     return im
 
 
@@ -175,7 +173,10 @@ def build():
 
     pad = mm(9)
     col_w = cards[0].width
-    w = pad * 5 + col_w * 2 + max(bands[0].width, st.width + mm(SEAL) + pad)
+    # width follows the number of drops shown, not a hardcoded two - adding a
+    # third strain silently pushed the bands off the right of the plate
+    w = (pad * (len(cards) + 2) + col_w * len(cards)
+         + max(bands[0].width, st.width + mm(SEAL) + pad) + pad)
     h = pad * 2 + cards[0].height + mm(16)
     plate = Image.new("RGB", (w, h), (244, 247, 250))
     d = ImageDraw.Draw(plate)

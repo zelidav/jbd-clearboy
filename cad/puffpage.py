@@ -113,7 +113,7 @@ def frames():
 
 CSS = """
 :root{
-  --blue:#2FB4F5; --blue-d:#127BB0; --pink:#E85090; --gold:#E8B21F;
+  --blue:#00A0C0; --blue-d:#0A2352; --pink:#6050C0; --gold:#D0A010;
   --ink:#0B0D10; --ink-2:#3C434C; --ink-3:#79828E;
   --paper:#FFFFFF; --wash:#F4F7FA; --rule:#E2E8EE;
   --font:"Poppins","Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
@@ -192,7 +192,7 @@ p{margin:0}
 .finish{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
   color:var(--ink-2)}
 .finish i{width:22px;height:22px;border-radius:50%;
-  background:linear-gradient(145deg,#8FD6FA,#2FB4F5 58%,#127BB0);
+  background:linear-gradient(145deg,#7FD4E4,#00A0C0 58%,#0A2352);
   box-shadow:0 0 0 2px var(--rule)}
 .spinbtn{margin-left:auto;border:1px solid var(--rule);background:transparent;
   color:var(--ink-2);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;
@@ -365,9 +365,9 @@ def lockup(size, ink="#fff", gold="var(--gold)"):
 
 FAVICON = ('<link rel="icon" href="data:image/svg+xml,'
            "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
-           "%3Crect width='32' height='32' rx='7' fill='%232FB4F5'/%3E"
+           "%3Crect width='32' height='32' rx='7' fill='%2300A0C0'/%3E"
            "%3Crect x='13' y='5' width='6' height='22' rx='3' fill='%23fff'/%3E"
-           "%3Ccircle cx='16' cy='24' r='3' fill='%23E85090'/%3E%3C/svg%3E\">")
+           "%3Ccircle cx='16' cy='24' r='3' fill='%236050C0'/%3E%3C/svg%3E\">")
 
 
 def build():
@@ -432,7 +432,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
           <div class="hint" id="hint">Drag to turn</div>
         </div>
         <div class="vbar">
-          <span class="finish"><i></i>Puff Blue &middot; silver fumed</span>
+          <span class="finish"><i></i>Puff Teal &middot; silver fumed</span>
           <button class="spinbtn" id="spinBtn" aria-pressed="true">Auto-turn</button>
         </div>
       </div>
@@ -459,20 +459,23 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 
 <section>
   <div class="wrap">
-    <div class="eyebrow">Why us, why you</div>
-    <h2 class="big">Two names that already<br>stand on their own</h2>
-    <p class="lede">Neither of us needs the other to have a good year, which is exactly
-    what makes this worth doing: one object, one season, both names on it.</p>
+    <div class="eyebrow">Why now</div>
+    <h2 class="big">The timing is<br>the whole thing</h2>
+    <p class="lede">You have the reach and the doors. We have been blowing glass since
+    the nineties and a name people collect. Put those together in the one week of the
+    year when people are buying an object instead of a price, and it is not a hard sell
+    to anybody &mdash; small, finite, and nothing either of us has to unpick
+    afterwards.</p>
     <div class="grid3">
-      <div class="card"><h3>California is yours</h3><p>The audience, the doors and the
-      flower. Twenty million pre-rolls is a standing invitation nobody else in this
-      conversation has.</p></div>
-      <div class="card"><h3>New York is moving for us</h3><p>Jerome Baker is opening
-      doors in New York quickly right now. A drop across both states lands in a market
-      each of us is already being asked for by name.</p></div>
-      <div class="card"><h3>Nobody&rsquo;s licence is involved</h3><p>The glass ships
-      from the non-cannabis entity. Nothing about the collab touches either side&rsquo;s
-      licence.</p></div>
+      <div class="card"><h3>The reach</h3><p>Twenty million pre-rolls and the doors that
+      go with them. Nothing we make gets in front of that many people on its
+      own.</p></div>
+      <div class="card"><h3>The momentum</h3><p>Jerome Baker is opening doors in New
+      York quickly right now. A drop across both states rides that in one of the two
+      markets you are already in.</p></div>
+      <div class="card"><h3>The window</h3><p>Holiday is the one stretch of the year
+      when the question is what to give somebody, not what something costs. That is the
+      whole reason this piece works.</p></div>
     </div>
   </div>
 </section>
@@ -530,7 +533,10 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
     <p class="lede">The glass is not tied to a strain, and nothing a regulator can move
     is printed on it. Paper does all of that &mdash; so a second drop is a print run,
     not a new piece.</p>
-    <p style="margin-top:26px"><img src="puff_variable.png?v=%(build)s"
+    <p style="margin-top:26px"><img src="puff_box_variants.png?v=%(build)s"
+      alt="The same box and the same glass with three different sleeves and cards"
+      style="border-radius:16px;border:1px solid var(--rule)"></p>
+    <p style="margin-top:22px"><img src="puff_variable.png?v=%(build)s"
       alt="Beauty card, band, tissue seal and compliance sticker, flat, in two strain variants"
       style="border-radius:16px;border:1px solid var(--rule)"></p>
     <div class="grid3">
@@ -578,7 +584,7 @@ hand-blown Jerome Baker tube, paired with a strain, in a box worth opening.">
 <footer>
   <div class="wrap">
     %(flock)s
-    <p>Puff marks are set as stand-ins, for your own artwork to replace.</p>
+    <p>Puff wordmark used as supplied.</p>
     <p style="margin-top:10px">Jerome Baker Designs &middot;
       <a href="mailto:%(contact)s">%(contact)s</a> &middot;
       <a href="./">the rest of the programme</a></p>

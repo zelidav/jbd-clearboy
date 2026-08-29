@@ -140,24 +140,25 @@ def s03_piece():
 def s04_why():
     pg, d = _page(BLACK)
     d.rectangle([0, 0, PAGE[0], 8], fill=BLUE)
-    eyebrow(d, (110, 130), "WHY US, WHY YOU", GOLD)
-    head(d, (110, 182), "Not a glass tube.\nA Jerome Baker.", 66, WHITE, 1000)
-    y = para(d, (110, 386), "Jerome Baker Designs has been blowing glass since the "
-             "nineties. The name is the point: it is the reason a customer keeps the "
-             "piece instead of the pack, and the reason the second one gets bought "
-             "without a joint in it at all.", "r", 25, (172, 180, 190), 820)
-    para(d, (110, y + 26), "Neither of us needs the other to have a good year. That is "
-         "exactly what makes this worth doing - two names that already stand on their "
-         "own, on one object, for one season.", "r", 25, (172, 180, 190), 820)
+    eyebrow(d, (110, 130), "WHY NOW", GOLD)
+    head(d, (110, 182), "The timing is\nthe whole thing.", 66, WHITE, 1000)
+    y = para(d, (110, 386), "You have the reach and the doors. We have been blowing "
+             "glass since the nineties and a name people collect - which is what makes "
+             "somebody keep the piece instead of the pack, and buy the second one with "
+             "no joint in it at all.", "r", 25, (172, 180, 190), 820)
+    para(d, (110, y + 26), "Put those together in the one week of the year when people "
+         "are buying an object instead of a price, and it is not a hard sell to "
+         "anybody. Small, finite, and nothing either of us has to unpick afterwards.",
+         "r", 25, (172, 180, 190), 820)
 
-    cards = [("CALIFORNIA IS YOURS", "The audience, the doors and the flower. Twenty "
-              "million pre-rolls is a standing invitation nobody else in this "
-              "conversation has."),
-             ("NEW YORK IS MOVING FOR US", "Jerome Baker is opening doors in New York "
-              "quickly right now. A drop across both states lands in a market "
-              "each of us is already being asked for by name."),
-             ("NOBODY'S LICENCE IS INVOLVED", "The glass ships from the non-cannabis "
-              "entity. Nothing about the collab touches either side's licence.")]
+    cards = [("THE REACH", "Twenty million pre-rolls and the doors that go with them. "
+              "Nothing we do gets in front of that many people on its own."),
+             ("THE MOMENTUM", "Jerome Baker is opening doors in New York quickly right "
+              "now. A drop across both states rides that in one of the two markets you "
+              "are already in."),
+             ("THE WINDOW", "Holiday is the one stretch of the year when the question "
+              "is what to give somebody, not what something costs. That is the whole "
+              "reason this piece works.")]
     x = 1030
     for i, (t, b) in enumerate(cards):
         yy = 300 + i * 216
@@ -214,13 +215,13 @@ def s06_variable():
          "can move is printed on it. Paper does all of that.",
          "r", 23, (58, 64, 72), 1080)
 
-    art = shot("puff_variable", (1150, 660))
+    art = shot("puff_box_variants_row", (1160, 660))
     pg.paste(art, (110, 356))
 
-    items = [("THE BEAUTY CARD", BLUE, "Sits over the piece in the box. Strain, "
-              "artwork, whatever the drop is called. New card, new drop."),
-             ("THE BAND", PINK, "Round the tube, off in one motion. The cheapest thing "
-              "in the pack to change and the first thing seen."),
+    items = [("THE SLEEVE", BLUE, "Printed on the box. The strain, in its own colour, "
+              "on the same board with the same die."),
+             ("THE CARD", PINK, "Goes in the box over the piece. Strain, artwork, "
+              "whatever the drop is called."),
              ("THE STICKER", GOLD, "Batch, potency, dates, warnings. It goes on last, "
               "so nothing a regulator asks for ever touches the glass.")]
     y = 360
@@ -351,7 +352,7 @@ def s09_close():
     d.text((110, PAGE[1] - 108), "JEROME BAKER DESIGNS", font=font("b", 22), fill=WHITE)
     d.text((110, PAGE[1] - 74), "david@canismajorpartners.com", font=font("m", 19),
            fill=(150, 200, 230))
-    rt = "Puff marks shown as stand-ins, for your artwork to replace."
+    rt = "Puff wordmark used as supplied."
     d.text((PAGE[0] - 110 - d.textlength(rt, font=font("m", 17)), PAGE[1] - 74), rt,
            font=font("m", 17), fill=(120, 130, 140))
     return pg

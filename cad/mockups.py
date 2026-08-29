@@ -174,21 +174,21 @@ WAYS = {
      sub="magenta frit, marbles \u00b7 wrapped linework"),
 
  # The collab way. One piece, one finish - a colourway drawn for Puff rather than one
- # of ours borrowed for them: their blue in the body, silver fumed so it flashes rather
- # than sits flat, their gold in the drips off the rim, and the wig wag at the base
- # pulled in the gold and the pink of their drip mark. Three colours, all theirs.
+ # of ours borrowed for them: the cyan-teal that runs through everything they make,
+ # silver fumed so it flashes rather than sits flat, with the drips and the wig wag
+ # pulled in their purple and their gold. Three colours, all off their own pack art.
  "puff_blue": dict(
      sticker=None,
-     body=(0.0620, 0.0260, 0.0060), frit=(0.020, 0.160, 0.060),
+     body=(0.1550, 0.0290, 0.0110), frit=(0.030, 0.150, 0.045),
      fume=1.15, fume_pow=1.00,
      fume_stops=((1.00, 1.00, 1.00), (0.90, 0.95, 1.06),
                  (0.92, 0.88, 1.10), (1.06, 0.98, 0.86)),
-     line=(0.02, 0.10, 0.16), fline=(0.01, 0.09, 0.15),
-     wrap=(0.020, 0.060, 0.160),
-     label=(47, 180, 245), label_text=(255, 255, 255),
+     line=(0.02, 0.11, 0.14), fline=(0.05, 0.02, 0.12),
+     wrap=(0.020, 0.055, 0.170),
+     label=(0, 160, 192), label_text=(255, 255, 255),
      lines="frit",
-     name="Puff blue \u00b7 silver fume",
-     sub="gold drips \u00b7 pink and gold wig wag"),
+     name="Puff teal \u00b7 silver fume",
+     sub="purple and gold drips \u00b7 same at the base"),
 }
 
 MARBLE = dict(absorb=(0.004, 0.004, 0.004), line=(0.62, 0.66, 0.70))
@@ -217,7 +217,7 @@ OPAQUE = {
  # Wrapped rigid board in Puff's blue. It was black, which is the default answer for
  # a presentation box and the wrong one here: the box is a brand surface before it is
  # a container, and it is the first thing seen.
- "board": dict(absorb=(0.3290, 0.1240, 0.0469), line=(0.05, 0.14, 0.20),
+ "board": dict(absorb=(0.4200, 0.1150, 0.0620), line=(0.04, 0.13, 0.17),
                kAmt=0.34, kPow=2.1, spec=0.20, min_thick=6.6, max_thick=7.4),
  # Die-cut board, natural kraft. The insert is the one part of a box like this that
  # usually cannot go in the recycling with the rest of it, so it is board and tissue
@@ -226,7 +226,7 @@ OPAQUE = {
                kAmt=0.48, kPow=1.7, spec=0.12, min_thick=7.6, max_thick=8.4),
  # Branded tissue, folded up the sides. Kept light and close to neutral: blue glass
  # absorbs red, so anything warm or dark behind it takes the piece down with it.
- "tissue": dict(absorb=(0.0086, 0.0213, 0.0176), line=(0.44, 0.38, 0.40),
+ "tissue": dict(absorb=(0.0125, 0.0155, 0.0225), line=(0.44, 0.38, 0.40),
                 kAmt=0.40, kPow=1.8, spec=0.08, min_thick=5.6, max_thick=6.2),
  "paper": dict(absorb=(0.0396, 0.0490, 0.0793), line=(0.34, 0.32, 0.28),
                kAmt=0.70, kPow=1.30, spec=0.26, min_thick=3.4, max_thick=4.2),
@@ -371,12 +371,43 @@ def make_jar_sticker(path):
 
 
 # ------------------------------------------------------- the Puff collab label
-# Puff's own colours, sampled off their pack art and their site: the tube blue, the
-# pink of the drip mark, and the gold of the grill in it. The wordmark on their pack
-# runs along the axis of the tube, so this one does too - it is the same gesture on a
-# tube that happens to be glass.
-PUFF = dict(blue=(47, 180, 245), pink=(232, 80, 144), gold=(232, 178, 31),
+# Puff's colours, sampled properly this time - across ten pieces of their pack and
+# collection art rather than off one product photo. The backbone is a cyan-teal, not a
+# sky blue, and the range rotates green, purple, orange, red and gold by strain. An
+# earlier pass here read the hot pink off their drip mark and made the whole thing look
+# like somebody else's collab; the pink is one mark, not the system.
+PUFF = dict(blue=(0, 160, 192),          # #00A0C0 - the most-used colour they own
+            navy=(10, 35, 82),           # the deep end of the same family
+            gold=(208, 160, 16),         # #D0A010
+            purple=(96, 80, 192),        # #6050C0
+            green=(14, 158, 90),
+            orange=(224, 128, 80),
+            pink=(232, 80, 144),         # kept for their drip mark only
             ink=(11, 13, 16), paper=(255, 255, 255))
+
+MARK = os.path.join("assets", "puff_mark.png")
+_MARK = {}
+
+
+def puff_mark(h, colour=(255, 255, 255)):
+    """Their wordmark, as supplied, at the height asked for.
+
+    Set rather than drawn was always a compromise - PUFF is a display face with
+    pill-shaped terminals and no font matches it. This is their own file, scaled by
+    height and never stretched, recoloured through its own alpha so it can sit on a
+    coloured ground. It already carries 'pre-rolls' and the registered mark, so the
+    lockup is their artwork plus our name, not two typesettings.
+    """
+    key = (int(h), colour)
+    if key not in _MARK:
+        src = Image.open(MARK).convert("RGBA")
+        w = max(int(round(src.width * float(h) / src.height)), 1)
+        src = src.resize((w, max(int(h), 1)), Image.LANCZOS)
+        solid = Image.new("RGBA", src.size, tuple(colour) + (255,))
+        solid.putalpha(src.getchannel("A"))
+        _MARK[key] = solid
+    return _MARK[key]
+
 
 BRAND_FONTS = {"heavy": "assets/fonts/Poppins-ExtraBold.ttf",
                "bold": "assets/fonts/Poppins-Bold.ttf",
@@ -480,7 +511,7 @@ def make_puff_label(w=2600, h=915):
     fpad, ftrack = u * 0.062, u * 0.030
     ff = brand_font("bold", fs)
     fw = _tracked_width(d, fact, ff, ftrack) + 2 * fpad * 1.6
-    _pill(d, ((band[0] + band[2] - fw) / 2, cy + u * 0.335), fact, ff, PUFF["pink"],
+    _pill(d, ((band[0] + band[2] - fw) / 2, cy + u * 0.335), fact, ff, PUFF["navy"],
           PUFF["paper"], fpad, ftrack)
 
     # No flip. The projector's u already runs the way the piece does - up the tube -
@@ -612,16 +643,13 @@ def make_box_wrap(w=2400, h=740):
     room = fw * 0.80
     scale = 1.0
     for _ in range(9):
-        big = brand_font("heavy", max(int(u * 0.34 * scale), 8))
-        sub = brand_font("round", max(int(u * 0.125 * scale), 6))
+        mark = puff_mark(max(u * 0.52 * scale, 6), PUFF["paper"])
         ours = brand_font("bold", max(int(u * 0.215 * scale), 7))
         tiny = brand_font("med", max(int(u * 0.105 * scale), 6))
         cross = brand_font("heavy", max(int(u * 0.27 * scale), 7))
-        puff_w = d.textlength("PUFF", font=big)
-        pre_w = _tracked_width(d, "pre-rolls", sub, u * 0.024 * scale)
         jb_w = d.textlength("JEROME BAKER", font=ours)
         des_w = _tracked_width(d, "DESIGNS", tiny, u * 0.060 * scale)
-        left_w, right_w = max(puff_w, pre_w), max(jb_w, des_w)
+        left_w, right_w = mark.width, max(jb_w, des_w)
         x_w = d.textlength("\u00d7", font=cross)
         gap = u * 0.26 * scale
         total = left_w + gap + x_w + gap + right_w
@@ -631,10 +659,7 @@ def make_box_wrap(w=2400, h=740):
 
     top = cy - u * 0.16
     x = cx - total / 2
-    d.text((x + (left_w - puff_w) / 2, top - u * 0.30 * scale), "PUFF", font=big,
-           fill=PUFF["paper"] + (255,))
-    _tracked_text(d, (x + (left_w - pre_w) / 2, top + u * 0.09 * scale), "pre-rolls",
-                  sub, PUFF["paper"] + (255,), u * 0.024 * scale)
+    img.paste(mark, (int(x), int(cy - u * 0.06 - mark.height / 2)), mark)
     x += left_w + gap
     d.text((x, top - u * 0.18 * scale), "\u00d7", font=cross,
            fill=PUFF["gold"] + (255,))
@@ -649,7 +674,7 @@ def make_box_wrap(w=2400, h=740):
     fpad, ftrack = u * 0.062, u * 0.030
     ff = brand_font("bold", fs)
     fwid = _tracked_width(d, fact, ff, ftrack) + 2 * fpad * 1.6
-    _pill(d, (cx - fwid / 2, cy + u * 0.335), fact, ff, PUFF["pink"], PUFF["paper"],
+    _pill(d, (cx - fwid / 2, cy + u * 0.335), fact, ff, PUFF["navy"], PUFF["paper"],
           fpad, ftrack)
     return img
 
@@ -901,7 +926,10 @@ def frame(r, piece, angle, tilt=None, want_kw=False):
             im = r.frame(angle, **kw)
             if p.get("lid_label"):
                 im = place_lid_label(im, r, angle, kw, _art(make_box_label))
-                im = place_box_wrap(im, r, angle, kw, _art(make_box_wrap))
+                # a piece may carry its own sleeve art - that is how the same box
+                # is shown with a different strain on it without re-modelling it
+                im = place_box_wrap(im, r, angle, kw,
+                                    p.get("wrap_art") or _art(make_box_wrap))
             return (im, kw) if want_kw else im
         return r.frame(angle, cam_r=p["cam_r"], target=p["target"], fov=p["fov"],
                        shadow=p["shadow"], tilt=p.get("tilt", 0.0), shift=p.get("shift"))

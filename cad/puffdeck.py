@@ -30,15 +30,18 @@ SITE = os.path.join("docs", "PUFF_x_JBD.pdf")
 SHOTS = "shots"
 
 PAGE = (1920, 1080)
-# sampled off puffprerolls.com: the tube on the pack, the drip mark, the grill in it
-BLUE = (47, 180, 245)
-PINK = (232, 80, 144)
-GOLD = (232, 178, 31)
+# Sampled across ten pieces of their pack and collection art, not off one photo: the
+# backbone is a cyan-teal and the range rotates purple, green, orange and gold by
+# strain. PINK here is their purple - the name stayed so the slides did not all have to
+# be rewritten, and it is the only accent that was ever wrong.
+BLUE = (0, 160, 192)
+PINK = (96, 80, 192)
+GOLD = (208, 160, 16)
 BLACK = (10, 12, 15)
 WHITE = (255, 255, 255)
 PAPER = (247, 248, 250)
 MUTE = (126, 132, 140)
-DEEP = (18, 108, 152)
+DEEP = (10, 35, 82)
 
 FONTS = {"h": "assets/fonts/Poppins-ExtraBold.ttf",
          "b": "assets/fonts/Poppins-Bold.ttf",

@@ -56,7 +56,8 @@ scaling) moves if they come back different.
 | `cad/box.py` | Presentation box - shell, hinged lid shown open, disc magnets, die-cut foam insert. Modelled around the tube where the tube already sits, so the glass meshes and the label projector are reused unchanged. |
 | `cad/puffdeck.py` | PUFF x Jerome Baker pitch - page furniture, Puff's palette and type. One piece, one finish: the joint tube in the `puff_blue` colourway. |
 | `cad/puffdeck_slides.py` | The nine pages of that pack. |
-| `cad/variable_art.py` | The parts of the pack that change per drop - beauty card, band, compliance sticker - drawn flat. |
+| `cad/variable_art.py` | The parts of the pack that change per drop - beauty card, band, tissue seal, compliance sticker - drawn flat. |
+| `cad/box_variants.py` | The same box rendered three times with a different sleeve and card on each. |
 | `cad/puffpage.py` | The interactive version of it - `docs/puff.html`, drag-to-spin, published on Pages. |
 | `cad/render.py` | Studio glass compositor (moderngl): sweep → Beer-Lambert tint with fume shift → density pass → specular → enamel decal. Not a path tracer. |
 | `cad/mockups.py` | Pieces, colourways, hero stills. |
